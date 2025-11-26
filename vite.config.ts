@@ -26,6 +26,7 @@ export default defineConfig({
           'vendor-ui': ['lucide-react'],
           'vendor-utils': ['crypto-js', 'marked', 'qrcode', 'upng-js', 'html2canvas'],
           'vendor-zip': ['jszip'],
+          'vendor-video': ['mediainfo.js'],
         },
       },
     },

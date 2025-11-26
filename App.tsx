@@ -10,7 +10,7 @@ import {
   Menu,
   X,
   QrCode,
-  FileOutput,
+  FileImage, 
   Activity,
   FileType,
   Stamp,
@@ -18,7 +18,8 @@ import {
   Video,
   Crop,
   Grid,
-  Layers
+  Layers,
+  FileVideo
 } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import JsonFormatter from './components/tools/JsonFormatter';
@@ -34,6 +35,7 @@ import ImageResizer from './components/tools/ImageResizer';
 import ImageCropper from './components/tools/ImageCropper';
 import ImageGridSlicer from './components/tools/ImageGridSlicer';
 import ImageComposition from './components/tools/ImageComposition';
+import VideoCommandGenerator from './components/tools/VideoCommandGenerator';
 import Logo from './components/Logo';
 import { Category, CategoryId } from './types';
 
@@ -45,18 +47,9 @@ const categories: Category[] = [
     icon: Type,
     tools: [
       {
-        id: 'json-format',
-        name: 'JSON 格式化',
-        description: '验证、格式化和压缩 JSON 数据',
-        icon: Braces,
-        component: <JsonFormatter />,
-        // Full width for code editors
-        layoutClass: 'w-full'
-      },
-      {
         id: 'password-gen',
         name: '随机密码生成',
-        description: '生成高强度随机密码',
+        description: '可自定义字符类型与长度的高强度密码生成器',
         icon: KeyRound,
         component: <PasswordGenerator />,
         layoutClass: 'max-w-3xl mx-auto'
@@ -64,15 +57,15 @@ const categories: Category[] = [
       {
         id: 'uuid-gen',
         name: 'UUID 生成',
-        description: '批量生成随机 UUID (v4)',
+        description: '支持 V4 (随机) 与 V5 (基于命名空间) 的 UUID 生成',
         icon: Fingerprint,
         component: <UuidGenerator />,
         layoutClass: 'max-w-3xl mx-auto'
       },
       {
         id: 'md5-hash',
-        name: 'MD5 加密',
-        description: '计算文本的 MD5 哈希值',
+        name: 'MD5 计算器',
+        description: '支持文本摘要计算与本地文件 MD5 哈希值计算',
         icon: Hash,
         component: <Md5Generator />,
         layoutClass: 'max-w-3xl mx-auto'
@@ -85,9 +78,17 @@ const categories: Category[] = [
     icon: ImageIcon,
     tools: [
       {
+        id: 'img-convert',
+        name: '图像压缩与转换',
+        description: '支持 JPG/PNG 格式互转，可调节质量与颜色深度以压缩体积',
+        icon: FileImage,
+        component: <ImageConverter />,
+        layoutClass: 'w-full'
+      },
+      {
         id: 'img-comp',
         name: '画布拼贴',
-        description: '多图层自由拼贴、旋转与合成',
+        description: '无限画布、多图层拖拽合成，支持自由旋转、缩放与层级调整',
         icon: Layers,
         component: <ImageComposition />,
         layoutClass: 'w-full'
@@ -95,7 +96,7 @@ const categories: Category[] = [
       {
         id: 'img-resize',
         name: '图像尺寸调整',
-        description: '调整图片像素尺寸或按百分比缩放',
+        description: '修改图片分辨率，支持像素/百分比缩放及等比锁定',
         icon: Scaling,
         component: <ImageResizer />,
         layoutClass: 'w-full'
@@ -103,7 +104,7 @@ const categories: Category[] = [
       {
         id: 'img-crop',
         name: '图像裁剪',
-        description: '自定义区域裁剪图片，支持精确坐标控制',
+        description: '可视化自由裁剪，支持精确坐标定位与快捷对齐',
         icon: Crop,
         component: <ImageCropper />,
         layoutClass: 'w-full'
@@ -111,23 +112,23 @@ const categories: Category[] = [
       {
         id: 'img-slice',
         name: '图像切片',
-        description: '将图片按行列均匀切分并打包下载',
+        description: '将图片按行列网格切分为多张小图，并打包为 ZIP 下载',
         icon: Grid,
         component: <ImageGridSlicer />,
         layoutClass: 'w-full'
       },
       {
-        id: 'img-convert',
-        name: '图像压缩与转换',
-        description: '图片格式转换 (JPG/PNG) 与体积压缩',
-        icon: FileOutput,
-        component: <ImageConverter />,
+        id: 'md-to-img',
+        name: 'Markdown 转图片',
+        description: 'Markdown 文本实时渲染，一键转换为长图下载',
+        icon: FileType,
+        component: <MarkdownToImage />,
         layoutClass: 'w-full'
       },
       {
         id: 'watermark',
         name: '图片水印',
-        description: '安全地为本地图片添加平铺文字水印',
+        description: '全本地处理，支持自定义文字、颜色、角度的平铺水印制作',
         icon: Stamp,
         component: <WatermarkGenerator />,
         layoutClass: 'max-w-5xl mx-auto'
@@ -135,18 +136,10 @@ const categories: Category[] = [
       {
         id: 'qr-gen',
         name: '二维码生成',
-        description: '生成自定义颜色和尺寸的二维码',
+        description: '实时生成二维码，支持自定义前景色、背景色与尺寸',
         icon: QrCode,
         component: <QrCodeGenerator />,
         layoutClass: 'max-w-5xl mx-auto'
-      },
-      {
-        id: 'md-to-img',
-        name: 'Markdown 转图片',
-        description: '将 Markdown 文本转换为精美图片并下载',
-        icon: FileType,
-        component: <MarkdownToImage />,
-        layoutClass: 'w-full'
       }
     ]
   },
@@ -154,7 +147,16 @@ const categories: Category[] = [
     id: CategoryId.AUDIO_VIDEO,
     name: '影音',
     icon: Video,
-    tools: []
+    tools: [
+      {
+        id: 'video-cmd',
+        name: '视频压缩与转换',
+        description: '本地解析视频参数，可视化生成 FFmpeg 转码与压缩命令',
+        icon: FileVideo,
+        component: <VideoCommandGenerator />,
+        layoutClass: 'w-full'
+      }
+    ]
   },
   {
     id: CategoryId.DEVELOPER,
@@ -162,9 +164,17 @@ const categories: Category[] = [
     icon: Code2,
     tools: [
       {
+        id: 'json-format',
+        name: 'JSON 格式化',
+        description: 'JSON 数据的验证、美化、压缩、纠错与树状预览',
+        icon: Braces,
+        component: <JsonFormatter />,
+        layoutClass: 'w-full'
+      },
+      {
         id: 'easing-vis',
-        name: '缓动函数可视化',
-        description: '可视化展示与预览常见缓动函数效果',
+        name: '缓动函数',
+        description: '交互式展示 CSS/JS 常用缓动函数曲线与动画效果',
         icon: Activity,
         component: <EasingVisualizer />,
         layoutClass: 'max-w-7xl mx-auto'

@@ -211,8 +211,8 @@ const EasingCard: React.FC<{ title: string, fn: (t: number) => number }> = ({ ti
   const startTimeRef = useRef<number>(0);
   const ballRef = useRef<HTMLDivElement>(null);
   
-  // Draw the static curve
-  useEffect(() => {
+  // Draw function extracted to be called inside requestAnimationFrame
+  const draw = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -221,6 +221,10 @@ const EasingCard: React.FC<{ title: string, fn: (t: number) => number }> = ({ ti
     // High DPI support
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
+    
+    // Check if rect is valid (non-zero), otherwise skip (might be hidden or not laid out)
+    if (rect.width === 0 || rect.height === 0) return;
+
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
     ctx.scale(dpr, dpr);
@@ -229,9 +233,7 @@ const EasingCard: React.FC<{ title: string, fn: (t: number) => number }> = ({ ti
     const h = rect.height;
     
     // Adjusted padding to allow overshoot for Elastic/Back functions
-    // Horizontal padding
     const paddingX = 8;
-    // Vertical padding - ample space for overshooting curves
     const paddingY = 40; 
     
     const graphW = w - paddingX * 2;
@@ -243,7 +245,6 @@ const EasingCard: React.FC<{ title: string, fn: (t: number) => number }> = ({ ti
     // Draw Axis (Light grid)
     ctx.strokeStyle = '#f3f4f6';
     ctx.lineWidth = 1;
-    // Horizontal lines representing 0 and 1
     const y0 = paddingY + graphH; // Bottom line (value 0)
     const y1 = paddingY;          // Top line (value 1)
     
@@ -252,7 +253,7 @@ const EasingCard: React.FC<{ title: string, fn: (t: number) => number }> = ({ ti
     
     // Draw Curve
     ctx.strokeStyle = '#2a97ff'; // Primary 500
-    ctx.lineWidth = 3; // Requested line width
+    ctx.lineWidth = 3; 
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     ctx.beginPath();
@@ -260,8 +261,6 @@ const EasingCard: React.FC<{ title: string, fn: (t: number) => number }> = ({ ti
     for (let x = 0; x <= graphW; x++) {
       const t = x / graphW;
       const val = fn(t);
-      // Invert Y because canvas Y grows downwards. 
-      // y=0 is top (value 1), y=h is bottom (value 0)
       const y = (1 - val) * graphH; 
       
       const drawX = paddingX + x;
@@ -271,6 +270,16 @@ const EasingCard: React.FC<{ title: string, fn: (t: number) => number }> = ({ ti
       else ctx.lineTo(drawX, drawY);
     }
     ctx.stroke();
+  };
+
+  // Draw the static curve
+  useEffect(() => {
+    // Use requestAnimationFrame to wait for any layout shifts or fade-in animations to settle
+    // before reading getBoundingClientRect inside draw()
+    const rafId = requestAnimationFrame(() => {
+       draw();
+    });
+    return () => cancelAnimationFrame(rafId);
   }, [fn]);
 
   // Handle Animation on Hover
@@ -296,10 +305,6 @@ const EasingCard: React.FC<{ title: string, fn: (t: number) => number }> = ({ ti
         const easedT = fn(Math.min(1, Math.max(0, t)));
         
         if (ballRef.current) {
-             // Leave room for the ball size relative to container height
-             // Container h-48 is 192px. Ball is 8px.
-             // We want the ball to move roughly from bottom to top of the curve area.
-             // Using 92% range to keep it visible inside the track
              ballRef.current.style.bottom = `${easedT * 92}%`; 
         }
 
@@ -325,7 +330,6 @@ const EasingCard: React.FC<{ title: string, fn: (t: number) => number }> = ({ ti
     >
       <div className="flex-1 min-w-0">
         <div className="text-sm font-semibold text-gray-700 mb-1 font-mono tracking-tight">{title}</div>
-        {/* Increased height to h-48 (192px) */}
         <div className="h-48 w-full relative">
              <canvas 
                 ref={canvasRef} 
@@ -335,7 +339,6 @@ const EasingCard: React.FC<{ title: string, fn: (t: number) => number }> = ({ ti
       </div>
       
       {/* Vertical Animation Track */}
-      {/* Increased height to match canvas */}
       <div className="h-48 w-3 bg-gray-100 rounded-full relative shrink-0">
         <div 
             ref={ballRef}
