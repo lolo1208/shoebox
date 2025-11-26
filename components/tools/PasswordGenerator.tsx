@@ -58,7 +58,7 @@ const PasswordGenerator: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
+    <div className="w-full space-y-8">
       {/* Display Area */}
       <div className="relative group">
         <div className="w-full p-6 text-center bg-gray-50 border border-gray-200 rounded-xl text-3xl font-mono text-gray-800 break-all min-h-[100px] flex items-center justify-center">

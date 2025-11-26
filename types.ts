@@ -3,8 +3,8 @@ import { LucideIcon } from 'lucide-react';
 
 export enum CategoryId {
   TEXT = 'text',
-  IMAGE_VIDEO = 'image_video',
-  FILE_CONVERT = 'file_convert',
+  IMAGE = 'image',
+  AUDIO_VIDEO = 'audio_video',
   DEVELOPER = 'developer',
 }
 
@@ -14,6 +14,9 @@ export interface Tool {
   description: string;
   icon: LucideIcon;
   component: React.ReactNode;
+  // Optional CSS class for the tool container (e.g., 'max-w-3xl mx-auto')
+  // If undefined, defaults to 'w-full'
+  layoutClass?: string;
 }
 
 export interface Category {
@@ -21,11 +24,4 @@ export interface Category {
   name: string;
   icon: LucideIcon;
   tools: Tool[];
-}
-
-// Declaration for CryptoJS loaded via CDN
-declare global {
-  interface Window {
-    CryptoJS: any;
-  }
 }

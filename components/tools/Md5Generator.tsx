@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Copy, Hash, Check, Upload, FileText, X, Loader2 } from 'lucide-react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import CryptoJS from 'crypto-js';
 
 const Md5Generator: React.FC = () => {
   const [activeTab, setActiveTab] = useLocalStorage<'text' | 'file'>('tool-md5-tab', 'text');
@@ -8,7 +9,7 @@ const Md5Generator: React.FC = () => {
   // Text State
   const [textInput, setTextInput] = useLocalStorage<string>('tool-md5-text', '');
   
-  // File State - Cannot persist File object in localStorage safely/efficiently
+  // File State
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -22,11 +23,11 @@ const Md5Generator: React.FC = () => {
   useEffect(() => {
     if (activeTab === 'text') {
       if (textInput) {
-        if (window.CryptoJS) {
-          const calculated = window.CryptoJS.MD5(textInput).toString();
+        try {
+          const calculated = CryptoJS.MD5(textInput).toString();
           setHash(calculated);
-        } else {
-          setHash("Error: CryptoJS library not loaded.");
+        } catch (e) {
+          setHash("Error calculating hash");
         }
       } else {
         setHash('');
@@ -36,8 +37,6 @@ const Md5Generator: React.FC = () => {
 
   // File Calculation Logic
   const calculateFileMd5 = async (selectedFile: File) => {
-    if (!window.CryptoJS) return;
-    
     setIsCalculating(true);
     setProgress(0);
     setHash('');
@@ -46,7 +45,8 @@ const Md5Generator: React.FC = () => {
     const chunks = Math.ceil(selectedFile.size / chunkSize);
     let currentChunk = 0;
     
-    const algo = window.CryptoJS.algo.MD5.create();
+    // Create incremental MD5 hasher
+    const algo = CryptoJS.algo.MD5.create();
     const fileReader = new FileReader();
 
     fileReader.onerror = () => {
@@ -65,7 +65,7 @@ const Md5Generator: React.FC = () => {
       if (!e.target?.result) return;
       
       const arrayBuffer = e.target.result as ArrayBuffer;
-      const wordArray = window.CryptoJS.lib.WordArray.create(arrayBuffer);
+      const wordArray = CryptoJS.lib.WordArray.create(arrayBuffer);
       algo.update(wordArray);
       
       currentChunk++;
@@ -128,7 +128,7 @@ const Md5Generator: React.FC = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="w-full space-y-6">
       {/* Tab Switcher */}
       <div className="flex p-1 bg-gray-100 rounded-lg w-fit">
         <button

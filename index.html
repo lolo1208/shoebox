@@ -3,10 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DevToolbox</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script>
+    <title>LOLO' Shoebox</title>
+    <!-- 
+      Tailwind CSS CDN for Preview/Dev environments without local build step.
+      This block has id="dev-cdn" and will be REMOVED by Vite during 'npm run build'.
+    -->
+    <script id="dev-cdn" src="https://cdn.tailwindcss.com"></script>
+    <script id="dev-cdn">
       tailwind.config = {
         theme: {
           extend: {
@@ -17,14 +20,14 @@
                 200: '#a6d6ff',
                 300: '#7cc1ff',
                 400: '#53acff',
-                500: '#2a97ff', // Semi Blue-ish
+                500: '#2a97ff',
                 600: '#006add',
                 700: '#004fa3',
                 800: '#00356b',
                 900: '#001b36',
               },
               gray: {
-                50: '#f9f9fa', // Semi bg
+                50: '#f9f9fa',
                 100: '#f4f5f6',
                 200: '#e6e8ea',
                 300: '#c6cace',
@@ -33,62 +36,48 @@
                 600: '#6b7075',
                 700: '#4f5358',
                 800: '#32363a',
-                900: '#1c1f23', // Semi text
+                900: '#1c1f23',
               }
             },
             fontFamily: {
               sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
             },
             animation: {
-              'fade-in': 'fadeIn 0.3s ease-out forwards',
+              'fade-in': 'fadeIn 0.3s ease-out',
             },
             keyframes: {
               fadeIn: {
-                '0%': { opacity: '0', transform: 'translateY(10px)' },
-                '100%': { opacity: '1', transform: 'translateY(0)' },
-              }
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
             }
           }
         }
       }
     </script>
-    <style>
-      body {
-        background-color: #f9f9fa;
-        color: #1c1f23;
-      }
-      /* Custom Scrollbar for Webkit */
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #c6cace;
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #a7abb0;
-      }
-    </style>
+    
   <script type="importmap">
 {
   "imports": {
-    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-    "react-dom": "https://esm.sh/react-dom@18.2.0",
-    "react": "https://esm.sh/react@18.2.0",
-    "react/": "https://esm.sh/react@18.2.0/",
-    "lucide-react": "https://esm.sh/lucide-react@0.344.0",
-    "qrcode": "https://esm.sh/qrcode@1.5.3",
-    "upng-js": "https://esm.sh/upng-js@2.1.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
+    "crypto-js": "https://aistudiocdn.com/crypto-js@^4.2.0",
+    "qrcode": "https://aistudiocdn.com/qrcode@^1.5.4",
+    "upng-js": "https://aistudiocdn.com/upng-js@^2.1.0",
+    "vite": "https://aistudiocdn.com/vite@^7.2.4",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
+    "marked": "https://aistudiocdn.com/marked@^17.0.1",
+    "html2canvas": "https://aistudiocdn.com/html2canvas@^1.4.1",
+    "jszip": "https://aistudiocdn.com/jszip@^3.10.1"
   }
 }
 </script>
+<link rel="stylesheet" href="/index.css">
 </head>
   <body>
     <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>

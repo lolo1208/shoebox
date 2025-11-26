@@ -190,10 +190,13 @@ const ImageConverter: React.FC = () => {
     setError(null);
   };
 
+  // Simple checkerboard pattern data URI (light gray/white)
+  const checkerboardPattern = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyMCcgaGVpZ2h0PScyMCcgZmlsbC1vcGFjaXR5PScwLjEnPjxyZWN0IHg9JzEwJyB3aWR0aD0nMTAnIGhlaWdodD0nMTAnIC8+PHJlY3QgeT0nMTAnIHdpZHRoPScxMCcgaGVpZ2h0PScxMCcgLz48L3N2Zz4=";
+
   return (
     <div className="flex flex-col lg:flex-row gap-8 h-full">
-        {/* Left Side: Upload or File Info */}
-        <div className="flex-1 space-y-6">
+        {/* Left Side: Upload or File Info - Fixed Width */}
+        <div className="w-full lg:w-80 space-y-6 shrink-0">
             {!file ? (
                 <div
                     onDragOver={handleDragOver}
@@ -212,11 +215,8 @@ const ImageConverter: React.FC = () => {
                         className="hidden" 
                         onChange={handleFileSelect}
                     />
-                    <div className="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center mb-4 text-primary-500">
-                        <Upload size={32} />
-                    </div>
-                    <p className="text-lg font-medium text-gray-700 mb-1">点击或拖拽图片到此处</p>
-                    <p className="text-sm text-gray-500">支持 JPG, PNG, WEBP, BMP, GIF 等常见格式</p>
+                    <Upload size={32} className="text-gray-400 mb-2" />
+                    <p className="text-sm font-medium text-gray-700">点击或拖拽上传</p>
                 </div>
             ) : (
                 <div className="bg-white border border-gray-200 rounded-xl p-6 relative">
@@ -231,7 +231,7 @@ const ImageConverter: React.FC = () => {
                         <div className="w-16 h-16 bg-primary-50 rounded-lg flex items-center justify-center text-primary-600 shrink-0">
                              <FileImage size={32} />
                         </div>
-                        <div>
+                        <div className="min-w-0">
                             <h3 className="font-bold text-gray-900 line-clamp-1 break-all">{file.name}</h3>
                             <p className="text-sm text-gray-500">原始大小: {formatSize(file.size)}</p>
                         </div>
@@ -247,7 +247,7 @@ const ImageConverter: React.FC = () => {
                                         onClick={() => setOutputFormat('image/jpeg')}
                                         className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${outputFormat === 'image/jpeg' ? 'bg-white shadow-sm text-primary-600' : 'text-gray-600 hover:text-gray-900'}`}
                                     >
-                                        JPG (JPEG)
+                                        JPG
                                     </button>
                                     <button
                                         onClick={() => setOutputFormat('image/png')}
@@ -261,7 +261,7 @@ const ImageConverter: React.FC = () => {
                              {outputFormat === 'image/jpeg' && (
                                  <div className="animate-fade-in">
                                     <div className="flex justify-between mb-2">
-                                        <label className="text-sm font-medium text-gray-700">图像质量 (压缩率)</label>
+                                        <label className="text-sm font-medium text-gray-700">图像质量</label>
                                         <span className="text-sm font-mono text-primary-600">{(quality * 100).toFixed(0)}%</span>
                                     </div>
                                     <input
@@ -274,8 +274,8 @@ const ImageConverter: React.FC = () => {
                                         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600"
                                     />
                                     <div className="flex justify-between text-xs text-gray-400 mt-1">
-                                        <span>低质量 (小体积)</span>
-                                        <span>高质量 (大体积)</span>
+                                        <span>低 (小)</span>
+                                        <span>高 (大)</span>
                                     </div>
                                  </div>
                              )}
@@ -284,8 +284,8 @@ const ImageConverter: React.FC = () => {
                                  <div className="space-y-4 animate-fade-in">
                                      <div className="p-3 bg-blue-50 text-blue-700 text-sm rounded-lg flex gap-2">
                                          <div className="shrink-0 mt-0.5"><Info size={16}/></div>
-                                         <p>
-                                             原生 PNG 为无损格式。开启下方 <strong>“有损压缩”</strong> 可通过减少颜色数量 (Quantization) 在保持视觉质量的同时大幅减小体积。
+                                         <p className="text-xs">
+                                             原生 PNG 为无损。开启<strong>“有损压缩”</strong>可大幅减小体积。
                                          </p>
                                      </div>
 
@@ -296,13 +296,13 @@ const ImageConverter: React.FC = () => {
                                             onChange={(e) => setPngCompress(e.target.checked)}
                                             className="w-5 h-5 text-primary-600 rounded border-gray-300 focus:ring-primary-500"
                                         />
-                                        <span className="font-medium text-gray-700">启用 PNG 有损压缩 (基于 UPNG.js)</span>
+                                        <span className="font-medium text-gray-700 text-sm">启用 PNG 有损压缩</span>
                                      </label>
 
                                      {pngCompress && (
                                          <div className="pl-8 animate-fade-in">
                                             <div className="flex justify-between mb-2">
-                                                <label className="text-sm font-medium text-gray-700">颜色深度 (Colors)</label>
+                                                <label className="text-sm font-medium text-gray-700">颜色深度</label>
                                                 <span className="text-sm font-mono text-primary-600">{pngColors}</span>
                                             </div>
                                             <input
@@ -314,11 +314,7 @@ const ImageConverter: React.FC = () => {
                                                 onChange={(e) => setPngColors(parseInt(e.target.value))}
                                                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600"
                                             />
-                                            <div className="flex justify-between text-xs text-gray-400 mt-1">
-                                                <span>2 (极小)</span>
-                                                <span>256 (高清)</span>
-                                            </div>
-                                         </div>
+                                        </div>
                                      )}
                                  </div>
                              )}
@@ -334,8 +330,8 @@ const ImageConverter: React.FC = () => {
             )}
         </div>
 
-        {/* Right Side: Preview & Action */}
-        <div className="flex-1 lg:max-w-md flex flex-col">
+        {/* Right Side: Preview & Action - Fluid Width */}
+        <div className="flex-1 flex flex-col min-w-0">
             <div className="bg-gray-50 border border-gray-200 rounded-xl flex-1 flex flex-col relative overflow-hidden min-h-[400px]">
                 <div className="p-4 border-b border-gray-200 bg-white flex justify-between items-center">
                     <span className="font-semibold text-gray-700">预览结果</span>
@@ -350,14 +346,17 @@ const ImageConverter: React.FC = () => {
                     )}
                 </div>
                 
-                <div className="flex-1 flex items-center justify-center p-6 bg-[url('https://media.istockphoto.com/id/1146260883/vector/transparent-background-pattern-gray-and-white.jpg?s=612x612&w=0&k=20&c=rsL4a2JjG8M8sO5h3e_qXwI6d2tT_yqX_1e7q3u_1e7q3u')] bg-repeat bg-[length:20px_20px]">
+                <div 
+                  className="flex-1 flex items-center justify-center p-6 overflow-auto"
+                  style={{ backgroundImage: `url("${checkerboardPattern}")` }}
+                >
                     {isProcessing ? (
                         <div className="flex flex-col items-center gap-3 text-primary-600">
                             <RefreshCw className="animate-spin" size={32} />
                             <span className="font-medium">处理中...</span>
                         </div>
                     ) : previewUrl ? (
-                        <img src={previewUrl} alt="Preview" className="max-w-full max-h-[400px] object-contain shadow-lg bg-white" />
+                        <img src={previewUrl} alt="Preview" className="max-w-full max-h-[600px] object-contain shadow-lg bg-white" />
                     ) : (
                         <div className="text-gray-400 flex flex-col items-center">
                             <ArrowRight size={48} className="mb-2 opacity-20" />

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Category } from '../types';
+import { ChevronRight } from 'lucide-react';
 
 interface SidebarProps {
   categories: Category[];
@@ -19,7 +20,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <div className="py-4">
       <div className="px-4 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-        工具箱
+        LOLO' Shoebox
       </div>
       <nav className="space-y-1">
         {categories.map((category) => {

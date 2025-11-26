@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Copy, RefreshCw, Check, Plus, Minus, ArrowRightLeft } from 'lucide-react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import CryptoJS from 'crypto-js';
 
 type UuidMode = 'v4' | 'v5';
 
@@ -9,14 +10,14 @@ const DEFAULT_NAMESPACE = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
 const UuidGenerator: React.FC = () => {
   const [mode, setMode] = useLocalStorage<UuidMode>('tool-uuid-mode', 'v4');
   
-  // v4 State - not persisting generated random UUIDs as they are random
+  // v4 State
   const [uuids, setUuids] = useState<string[]>([]);
   const [count, setCount] = useLocalStorage<number>('tool-uuid-v4-count', 5);
   
-  // v5 State - persist input
+  // v5 State
   const [contentInput, setContentInput] = useLocalStorage<string>('tool-uuid-v5-input', '');
   const [contentUuid, setContentUuid] = useState('');
-  const [namespace, setNamespace] = useLocalStorage<string>('tool-uuid-v5-ns', ''); // Default empty in UI
+  const [namespace, setNamespace] = useLocalStorage<string>('tool-uuid-v5-ns', ''); 
   
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [copiedV5, setCopiedV5] = useState(false);
@@ -36,25 +37,23 @@ const UuidGenerator: React.FC = () => {
 
   // --- Logic for V5 (SHA1 based) ---
   const generateUUIDv5 = (name: string, ns: string) => {
-    if (!window.CryptoJS) return "Error: CryptoJS not loaded";
-    
     // Use default namespace if empty
     const effectiveNs = ns.trim() || DEFAULT_NAMESPACE;
 
     try {
       // 1. Convert Namespace Hex to WordArray
       const nsHex = effectiveNs.replace(/-/g, '');
-      const nsWords = window.CryptoJS.enc.Hex.parse(nsHex);
+      const nsWords = CryptoJS.enc.Hex.parse(nsHex);
       
       // 2. Convert Name (Content) to WordArray (UTF-8)
-      const nameWords = window.CryptoJS.enc.Utf8.parse(name);
+      const nameWords = CryptoJS.enc.Utf8.parse(name);
       
       // 3. Concatenate: Namespace + Name
       const combined = nsWords.concat(nameWords);
       
       // 4. SHA1 Hash
-      const hash = window.CryptoJS.SHA1(combined);
-      const hex = hash.toString(window.CryptoJS.enc.Hex);
+      const hash = CryptoJS.SHA1(combined);
+      const hex = hash.toString(CryptoJS.enc.Hex);
       
       // 5. Format as UUID and set Version/Variant
       const raw = hex.substring(0, 32);
@@ -123,7 +122,7 @@ const UuidGenerator: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-3xl mx-auto">
+    <div className="w-full space-y-6">
       {/* Mode Switcher */}
       <div className="flex p-1 bg-gray-100 rounded-lg w-fit">
         <button

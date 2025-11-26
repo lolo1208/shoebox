@@ -6,15 +6,22 @@
 
 This contains everything you need to run your app locally.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1ujeqaOFUU9qFA0dy0gX9Xx4fs2Dy5Mgn
-
-## Run Locally
-
 **Prerequisites:**  Node.js
 
-
+## Run Locally
 1. Install dependencies:
    `npm install`
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+
+
+## 构建发布
+
+```bash
+# 安装依赖
+npm install lucide-react
+
+# 运行构建命令
+npm run build
+```

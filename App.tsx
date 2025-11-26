@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Type, 
-  Image, 
+  Image as ImageIcon, 
   Code2, 
   Braces, 
   KeyRound, 
@@ -10,9 +10,15 @@ import {
   Menu,
   X,
   QrCode,
-  ArrowRightLeft,
   FileOutput,
-  Activity
+  Activity,
+  FileType,
+  Stamp,
+  Scaling,
+  Video,
+  Crop,
+  Grid,
+  Layers
 } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import JsonFormatter from './components/tools/JsonFormatter';
@@ -22,13 +28,20 @@ import Md5Generator from './components/tools/Md5Generator';
 import QrCodeGenerator from './components/tools/QrCodeGenerator';
 import ImageConverter from './components/tools/ImageConverter';
 import EasingVisualizer from './components/tools/EasingVisualizer';
-import { Category, CategoryId, Tool } from './types';
+import MarkdownToImage from './components/tools/MarkdownToImage';
+import WatermarkGenerator from './components/tools/WatermarkGenerator';
+import ImageResizer from './components/tools/ImageResizer';
+import ImageCropper from './components/tools/ImageCropper';
+import ImageGridSlicer from './components/tools/ImageGridSlicer';
+import ImageComposition from './components/tools/ImageComposition';
+import Logo from './components/Logo';
+import { Category, CategoryId } from './types';
 
 // Define the catalog of tools
 const categories: Category[] = [
   {
     id: CategoryId.TEXT,
-    name: '文本工具',
+    name: '文本',
     icon: Type,
     tools: [
       {
@@ -36,58 +49,112 @@ const categories: Category[] = [
         name: 'JSON 格式化',
         description: '验证、格式化和压缩 JSON 数据',
         icon: Braces,
-        component: <JsonFormatter />
+        component: <JsonFormatter />,
+        // Full width for code editors
+        layoutClass: 'w-full'
       },
       {
         id: 'password-gen',
         name: '随机密码生成',
         description: '生成高强度随机密码',
         icon: KeyRound,
-        component: <PasswordGenerator />
+        component: <PasswordGenerator />,
+        layoutClass: 'max-w-3xl mx-auto'
       },
       {
         id: 'uuid-gen',
         name: 'UUID 生成',
         description: '批量生成随机 UUID (v4)',
         icon: Fingerprint,
-        component: <UuidGenerator />
+        component: <UuidGenerator />,
+        layoutClass: 'max-w-3xl mx-auto'
       },
       {
         id: 'md5-hash',
         name: 'MD5 加密',
         description: '计算文本的 MD5 哈希值',
         icon: Hash,
-        component: <Md5Generator />
+        component: <Md5Generator />,
+        layoutClass: 'max-w-3xl mx-auto'
       }
     ]
   },
   {
-    id: CategoryId.IMAGE_VIDEO,
-    name: '图像和视频',
-    icon: Image,
+    id: CategoryId.IMAGE,
+    name: '图像',
+    icon: ImageIcon,
     tools: [
+      {
+        id: 'img-comp',
+        name: '画布拼贴',
+        description: '多图层自由拼贴、旋转与合成',
+        icon: Layers,
+        component: <ImageComposition />,
+        layoutClass: 'w-full'
+      },
+      {
+        id: 'img-resize',
+        name: '图像尺寸调整',
+        description: '调整图片像素尺寸或按百分比缩放',
+        icon: Scaling,
+        component: <ImageResizer />,
+        layoutClass: 'w-full'
+      },
+      {
+        id: 'img-crop',
+        name: '图像裁剪',
+        description: '自定义区域裁剪图片，支持精确坐标控制',
+        icon: Crop,
+        component: <ImageCropper />,
+        layoutClass: 'w-full'
+      },
+      {
+        id: 'img-slice',
+        name: '图像切片',
+        description: '将图片按行列均匀切分并打包下载',
+        icon: Grid,
+        component: <ImageGridSlicer />,
+        layoutClass: 'w-full'
+      },
+      {
+        id: 'img-convert',
+        name: '图像压缩与转换',
+        description: '图片格式转换 (JPG/PNG) 与体积压缩',
+        icon: FileOutput,
+        component: <ImageConverter />,
+        layoutClass: 'w-full'
+      },
+      {
+        id: 'watermark',
+        name: '图片水印',
+        description: '安全地为本地图片添加平铺文字水印',
+        icon: Stamp,
+        component: <WatermarkGenerator />,
+        layoutClass: 'max-w-5xl mx-auto'
+      },
       {
         id: 'qr-gen',
         name: '二维码生成',
         description: '生成自定义颜色和尺寸的二维码',
         icon: QrCode,
-        component: <QrCodeGenerator />
+        component: <QrCodeGenerator />,
+        layoutClass: 'max-w-5xl mx-auto'
+      },
+      {
+        id: 'md-to-img',
+        name: 'Markdown 转图片',
+        description: '将 Markdown 文本转换为精美图片并下载',
+        icon: FileType,
+        component: <MarkdownToImage />,
+        layoutClass: 'w-full'
       }
     ]
   },
   {
-    id: CategoryId.FILE_CONVERT,
-    name: '文件转换',
-    icon: ArrowRightLeft,
-    tools: [
-      {
-        id: 'img-convert',
-        name: '图片格式转换',
-        description: '图片格式转换 (JPG/PNG) 与体积压缩',
-        icon: FileOutput,
-        component: <ImageConverter />
-      }
-    ]
+    id: CategoryId.AUDIO_VIDEO,
+    name: '影音',
+    icon: Video,
+    tools: []
   },
   {
     id: CategoryId.DEVELOPER,
@@ -99,7 +166,8 @@ const categories: Category[] = [
         name: '缓动函数可视化',
         description: '可视化展示与预览常见缓动函数效果',
         icon: Activity,
-        component: <EasingVisualizer />
+        component: <EasingVisualizer />,
+        layoutClass: 'max-w-7xl mx-auto'
       }
     ]
   }
@@ -148,9 +216,9 @@ const App: React.FC = () => {
         <div className="flex items-center justify-between p-4 h-16 border-b border-gray-100">
           <div className="flex items-center gap-2 font-bold text-xl text-primary-600">
             <div className="w-8 h-8 bg-primary-600 text-white rounded-lg flex items-center justify-center">
-              <Code2 size={20} />
+              <Logo size={20} />
             </div>
-            DevToolbox
+            LOLO' Shoebox
           </div>
           <button className="md:hidden text-gray-500" onClick={() => setIsSidebarOpen(false)}>
             <X size={20} />
@@ -186,10 +254,10 @@ const App: React.FC = () => {
         </header>
 
         <main className="flex-1 overflow-auto p-4 md:p-8">
-          <div className="max-w-5xl mx-auto">
+          <div className="w-full mx-auto">
             {!activeTool ? (
               // Category View (Tool Grid)
-              <div className="animate-fade-in">
+              <div className="animate-fade-in max-w-5xl mx-auto">
                  <div className="mb-8">
                     <h1 className="text-2xl font-bold text-gray-900 mb-2">
                       {activeCategory?.name}
@@ -228,8 +296,8 @@ const App: React.FC = () => {
                  </div>
               </div>
             ) : (
-              // Tool Detail View
-              <div className="animate-fade-in bg-white rounded-xl border border-gray-200 shadow-sm min-h-[500px]">
+              // Tool Detail View - Layout controlled by activeTool.layoutClass
+              <div className={`animate-fade-in bg-white rounded-xl border border-gray-200 shadow-sm min-h-[500px] ${activeTool.layoutClass || 'w-full'}`}>
                  <div className="border-b border-gray-100 p-6 flex items-center gap-4">
                     <div className="p-2 bg-primary-50 text-primary-600 rounded-lg">
                        <activeTool.icon size={24} />
