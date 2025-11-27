@@ -1,3 +1,4 @@
+
 {
   "name": "lolo-shoebox",
   "private": true,
@@ -10,6 +11,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.10",
+    "@ffmpeg/util": "^0.12.1",
     "crypto-js": "^4.2.0",
     "html2canvas": "^1.4.1",
     "jszip": "^3.10.1",

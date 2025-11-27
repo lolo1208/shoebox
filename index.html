@@ -1,9 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LOLO' Shoebox</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23006add%22><path d=%22M3 6C3 4.89543 3.89543 4 5 4H19C20.1046 4 21 4.89543 21 6V8H3V6ZM3 10V18C3 19.1046 3.89543 20 5 20H19C20.1046 20 21 19.1046 21 18V10H3ZM10 14C10 13.4477 10.4477 13 11 13H13C13.5523 13 14 13.4477 14 14C14 14.5523 13.5523 15 13 15H11C10.4477 15 10 14.5523 10 14Z%22/></svg>" type="image/svg+xml">
     <!-- 
       Tailwind CSS CDN for Preview/Dev environments without local build step.
       This block has id="dev-cdn" and will be REMOVED by Vite during 'npm run build'.
@@ -44,12 +46,17 @@
             },
             animation: {
               'fade-in': 'fadeIn 0.3s ease-out',
+              'slide-up': 'slideUp 0.4s ease-out',
             },
             keyframes: {
               fadeIn: {
                 '0%': { opacity: '0' },
                 '100%': { opacity: '1' },
               },
+              slideUp: {
+                '0%': { transform: 'translateY(10px)', opacity: '0' },
+                '100%': { transform: 'translateY(0)', opacity: '1' },
+              }
             }
           }
         }
@@ -71,7 +78,10 @@
     "marked": "https://aistudiocdn.com/marked@^17.0.1",
     "html2canvas": "https://aistudiocdn.com/html2canvas@^1.4.1",
     "jszip": "https://aistudiocdn.com/jszip@^3.10.1",
-    "mediainfo.js": "https://aistudiocdn.com/mediainfo.js@^0.3.6"
+    "mediainfo.js": "https://aistudiocdn.com/mediainfo.js@^0.3.6",
+    "dom": "https://aistudiocdn.com/dom@^0.0.3",
+    "@ffmpeg/ffmpeg": "https://aistudiocdn.com/@ffmpeg/ffmpeg@^0.12.15",
+    "@ffmpeg/util": "https://aistudiocdn.com/@ffmpeg/util@^0.12.2"
   }
 }
 </script>

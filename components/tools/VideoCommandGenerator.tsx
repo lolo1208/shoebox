@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import React, { useState, useEffect, useRef } from 'react';
 import { Upload, FileVideo, Terminal, Copy, Check, Info, Film, Cpu, Zap, Volume2, RefreshCw, Captions, Settings2, FolderInput, ExternalLink, Calculator, AlertTriangle, Plus, Trash2, FileText } from 'lucide-react';
 // @ts-ignore
@@ -115,7 +116,7 @@ const VideoCommandGenerator: React.FC = () => {
 
   const handleExternalSubUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.files) {
-          const newSubs: ExternalSubtitle[] = Array.from(e.target.files).map(f => ({
+          const newSubs: ExternalSubtitle[] = Array.from<File>(e.target.files).map(f => ({
               id: Math.random().toString(36).substr(2, 9),
               file: f,
               language: 'chi', // Default to Chinese
@@ -144,7 +145,11 @@ const VideoCommandGenerator: React.FC = () => {
     setSelectedSubTracks(new Set());
 
     try {
-      const mediainfo = await MediaInfoFactory({ format: 'object' });
+      const mediainfo = await MediaInfoFactory({ 
+        format: 'object',
+        // Use a public CDN for the WASM file to ensure it loads correctly in both Preview and Production
+        locateFile: () => 'https://unpkg.com/mediainfo.js@0.2.1/dist/MediaInfoModule.wasm'
+      });
       
       const getSize = () => f.size;
       const readChunk = (chunkSize: number, offset: number) =>
@@ -372,14 +377,14 @@ const VideoCommandGenerator: React.FC = () => {
     
     // Map Selected Audio
     if (audioEncoder !== 'none') {
-        const sortedAudio = Array.from(selectedAudioTracks).sort((a, b) => a - b);
+        const sortedAudio = Array.from<number>(selectedAudioTracks).sort((a, b) => a - b);
         sortedAudio.forEach(id => {
             cmd += ` -map 0:a:${id}`;
         });
     }
 
     // Map Internal Subs
-    const sortedSubs = Array.from(selectedSubTracks).sort((a, b) => a - b);
+    const sortedSubs = Array.from<number>(selectedSubTracks).sort((a, b) => a - b);
     let outputSubIndex = 0;
     
     const isMp4 = container === 'mp4' || container === 'mov';
@@ -472,7 +477,7 @@ const VideoCommandGenerator: React.FC = () => {
   }, [file, workDir, videoEncoder, crf, preset, audioEncoder, scale, customScaleW, container, selectedAudioTracks, selectedSubTracks, metadata, externalSubs]);
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(command);
+    (navigator as any).clipboard.writeText(command);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -570,305 +575,287 @@ const VideoCommandGenerator: React.FC = () => {
                                             className="mt-0.5 rounded text-primary-600 focus:ring-primary-500"
                                         />
                                         <div className="text-xs">
-                                            <div className="font-semibold text-gray-800">
-                                                #{a.id + 1} - {a.language}
-                                                {a.title && <span className="ml-1 text-gray-500 font-normal">[{a.title}]</span>}
-                                                {a.isDefault && <span className="ml-2 text-[10px] bg-gray-200 px-1 rounded text-gray-600">Default</span>}
-                                            </div>
-                                            <div className="text-gray-500">{a.format}, {a.details}</div>
+                                            <div className="font-semibold text-gray-700">{a.title || 'Untitled'} ({a.language})</div>
+                                            <div className="text-gray-500">{a.details}</div>
                                         </div>
                                     </label>
                                 ))}
                             </div>
-                        ) : <div className="text-xs text-gray-400 italic">无音频流</div>}
+                        ) : (
+                            <div className="text-gray-400 text-xs italic">无音频流</div>
+                        )}
                     </div>
 
                     {/* Subtitle Tracks Selection */}
                     <div>
-                        <div className="font-medium text-sm text-gray-900 mb-2 flex items-center gap-1"><Captions size={14}/> 内部字幕 (多选)</div>
-                        <div className="space-y-1">
-                            {metadata.subtitles.length > 0 ? metadata.subtitles.map((s) => (
-                                <label key={s.id} className="flex items-start gap-2 cursor-pointer p-1.5 rounded hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-colors">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={selectedSubTracks.has(s.id)}
-                                        onChange={() => toggleTrack(selectedSubTracks, s.id, setSelectedSubTracks)}
-                                        className="mt-0.5 rounded text-primary-600 focus:ring-primary-500"
-                                    />
-                                    <div className="text-xs">
-                                        <div className="font-semibold text-gray-800">
-                                            #{s.id + 1} - {s.language}
-                                            {s.title && <span className="ml-1 text-gray-500 font-normal">[{s.title}]</span>}
-                                            {s.isDefault && <span className="ml-2 text-[10px] bg-gray-200 px-1 rounded text-gray-600">Default</span>}
+                        <div className="font-medium text-sm text-gray-900 mb-2 flex items-center gap-1"><Captions size={14}/> 字幕流 (多选)</div>
+                        {metadata.subtitles.length > 0 ? (
+                            <div className="space-y-1">
+                                {metadata.subtitles.map((s) => (
+                                    <label key={s.id} className="flex items-start gap-2 cursor-pointer p-1.5 rounded hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-colors">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={selectedSubTracks.has(s.id)}
+                                            onChange={() => toggleTrack(selectedSubTracks, s.id, setSelectedSubTracks)}
+                                            className="mt-0.5 rounded text-primary-600 focus:ring-primary-500"
+                                        />
+                                        <div className="text-xs">
+                                            <div className="font-semibold text-gray-700">{s.title || 'Untitled'} ({s.language})</div>
+                                            <div className="text-gray-500">{s.details} {s.isDefault ? '[Default]' : ''}</div>
                                         </div>
-                                        <div className="text-gray-500">{s.format} {s.details}</div>
-                                    </div>
-                                </label>
-                            )) : <div className="text-xs text-gray-400 italic">无字幕流</div>}
-                        </div>
+                                    </label>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-gray-400 text-xs italic">无内置字幕</div>
+                        )}
                     </div>
                 </div>
             </div>
         )}
+
+        {/* External Subtitles */}
+        <div className="flex-1 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm flex flex-col min-h-[150px]">
+            <div className="p-3 bg-gray-50 border-b border-gray-200 font-semibold text-gray-700 flex justify-between items-center shrink-0">
+                <div className="flex items-center gap-2"><Captions size={16} /> 外挂字幕</div>
+                <button 
+                    onClick={() => document.getElementById('sub-upload')?.click()}
+                    className="p-1 hover:bg-gray-200 rounded text-gray-600 transition-colors"
+                    title="添加字幕文件"
+                >
+                    <Plus size={16} />
+                </button>
+                <input id="sub-upload" type="file" multiple accept=".srt,.ass,.ssa,.vtt" className="hidden" onChange={handleExternalSubUpload} />
+            </div>
+            
+            <div className="p-2 overflow-y-auto custom-scrollbar flex-1">
+                {externalSubs.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-gray-400 text-xs gap-1">
+                        <FileText size={24} className="opacity-20" />
+                        <span>暂无外挂字幕</span>
+                    </div>
+                ) : (
+                    <div className="space-y-2">
+                        {externalSubs.map((sub) => (
+                            <div key={sub.id} className="bg-gray-50 p-2 rounded border border-gray-100 group">
+                                <div className="flex justify-between items-start mb-1">
+                                    <div className="font-medium text-xs text-gray-700 truncate max-w-[180px]" title={sub.file.name}>{sub.file.name}</div>
+                                    <button onClick={() => removeExternalSub(sub.id)} className="text-gray-400 hover:text-red-500"><Trash2 size={12}/></button>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <input 
+                                        type="text" 
+                                        value={sub.language}
+                                        onChange={(e) => updateExternalSub(sub.id, 'language', e.target.value)}
+                                        placeholder="lang (e.g. chi)"
+                                        className="text-xs p-1 border rounded"
+                                        title="Language Code (ISO 639-2)"
+                                    />
+                                    <input 
+                                        type="text" 
+                                        value={sub.title}
+                                        onChange={(e) => updateExternalSub(sub.id, 'title', e.target.value)}
+                                        placeholder="Title"
+                                        className="text-xs p-1 border rounded"
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
       </div>
 
       {/* Right: Configuration & Command */}
-      <div className="flex-1 space-y-6 overflow-y-auto pr-1 custom-scrollbar">
-          {/* Quick Presets */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-              <button onClick={() => applyPreset('compat')} className="p-3 bg-white border border-gray-200 rounded-lg hover:border-primary-300 hover:shadow-sm text-left transition-all group">
-                  <div className="font-semibold text-gray-800 group-hover:text-primary-600 text-sm">兼容性优先</div>
-                  <div className="text-xs text-gray-500 mt-1">MP4, H.264, 中画质</div>
-              </button>
-              <button onClick={() => applyPreset('compress')} className="p-3 bg-white border border-gray-200 rounded-lg hover:border-primary-300 hover:shadow-sm text-left transition-all group">
-                  <div className="font-semibold text-gray-800 group-hover:text-primary-600 text-sm">极致压缩</div>
-                  <div className="text-xs text-gray-500 mt-1">MP4, H.265, 慢速</div>
-              </button>
-              <button onClick={() => applyPreset('high')} className="p-3 bg-white border border-gray-200 rounded-lg hover:border-primary-300 hover:shadow-sm text-left transition-all group">
-                  <div className="font-semibold text-gray-800 group-hover:text-primary-600 text-sm">高质量存档</div>
-                  <div className="text-xs text-gray-500 mt-1">MKV, CRF 18, 无损音频</div>
-              </button>
-          </div>
-
-          <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-6 shadow-sm">
-              <h3 className="font-bold text-gray-800 flex items-center gap-2">
-                  <Settings2 size={18} className="text-primary-600" />
-                  转码参数配置
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">封装格式 (Container)</label>
-                      <select value={container} onChange={(e) => setContainer(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg bg-gray-50 text-sm focus:ring-2 focus:ring-primary-100 focus:border-primary-500">
-                          <option value="mp4">MP4 (通用)</option>
-                          <option value="mkv">MKV (功能强)</option>
-                          <option value="mov">MOV (Apple)</option>
-                          <option value="webm">WebM (网页)</option>
-                      </select>
-                  </div>
-                  <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                          分辨率限制 
-                          <span className="text-xs text-gray-400 font-normal ml-2">(仅缩小, 不放大)</span>
-                      </label>
-                      <select value={scale} onChange={(e) => setScale(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg bg-gray-50 text-sm focus:ring-2 focus:ring-primary-100 focus:border-primary-500">
-                          <option value="original">保持原始分辨率</option>
-                          <option value="1080p">限制为 1080p (Max Height)</option>
-                          <option value="720p">限制为 720p (Max Height)</option>
-                          <option value="custom">限制宽度 (Max Width)</option>
-                      </select>
-                      {scale === 'custom' && (
-                          <input 
-                            type="number" 
-                            value={customScaleW} 
-                            onChange={(e) => setCustomScaleW(parseInt(e.target.value))}
-                            className="mt-2 w-full p-2 border border-gray-300 rounded-lg text-sm"
-                            placeholder="Max Width (e.g. 1920)"
-                          />
-                      )}
-                  </div>
-
-                  <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">视频编码 (Encoder)</label>
-                      <select value={videoEncoder} onChange={(e) => setVideoEncoder(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg bg-gray-50 text-sm focus:ring-2 focus:ring-primary-100 focus:border-primary-500">
-                          <optgroup label="CPU (软件编码)">
-                              <option value="libx264">H.264 (x264) - 兼容性最好</option>
-                              <option value="libx265">H.265 (x265) - 压缩率最高</option>
-                              <option value="libvpx-vp9">VP9 - Web通用</option>
-                          </optgroup>
-                          <optgroup label="GPU (硬件加速)">
-                              <option value="h264_nvenc">NVIDIA H.264</option>
-                              <option value="hevc_nvenc">NVIDIA H.265</option>
-                              <option value="h264_amf">AMD H.264</option>
-                              <option value="h264_videotoolbox">Apple Silicon H.264</option>
-                          </optgroup>
-                      </select>
-                  </div>
-
-                  <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">音频编码 (Audio)</label>
-                      <select value={audioEncoder} onChange={(e) => setAudioEncoder(e.target.value)} className="w-full p-2.5 border border-gray-300 rounded-lg bg-gray-50 text-sm focus:ring-2 focus:ring-primary-100 focus:border-primary-500">
-                          <option value="aac">AAC (推荐)</option>
-                          <option value="libmp3lame">MP3</option>
-                          <option value="copy">Copy (不转码，原样复制)</option>
-                          <option value="none">移除音频</option>
-                      </select>
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden gap-6">
+          {/* Settings Panel */}
+          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm overflow-y-auto custom-scrollbar">
+              <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2"><Settings2 size={20}/> 转码配置</h2>
+                  <div className="flex gap-2">
+                      <button onClick={() => applyPreset('compat')} className="px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">兼容优先</button>
+                      <button onClick={() => applyPreset('compress')} className="px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">极限压缩</button>
+                      <button onClick={() => applyPreset('high')} className="px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">画质优先</button>
                   </div>
               </div>
 
-              {/* CRF Slider */}
-              {!videoEncoder.includes('vp9') && (
-                  <div>
-                      <div className="flex justify-between mb-2">
-                          <label className="text-sm font-medium text-gray-700">压缩质量 (CRF/CQ)</label>
-                          <span className="text-sm font-mono text-primary-600 font-bold">{crf}</span>
-                      </div>
-                      <input 
-                        type="range" min="0" max="51" 
-                        value={crf} onChange={(e) => setCrf(parseInt(e.target.value))}
-                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600"
-                      />
-                      <div className="flex justify-between text-xs text-gray-400 mt-1 px-1">
-                          <span>0 (无损)</span>
-                          <span>18 (高画质)</span>
-                          <span>23 (平衡)</span>
-                          <span>28 (压缩)</span>
-                          <span>51 (低画质)</span>
-                      </div>
-                  </div>
-              )}
-              
-              {/* Preset Slider for CPU */}
-              {(videoEncoder === 'libx264' || videoEncoder === 'libx265') && (
-                  <div>
-                      <div className="flex justify-between mb-2">
-                          <label className="text-sm font-medium text-gray-700">编码速度 (Preset)</label>
-                          <span className="text-sm font-mono text-primary-600 font-bold">{preset}</span>
-                      </div>
-                      <div className="flex justify-between gap-1 bg-gray-100 p-1 rounded-lg overflow-x-auto">
-                          {['ultrafast', 'superfast', 'veryfast', 'faster', 'fast', 'medium', 'slow', 'slower', 'veryslow'].map((p) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {/* Container */}
+                  <div className="space-y-3">
+                      <label className="text-sm font-medium text-gray-700 block">封装格式 (Container)</label>
+                      <div className="flex bg-gray-100 p-1 rounded-lg">
+                          {['mp4', 'mkv', 'mov'].map(c => (
                               <button 
-                                key={p}
-                                onClick={() => setPreset(p)}
-                                className={`flex-1 h-8 px-2 rounded text-[10px] sm:text-xs transition-colors whitespace-nowrap ${preset === p ? 'bg-white shadow text-primary-600 font-bold ring-1 ring-primary-100' : 'text-gray-500 hover:text-gray-700'}`}
-                                title={p}
+                                key={c}
+                                onClick={() => setContainer(c)}
+                                className={`flex-1 py-1.5 text-xs font-medium rounded-md uppercase ${container === c ? 'bg-white shadow text-primary-600' : 'text-gray-500'}`}
                               >
-                                  {p}
+                                  {c}
                               </button>
                           ))}
                       </div>
-                      <p className="text-xs text-gray-400 mt-1">越慢压缩率越高(文件越小)，越快文件越大。</p>
+                  </div>
+
+                  {/* Video Encoder */}
+                  <div className="space-y-3">
+                      <label className="text-sm font-medium text-gray-700 block">视频编码 (Video Codec)</label>
+                      <select 
+                        value={videoEncoder} 
+                        onChange={(e) => setVideoEncoder(e.target.value)}
+                        className="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-primary-500 focus:border-primary-500"
+                      >
+                          <option value="libx264">H.264 (libx264) - 最通用</option>
+                          <option value="libx265">H.265 (libx265) - 高压缩</option>
+                          <option value="h264_nvenc">NVIDIA H.264 (nvenc)</option>
+                          <option value="hevc_nvenc">NVIDIA H.265 (nvenc)</option>
+                          <option value="libvpx-vp9">VP9 (Web friendly)</option>
+                          <option value="copy">Copy (不转码)</option>
+                      </select>
+                  </div>
+
+                  {/* Audio Encoder */}
+                  <div className="space-y-3">
+                      <label className="text-sm font-medium text-gray-700 block">音频编码 (Audio Codec)</label>
+                      <select 
+                        value={audioEncoder} 
+                        onChange={(e) => setAudioEncoder(e.target.value)}
+                        className="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-primary-500 focus:border-primary-500"
+                      >
+                          <option value="aac">AAC (128k)</option>
+                          <option value="libmp3lame">MP3</option>
+                          <option value="ac3">AC3</option>
+                          <option value="copy">Copy (不转码)</option>
+                          <option value="none">无音频 (Mute)</option>
+                      </select>
+                  </div>
+
+                  {/* CRF / Quality */}
+                  {videoEncoder !== 'copy' && (
+                      <div className="space-y-3">
+                          <div className="flex justify-between">
+                              <label className="text-sm font-medium text-gray-700 block">画质系数 (CRF: {crf})</label>
+                              <span className="text-xs text-gray-500">{crf < 18 ? '无损级' : crf < 24 ? '高质量' : '低画质'}</span>
+                          </div>
+                          <input 
+                            type="range" min="0" max="51" step="1"
+                            value={crf} onChange={(e) => setCrf(parseInt(e.target.value))}
+                            className="w-full h-2 bg-gray-200 rounded-lg accent-primary-600 cursor-pointer"
+                          />
+                          <div className="flex justify-between text-xs text-gray-400">
+                              <span>0 (高)</span>
+                              <span>23 (标准)</span>
+                              <span>51 (低)</span>
+                          </div>
+                      </div>
+                  )}
+
+                  {/* Preset Speed */}
+                  {videoEncoder !== 'copy' && !videoEncoder.includes('nvenc') && (
+                      <div className="space-y-3">
+                           <label className="text-sm font-medium text-gray-700 block">编码速度 (Preset)</label>
+                           <select 
+                             value={preset} onChange={(e) => setPreset(e.target.value)}
+                             className="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-sm"
+                           >
+                               <option value="ultrafast">Ultrafast (最快/大)</option>
+                               <option value="superfast">Superfast</option>
+                               <option value="veryfast">Veryfast</option>
+                               <option value="faster">Faster</option>
+                               <option value="fast">Fast</option>
+                               <option value="medium">Medium (平衡)</option>
+                               <option value="slow">Slow</option>
+                               <option value="slower">Slower</option>
+                               <option value="veryslow">Veryslow (最小)</option>
+                           </select>
+                      </div>
+                  )}
+
+                  {/* Resolution Scale */}
+                  <div className="space-y-3">
+                       <label className="text-sm font-medium text-gray-700 block">分辨率缩放</label>
+                       <select 
+                         value={scale} onChange={(e) => setScale(e.target.value)}
+                         className="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-sm"
+                       >
+                           <option value="original">原始分辨率</option>
+                           <option value="1080p">限制最大 1080p</option>
+                           <option value="720p">限制最大 720p</option>
+                           <option value="custom">自定义宽度...</option>
+                       </select>
+                       {scale === 'custom' && (
+                           <div className="flex items-center gap-2 mt-2">
+                               <input 
+                                 type="number" 
+                                 value={customScaleW} 
+                                 onChange={(e) => setCustomScaleW(parseInt(e.target.value))}
+                                 className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                                 placeholder="Width px"
+                               />
+                               <span className="text-xs text-gray-500 whitespace-nowrap">px (Auto Height)</span>
+                           </div>
+                       )}
+                  </div>
+              </div>
+              
+              {/* Working Directory */}
+              <div className="mt-6 pt-6 border-t border-gray-100 space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <FolderInput size={16} />
+                      工作目录 (可选)
+                  </div>
+                  <input 
+                    type="text" 
+                    value={workDir}
+                    onChange={(e) => setWorkDir(e.target.value)}
+                    placeholder="例如: C:\Videos 或 /Users/name/Movies (留空则使用相对路径)"
+                    className="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg text-sm font-mono text-gray-600"
+                  />
+                  <p className="text-xs text-gray-400">设置后，输入/输出文件将使用完整路径，方便在任意位置运行命令。</p>
+              </div>
+
+              {/* Estimation */}
+              {metadata && estimatedSize && (
+                  <div className="mt-6 p-4 bg-green-50 rounded-xl border border-green-100 flex items-start gap-3 text-green-800">
+                      <Calculator size={20} className="mt-0.5" />
+                      <div>
+                          <div className="font-bold">预估输出大小: ~{estimatedSize}</div>
+                          <div className="text-xs opacity-80 mt-1">仅供参考，实际大小受画面复杂度影响较大。NVENC 编码通常比 x264/x265 生成的文件稍大。</div>
+                      </div>
                   </div>
               )}
-
-              {/* External Subtitles */}
-              <div>
-                   <div className="flex items-center justify-between mb-2">
-                        <label className="block text-sm font-medium text-gray-700 flex items-center gap-1">
-                            <FileText size={14} /> 添加外部字幕
-                        </label>
-                        <button 
-                            onClick={() => document.getElementById('sub-upload')?.click()}
-                            className="text-xs flex items-center gap-1 text-primary-600 hover:text-primary-700 px-2 py-1 bg-primary-50 rounded hover:bg-primary-100 transition-colors"
-                        >
-                            <Plus size={12} /> 添加字幕文件
-                        </button>
-                        <input id="sub-upload" type="file" accept=".srt,.ass,.ssa,.vtt" multiple className="hidden" onChange={handleExternalSubUpload} />
-                   </div>
-                   
-                   {externalSubs.length > 0 ? (
-                       <div className="space-y-2">
-                           {externalSubs.map((sub, idx) => (
-                               <div key={sub.id} className="flex items-center gap-2 p-2 bg-gray-50 border border-gray-200 rounded-lg text-xs">
-                                   <div className="w-5 h-5 bg-gray-200 rounded flex items-center justify-center text-gray-500 font-mono">
-                                       {idx + 1}
-                                   </div>
-                                   <div className="flex-1 min-w-0">
-                                       <div className="truncate font-medium text-gray-700">{sub.file.name}</div>
-                                       <div className="flex gap-2 mt-1">
-                                           <input 
-                                                type="text" 
-                                                value={sub.language}
-                                                onChange={(e) => updateExternalSub(sub.id, 'language', e.target.value)}
-                                                className="w-12 p-0.5 border rounded text-center text-[10px]"
-                                                placeholder="lang"
-                                                title="语言代码 (如 chi, eng)"
-                                           />
-                                           <input 
-                                                type="text" 
-                                                value={sub.title}
-                                                onChange={(e) => updateExternalSub(sub.id, 'title', e.target.value)}
-                                                className="flex-1 p-0.5 border rounded text-[10px]"
-                                                placeholder="标题 (如 中文, Director's Cut)"
-                                           />
-                                       </div>
-                                   </div>
-                                   <button 
-                                        onClick={() => removeExternalSub(sub.id)}
-                                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-white rounded transition-colors"
-                                   >
-                                       <Trash2 size={14} />
-                                   </button>
-                               </div>
-                           ))}
-                       </div>
-                   ) : (
-                       <div className="text-xs text-gray-400 italic p-3 border border-dashed border-gray-200 rounded-lg text-center">
-                           暂无外部字幕，点击上方按钮添加 .srt, .ass 等文件
-                       </div>
-                   )}
-              </div>
           </div>
-
-          {/* Working Directory Input */}
-          <div className="shrink-0">
-             <label className="text-xs font-medium text-gray-500 mb-1 flex items-center gap-1">
-                 <FolderInput size={12} />
-                 本地工作目录 (可选)
-             </label>
-             <input 
-                type="text" 
-                value={workDir}
-                onChange={(e) => setWorkDir(e.target.value)}
-                placeholder="例如 D:\Videos 或 /Users/Name/Movies"
-                className="w-full p-2 text-xs border border-gray-300 rounded-lg bg-white focus:ring-1 focus:ring-primary-500 focus:border-primary-500 font-mono"
-             />
-             <p className="text-[10px] text-gray-400 mt-1">设置后将生成绝对路径，方便在任意目录运行命令。</p>
-          </div>
-
-          {/* Warnings */}
-          {warnings.length > 0 && (
-             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 space-y-1">
-                 {warnings.map((w, i) => (
-                     <div key={i} className="flex items-start gap-2 text-xs text-yellow-800">
-                         <AlertTriangle size={12} className="mt-0.5 shrink-0" />
-                         <span>{w}</span>
-                     </div>
-                 ))}
-             </div>
-          )}
 
           {/* Command Output */}
-          <div className="space-y-2">
-              <div className="flex justify-between items-end">
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+          <div className="flex-1 bg-gray-900 rounded-xl p-0 flex flex-col overflow-hidden shadow-lg min-h-[200px]">
+              <div className="bg-gray-800 px-4 py-2 flex justify-between items-center shrink-0">
+                  <div className="text-gray-300 text-sm font-mono flex items-center gap-2">
                       <Terminal size={16} />
-                      对应的 FFmpeg 命令
-                  </label>
-                  {estimatedSize && (
-                      <span className="text-xs font-mono text-primary-600 flex items-center gap-1 bg-primary-50 px-2 py-0.5 rounded">
-                          <Calculator size={10} />
-                          预估大小: ~{estimatedSize} (仅供参考)
-                      </span>
-                  )}
-              </div>
-              <div className="relative group">
-                  <textarea 
-                    readOnly
-                    value={command}
-                    className="w-full h-48 p-4 bg-gray-900 text-gray-100 font-mono text-xs sm:text-sm rounded-xl border border-gray-700 focus:ring-2 focus:ring-primary-500 focus:outline-none resize-none custom-scrollbar"
-                  />
+                      FFmpeg Command
+                  </div>
                   <button 
                     onClick={copyToClipboard}
-                    className="absolute top-2 right-2 p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors border border-gray-600 shadow-sm opacity-100 sm:opacity-0 group-hover:opacity-100"
-                    title="复制命令"
+                    className="text-xs flex items-center gap-1.5 px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded transition-colors"
                   >
-                      {copied ? <Check size={16} className="text-green-400"/> : <Copy size={16} />}
+                      {copied ? <Check size={14} /> : <Copy size={14} />}
+                      {copied ? 'Copied' : 'Copy'}
                   </button>
               </div>
-              <div className="text-xs text-gray-500 flex flex-col gap-1">
-                  <div className="flex gap-1">
-                      <Info size={12} className="mt-0.5 shrink-0" />
-                      <p>
-                          请确保您的电脑上已安装 FFmpeg。在终端或命令提示符中运行上述命令即可。
-                      </p>
-                  </div>
-                  <div className="flex gap-1 ml-4 items-center">
-                      <ExternalLink size={10} />
-                      <a href="https://ffmpeg.org/download.html" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline">
-                          前往 FFmpeg 官网下载
-                      </a>
-                  </div>
+              <div className="flex-1 p-4 overflow-auto custom-scrollbar-dark relative">
+                  <pre className="font-mono text-sm text-green-400 whitespace-pre-wrap break-all leading-relaxed">
+                      {command || '# 等待文件与配置...'}
+                  </pre>
+                  
+                  {warnings.length > 0 && (
+                      <div className="mt-4 pt-4 border-t border-gray-700">
+                          {warnings.map((w, i) => (
+                              <div key={i} className="flex items-start gap-2 text-amber-400 text-xs mt-1">
+                                  <AlertTriangle size={12} className="mt-0.5 shrink-0" />
+                                  <span>{w}</span>
+                              </div>
+                          ))}
+                      </div>
+                  )}
               </div>
           </div>
       </div>

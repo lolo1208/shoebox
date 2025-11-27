@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import React, { useState, useEffect, useCallback } from 'react';
 import { RefreshCw, Copy, Check } from 'lucide-react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
@@ -52,7 +53,7 @@ const PasswordGenerator: React.FC = () => {
 
   const copyToClipboard = () => {
     if (!password) return;
-    navigator.clipboard.writeText(password);
+    (navigator as any).clipboard.writeText(password);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -93,7 +94,7 @@ const PasswordGenerator: React.FC = () => {
             min="4"
             max="64"
             value={length}
-            onChange={(e) => setLength(parseInt(e.target.value))}
+            onChange={(e) => setLength(parseInt((e.target as HTMLInputElement).value))}
             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600"
           />
           <div className="flex justify-between text-xs text-gray-400 mt-1">
@@ -108,7 +109,7 @@ const PasswordGenerator: React.FC = () => {
             <input
               type="checkbox"
               checked={includeUppercase}
-              onChange={(e) => setIncludeUppercase(e.target.checked)}
+              onChange={(e) => setIncludeUppercase((e.target as HTMLInputElement).checked)}
               className="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
             />
             <span className="text-gray-700">大写字母 (A-Z)</span>
@@ -117,7 +118,7 @@ const PasswordGenerator: React.FC = () => {
             <input
               type="checkbox"
               checked={includeLowercase}
-              onChange={(e) => setIncludeLowercase(e.target.checked)}
+              onChange={(e) => setIncludeLowercase((e.target as HTMLInputElement).checked)}
               className="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
             />
             <span className="text-gray-700">小写字母 (a-z)</span>
@@ -126,7 +127,7 @@ const PasswordGenerator: React.FC = () => {
             <input
               type="checkbox"
               checked={includeNumbers}
-              onChange={(e) => setIncludeNumbers(e.target.checked)}
+              onChange={(e) => setIncludeNumbers((e.target as HTMLInputElement).checked)}
               className="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
             />
             <span className="text-gray-700">数字 (0-9)</span>
@@ -135,7 +136,7 @@ const PasswordGenerator: React.FC = () => {
             <input
               type="checkbox"
               checked={includeSymbols}
-              onChange={(e) => setIncludeSymbols(e.target.checked)}
+              onChange={(e) => setIncludeSymbols((e.target as HTMLInputElement).checked)}
               className="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
             />
             <span className="text-gray-700">特殊符号 (!@#$)</span>

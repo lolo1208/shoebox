@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import React, { useState, useEffect, useRef } from 'react';
 import { Upload, Download, RefreshCw, X, ArrowRight, FileImage, Image as ImageIcon, Info } from 'lucide-react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
@@ -197,6 +198,15 @@ const ImageConverter: React.FC = () => {
     <div className="flex flex-col lg:flex-row gap-8 h-full">
         {/* Left Side: Upload or File Info - Fixed Width */}
         <div className="w-full lg:w-80 space-y-6 shrink-0">
+            {/* Input must be always mounted */}
+            <input 
+                id="img-upload" 
+                type="file" 
+                accept="image/png, image/jpeg, image/webp, image/gif, image/bmp"
+                className="hidden" 
+                onChange={handleFileSelect}
+            />
+
             {!file ? (
                 <div
                     onDragOver={handleDragOver}
@@ -208,13 +218,6 @@ const ImageConverter: React.FC = () => {
                     `}
                     onClick={() => document.getElementById('img-upload')?.click()}
                 >
-                    <input 
-                        id="img-upload" 
-                        type="file" 
-                        accept="image/png, image/jpeg, image/webp, image/gif, image/bmp"
-                        className="hidden" 
-                        onChange={handleFileSelect}
-                    />
                     <Upload size={32} className="text-gray-400 mb-2" />
                     <p className="text-sm font-medium text-gray-700">点击或拖拽上传</p>
                 </div>
@@ -270,7 +273,7 @@ const ImageConverter: React.FC = () => {
                                         max="1.0"
                                         step="0.05"
                                         value={quality}
-                                        onChange={(e) => setQuality(parseFloat(e.target.value))}
+                                        onChange={(e) => setQuality(parseFloat((e.target as HTMLInputElement).value))}
                                         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600"
                                     />
                                     <div className="flex justify-between text-xs text-gray-400 mt-1">
@@ -293,7 +296,7 @@ const ImageConverter: React.FC = () => {
                                         <input 
                                             type="checkbox" 
                                             checked={pngCompress}
-                                            onChange={(e) => setPngCompress(e.target.checked)}
+                                            onChange={(e) => setPngCompress((e.target as HTMLInputElement).checked)}
                                             className="w-5 h-5 text-primary-600 rounded border-gray-300 focus:ring-primary-500"
                                         />
                                         <span className="font-medium text-gray-700 text-sm">启用 PNG 有损压缩</span>
@@ -311,7 +314,7 @@ const ImageConverter: React.FC = () => {
                                                 max="256"
                                                 step="2"
                                                 value={pngColors}
-                                                onChange={(e) => setPngColors(parseInt(e.target.value))}
+                                                onChange={(e) => setPngColors(parseInt((e.target as HTMLInputElement).value))}
                                                 className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600"
                                             />
                                         </div>

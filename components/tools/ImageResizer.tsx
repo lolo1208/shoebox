@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import React, { useState, useEffect, useRef } from 'react';
 import { Upload, Download, RefreshCw, X, FileImage, Lock, Unlock, ArrowRight } from 'lucide-react';
 
@@ -154,6 +155,9 @@ const ImageResizer: React.FC = () => {
     <div className="flex flex-col lg:flex-row gap-8 h-full">
       {/* Left Sidebar */}
       <div className="w-full lg:w-80 shrink-0 space-y-6">
+         {/* Fix: Always mount input */}
+         <input id="resize-upload" type="file" accept="image/*" className="hidden" onChange={(e) => (e.target as HTMLInputElement).files?.[0] && setFile((e.target as HTMLInputElement).files![0])} />
+
          {!file ? (
             <div
                 onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
@@ -165,7 +169,6 @@ const ImageResizer: React.FC = () => {
                     ${isDragging ? 'border-primary-500 bg-primary-50' : 'border-gray-300 hover:border-primary-400 hover:bg-gray-100'}
                 `}
             >
-                <input id="resize-upload" type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && setFile(e.target.files[0])} />
                 <Upload size={32} className="text-gray-400 mb-2" />
                 <p className="text-sm font-medium text-gray-700">点击或拖拽上传</p>
             </div>
@@ -200,7 +203,7 @@ const ImageResizer: React.FC = () => {
                              <input 
                                 type="range" min="1" max="200" step="1" 
                                 value={scalePercent} 
-                                onChange={(e) => handlePercentChange(parseInt(e.target.value))}
+                                onChange={(e) => handlePercentChange(parseInt((e.target as HTMLInputElement).value))}
                                 className="w-full h-2 bg-gray-200 rounded-lg accent-primary-600 cursor-pointer"
                              />
                              <div className="flex justify-between text-xs text-gray-400 pt-1">
@@ -218,14 +221,14 @@ const ImageResizer: React.FC = () => {
                             <div className="flex items-center gap-2">
                                 <div className="flex-1">
                                     <label className="text-xs text-gray-500 mb-1 block">宽度 (W)</label>
-                                    <input type="number" value={targetW} onChange={(e) => handleDimensionChange('w', e.target.value)} className="w-full p-2 border border-gray-300 rounded-lg text-sm" />
+                                    <input type="number" value={targetW} onChange={(e) => handleDimensionChange('w', (e.target as HTMLInputElement).value)} className="w-full p-2 border border-gray-300 rounded-lg text-sm" />
                                 </div>
                                 <button onClick={() => setLockRatio(!lockRatio)} className={`mt-5 p-1.5 rounded ${lockRatio ? 'bg-primary-50 text-primary-600' : 'text-gray-400'}`}>
                                     {lockRatio ? <Lock size={16} /> : <Unlock size={16} />}
                                 </button>
                                 <div className="flex-1">
                                     <label className="text-xs text-gray-500 mb-1 block">高度 (H)</label>
-                                    <input type="number" value={targetH} onChange={(e) => handleDimensionChange('h', e.target.value)} className="w-full p-2 border border-gray-300 rounded-lg text-sm" />
+                                    <input type="number" value={targetH} onChange={(e) => handleDimensionChange('h', (e.target as HTMLInputElement).value)} className="w-full p-2 border border-gray-300 rounded-lg text-sm" />
                                 </div>
                             </div>
                         </div>

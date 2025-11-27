@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import React, { useState, useRef, useEffect } from 'react';
 import { Upload, Download, RefreshCw, X, Image as ImageIcon } from 'lucide-react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
@@ -150,7 +151,7 @@ const WatermarkGenerator: React.FC = () => {
                    type="file" 
                    accept="image/*" 
                    className="hidden" 
-                   onChange={(e) => e.target.files?.[0] && setFile(e.target.files[0])} 
+                   onChange={(e) => (e.target as HTMLInputElement).files?.[0] && setFile((e.target as HTMLInputElement).files![0])} 
                 />
                 
                 {file ? (
@@ -172,7 +173,7 @@ const WatermarkGenerator: React.FC = () => {
                  <input 
                     type="text" 
                     value={text} 
-                    onChange={(e) => setText(e.target.value)}
+                    onChange={(e) => setText((e.target as HTMLInputElement).value)}
                     className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-100 focus:border-primary-500"
                     placeholder="请输入水印内容"
                  />
@@ -190,13 +191,13 @@ const WatermarkGenerator: React.FC = () => {
                     <input 
                         type="color" 
                         value={color} 
-                        onChange={(e) => setColor(e.target.value)}
+                        onChange={(e) => setColor((e.target as HTMLInputElement).value)}
                         className="h-9 w-12 p-1 bg-white border border-gray-300 rounded cursor-pointer"
                     />
                     <input 
                        type="text"
                        value={color}
-                       onChange={(e) => setColor(e.target.value)}
+                       onChange={(e) => setColor((e.target as HTMLInputElement).value)}
                        className="flex-1 p-2 border border-gray-300 rounded-lg text-sm"
                     />
                 </div>
@@ -209,7 +210,7 @@ const WatermarkGenerator: React.FC = () => {
                 </div>
                 <input 
                     type="range" min="0" max="1" step="0.05" 
-                    value={alpha} onChange={(e) => setAlpha(parseFloat(e.target.value))}
+                    value={alpha} onChange={(e) => setAlpha(parseFloat((e.target as HTMLInputElement).value))}
                     className="w-full h-2 bg-gray-200 rounded-lg accent-primary-600 cursor-pointer"
                 />
             </div>
@@ -221,7 +222,7 @@ const WatermarkGenerator: React.FC = () => {
                 </div>
                 <input 
                     type="range" min="-90" max="90" step="1" 
-                    value={angle} onChange={(e) => setAngle(parseInt(e.target.value))}
+                    value={angle} onChange={(e) => setAngle(parseInt((e.target as HTMLInputElement).value))}
                     className="w-full h-2 bg-gray-200 rounded-lg accent-primary-600 cursor-pointer"
                 />
             </div>
@@ -233,7 +234,7 @@ const WatermarkGenerator: React.FC = () => {
                 </div>
                 <input 
                     type="range" min="1" max="10" step="0.2" 
-                    value={space} onChange={(e) => setSpace(parseFloat(e.target.value))}
+                    value={space} onChange={(e) => setSpace(parseFloat((e.target as HTMLInputElement).value))}
                     className="w-full h-2 bg-gray-200 rounded-lg accent-primary-600 cursor-pointer"
                 />
             </div>
@@ -245,7 +246,7 @@ const WatermarkGenerator: React.FC = () => {
                 </div>
                 <input 
                     type="range" min="0.5" max="5" step="0.1" 
-                    value={size} onChange={(e) => setSize(parseFloat(e.target.value))}
+                    value={size} onChange={(e) => setSize(parseFloat((e.target as HTMLInputElement).value))}
                     className="w-full h-2 bg-gray-200 rounded-lg accent-primary-600 cursor-pointer"
                 />
             </div>
@@ -273,7 +274,7 @@ const WatermarkGenerator: React.FC = () => {
                          <input 
                             type="checkbox" 
                             checked={autoRefresh} 
-                            onChange={(e) => setAutoRefresh(e.target.checked)}
+                            onChange={(e) => setAutoRefresh((e.target as HTMLInputElement).checked)}
                             className="rounded text-primary-600 focus:ring-primary-500"
                          />
                          <span className="text-sm text-gray-700">实时刷新</span>

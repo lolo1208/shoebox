@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import React, { useState } from 'react';
 import { Copy, RefreshCw, Check, Plus, Minus, ArrowRightLeft } from 'lucide-react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
@@ -99,20 +100,20 @@ const UuidGenerator: React.FC = () => {
   }, [contentInput, namespace]);
 
   const copyOne = (uuid: string, index: number) => {
-    navigator.clipboard.writeText(uuid);
+    (navigator as any).clipboard.writeText(uuid);
     setCopiedIndex(index);
     setTimeout(() => setCopiedIndex(null), 1500);
   };
 
   const copyV5 = () => {
     if (!contentUuid) return;
-    navigator.clipboard.writeText(contentUuid);
+    (navigator as any).clipboard.writeText(contentUuid);
     setCopiedV5(true);
     setTimeout(() => setCopiedV5(false), 1500);
   };
 
   const copyAll = () => {
-    navigator.clipboard.writeText(uuids.join('\n'));
+    (navigator as any).clipboard.writeText(uuids.join('\n'));
     setCopiedIndex(-1); 
     setTimeout(() => setCopiedIndex(null), 1500);
   };
@@ -205,7 +206,7 @@ const UuidGenerator: React.FC = () => {
                     <input 
                         type="text"
                         value={contentInput}
-                        onChange={(e) => setContentInput(e.target.value)}
+                        onChange={(e) => setContentInput((e.target as HTMLInputElement).value)}
                         placeholder="输入你想要转换成 UUID 的字符串..."
                         className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 transition-all text-gray-800"
                     />
@@ -217,7 +218,7 @@ const UuidGenerator: React.FC = () => {
                         <input 
                             type="text"
                             value={namespace}
-                            onChange={(e) => setNamespace(e.target.value)}
+                            onChange={(e) => setNamespace((e.target as HTMLInputElement).value)}
                             placeholder={`默认: ${DEFAULT_NAMESPACE}`}
                             className="flex-1 p-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-100 focus:border-primary-500 transition-all font-mono text-gray-600"
                         />

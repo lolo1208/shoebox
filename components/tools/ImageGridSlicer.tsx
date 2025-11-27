@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import React, { useState, useEffect, useRef } from 'react';
 import { Upload, Download, RefreshCw, X, FileImage, Grid, ArrowRight } from 'lucide-react';
 import JSZip from 'jszip';
@@ -125,6 +126,9 @@ const ImageGridSlicer: React.FC = () => {
     <div className="flex flex-col lg:flex-row gap-8 h-full">
       {/* Left Sidebar */}
       <div className="w-full lg:w-80 shrink-0 space-y-6">
+        {/* Fix: Always mount input */}
+        <input id="slice-upload" type="file" accept="image/*" className="hidden" onChange={(e) => (e.target as HTMLInputElement).files?.[0] && setFile((e.target as HTMLInputElement).files![0])} />
+
         {!file ? (
             <div
                 onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
@@ -136,7 +140,6 @@ const ImageGridSlicer: React.FC = () => {
                     ${isDragging ? 'border-primary-500 bg-primary-50' : 'border-gray-300 hover:border-primary-400 hover:bg-gray-100'}
                 `}
             >
-                <input id="slice-upload" type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && setFile(e.target.files[0])} />
                 <Upload size={32} className="text-gray-400 mb-2" />
                 <p className="text-sm font-medium text-gray-700">点击或拖拽上传</p>
             </div>
@@ -170,7 +173,7 @@ const ImageGridSlicer: React.FC = () => {
                             <input 
                                 type="number" min="1" max="20"
                                 value={rows} 
-                                onChange={(e) => setRows(Math.max(1, parseInt(e.target.value) || 1))}
+                                onChange={(e) => setRows(Math.max(1, parseInt((e.target as HTMLInputElement).value) || 1))}
                                 className="w-full p-2 border border-gray-300 rounded-lg text-sm"
                             />
                         </div>
@@ -179,7 +182,7 @@ const ImageGridSlicer: React.FC = () => {
                             <input 
                                 type="number" min="1" max="20"
                                 value={cols} 
-                                onChange={(e) => setCols(Math.max(1, parseInt(e.target.value) || 1))}
+                                onChange={(e) => setCols(Math.max(1, parseInt((e.target as HTMLInputElement).value) || 1))}
                                 className="w-full p-2 border border-gray-300 rounded-lg text-sm"
                             />
                         </div>

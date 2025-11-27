@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import React, { useState, useRef, useEffect } from 'react';
 import { Upload, Download, RefreshCw, X, Plus, RotateCw, Trash2, ArrowUp, ArrowDown, LayoutTemplate, ChevronDown, ChevronRight, Smartphone, Monitor, FileText, Instagram, Hash, Layers, ArrowRightLeft } from 'lucide-react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
@@ -205,7 +206,7 @@ const ImageComposition: React.FC = () => {
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      Array.from(e.target.files).forEach(file => {
+      Array.from<File>(e.target.files).forEach(file => {
         if (file.type.startsWith('image/')) addImage(file);
       });
     }
@@ -454,7 +455,7 @@ const ImageComposition: React.FC = () => {
                         type="number" 
                         value={canvasW || ''} 
                         onChange={e => {
-                            const val = parseInt(e.target.value);
+                            const val = parseInt((e.target as HTMLInputElement).value);
                             setCanvasW(isNaN(val) ? 0 : val);
                         }} 
                         className="w-full p-2 border border-gray-300 rounded text-sm"
@@ -473,7 +474,7 @@ const ImageComposition: React.FC = () => {
                         type="number" 
                         value={canvasH || ''} 
                         onChange={e => {
-                            const val = parseInt(e.target.value);
+                            const val = parseInt((e.target as HTMLInputElement).value);
                             setCanvasH(isNaN(val) ? 0 : val);
                         }} 
                         className="w-full p-2 border border-gray-300 rounded text-sm"
@@ -542,7 +543,7 @@ const ImageComposition: React.FC = () => {
                     <input 
                         type="color" 
                         value={bgColor.slice(0, 7)} // Input only takes hex
-                        onChange={e => setBgColor(e.target.value)}
+                        onChange={e => setBgColor((e.target as HTMLInputElement).value)}
                         className="h-9 w-12 p-1 bg-white border border-gray-300 rounded cursor-pointer"
                     />
                     <div className="flex-1 flex gap-2">

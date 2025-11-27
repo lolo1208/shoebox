@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import React, { useState, useEffect } from 'react';
 import { Copy, FileJson, Trash2, Minimize2, Check, Wand2, ChevronRight, ChevronDown, ArrowRight, Sparkles, ArrowDownAZ, ArrowUpAZ, AlignLeft, Settings2 } from 'lucide-react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
@@ -229,7 +230,7 @@ const JsonFormatter: React.FC = () => {
   };
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(input);
+    (navigator as any).clipboard.writeText(input);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -362,7 +363,7 @@ const JsonFormatter: React.FC = () => {
                 <AlignLeft size={14} className="text-gray-400" />
                 <select 
                     value={indentSize} 
-                    onChange={(e) => setIndentSize(parseInt(e.target.value))}
+                    onChange={(e) => setIndentSize(parseInt((e.target as HTMLSelectElement).value))}
                     className="text-xs font-medium text-gray-600 bg-transparent border-none focus:ring-0 cursor-pointer"
                 >
                     <option value={2}>2 空格</option>
@@ -424,7 +425,7 @@ const JsonFormatter: React.FC = () => {
              <div className="flex-1 relative">
                  <textarea
                     value={input}
-                    onChange={(e) => setInput(e.target.value)}
+                    onChange={(e) => setInput((e.target as HTMLTextAreaElement).value)}
                     placeholder='在此粘贴 JSON... (支持去除 // 注释)'
                     className={`
                         w-full h-full p-4 font-mono text-sm bg-gray-50 border rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary-100 transition-all text-gray-800

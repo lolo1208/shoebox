@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import React, { useRef, useEffect, useState } from 'react';
 
 // --- Math Formulas ---

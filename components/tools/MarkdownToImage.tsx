@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import React, { useRef, useState, useEffect } from 'react';
 import { Download, RefreshCw, Image as ImageIcon } from 'lucide-react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
@@ -57,7 +58,7 @@ const MarkdownToImage: React.FC = () => {
         </div>
         <textarea
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => setInput((e.target as HTMLTextAreaElement).value)}
           className="flex-1 w-full p-4 font-mono text-sm bg-gray-50 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-primary-500 transition-all text-gray-800"
           placeholder="# Type your markdown here..."
         />

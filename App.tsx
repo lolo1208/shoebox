@@ -1,3 +1,5 @@
+
+/// <reference lib="dom" />
 import React, { useState } from 'react';
 import { 
   Type, 
@@ -19,9 +21,11 @@ import {
   Crop,
   Grid,
   Layers,
-  FileVideo
+  FileVideo,
+  Music
 } from 'lucide-react';
 import Sidebar from './components/Sidebar';
+import Home from './components/Home';
 import JsonFormatter from './components/tools/JsonFormatter';
 import PasswordGenerator from './components/tools/PasswordGenerator';
 import UuidGenerator from './components/tools/UuidGenerator';
@@ -36,6 +40,7 @@ import ImageCropper from './components/tools/ImageCropper';
 import ImageGridSlicer from './components/tools/ImageGridSlicer';
 import ImageComposition from './components/tools/ImageComposition';
 import VideoCommandGenerator from './components/tools/VideoCommandGenerator';
+import AudioConverter from './components/tools/AudioConverter';
 import Logo from './components/Logo';
 import { Category, CategoryId } from './types';
 
@@ -45,6 +50,7 @@ const categories: Category[] = [
     id: CategoryId.TEXT,
     name: '文本',
     icon: Type,
+    description: '包含 JSON 格式化、密码生成、UUID 生成、哈希计算等常用文本处理工具。',
     tools: [
       {
         id: 'password-gen',
@@ -76,6 +82,7 @@ const categories: Category[] = [
     id: CategoryId.IMAGE,
     name: '图像',
     icon: ImageIcon,
+    description: '提供图片压缩、裁剪、拼接、水印、格式转换等一站式图像处理能力。',
     tools: [
       {
         id: 'img-convert',
@@ -147,7 +154,16 @@ const categories: Category[] = [
     id: CategoryId.AUDIO_VIDEO,
     name: '影音',
     icon: Video,
+    description: '支持音视频格式转码、压缩、提取音频及剪辑等功能的影音工具箱。',
     tools: [
+      {
+        id: 'audio-convert',
+        name: '音频压缩与转换',
+        description: '支持音频/视频导入，可视化波形剪辑、音量调节、采样率转换与导出',
+        icon: Music,
+        component: <AudioConverter />,
+        layoutClass: 'w-full'
+      },
       {
         id: 'video-cmd',
         name: '视频压缩与转换',
@@ -162,6 +178,7 @@ const categories: Category[] = [
     id: CategoryId.DEVELOPER,
     name: '开发者',
     icon: Code2,
+    description: '正则表达式、缓动函数、代码格式化等开发辅助工具。',
     tools: [
       {
         id: 'json-format',
@@ -184,6 +201,7 @@ const categories: Category[] = [
 ];
 
 const App: React.FC = () => {
+  const [isHome, setIsHome] = useState(true);
   const [activeCategoryId, setActiveCategoryId] = useState<string>(CategoryId.TEXT);
   const [activeToolId, setActiveToolId] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -191,8 +209,13 @@ const App: React.FC = () => {
   const activeCategory = categories.find(c => c.id === activeCategoryId);
   const activeTool = activeCategory?.tools.find(t => t.id === activeToolId);
 
-  const handleToolSelect = (toolId: string) => {
+  const handleToolSelect = (toolId: string, categoryId?: string) => {
+    if (categoryId) {
+        setActiveCategoryId(categoryId);
+    }
     setActiveToolId(toolId);
+    setIsHome(false);
+    
     // On mobile, close sidebar after selection
     if (window.innerWidth < 768) {
       setIsSidebarOpen(false);
@@ -201,7 +224,13 @@ const App: React.FC = () => {
 
   const handleCategorySelect = (categoryId: string) => {
     setActiveCategoryId(categoryId);
-    setActiveToolId(null); // Reset tool when category changes to show category list
+    setActiveToolId(null); // Reset tool when category changes
+    setIsHome(false);
+  };
+
+  const goHome = () => {
+      setIsHome(true);
+      setActiveToolId(null);
   };
 
   return (
@@ -224,12 +253,15 @@ const App: React.FC = () => {
         `}
       >
         <div className="flex items-center justify-between p-4 h-16 border-b border-gray-100">
-          <div className="flex items-center gap-2 font-bold text-xl text-primary-600">
+          <button 
+            onClick={goHome}
+            className="flex items-center gap-2 font-bold text-xl text-primary-600 hover:opacity-80 transition-opacity"
+          >
             <div className="w-8 h-8 bg-primary-600 text-white rounded-lg flex items-center justify-center">
               <Logo size={20} />
             </div>
             LOLO' Shoebox
-          </div>
+          </button>
           <button className="md:hidden text-gray-500" onClick={() => setIsSidebarOpen(false)}>
             <X size={20} />
           </button>
@@ -238,9 +270,9 @@ const App: React.FC = () => {
         <Sidebar 
           categories={categories} 
           activeCategoryId={activeCategoryId}
-          activeToolId={activeToolId}
+          activeToolId={isHome ? null : activeToolId}
           onSelectCategory={handleCategorySelect}
-          onSelectTool={handleToolSelect}
+          onSelectTool={(id) => handleToolSelect(id)}
         />
       </div>
 
@@ -248,79 +280,91 @@ const App: React.FC = () => {
       <div className="flex-1 flex flex-col h-full overflow-hidden w-full relative">
         <header className="h-16 bg-white border-b border-gray-200 flex items-center px-6 justify-between flex-shrink-0">
           <div className="flex items-center gap-2 text-gray-500 text-sm">
-            <button 
-              onClick={() => setActiveToolId(null)}
-              className="hover:text-primary-600 transition-colors flex items-center gap-1"
-            >
-               {categories.find(c => c.id === activeCategoryId)?.name}
-            </button>
-            {activeTool && (
-              <>
-                <span>/</span>
-                <span className="font-medium text-gray-900">{activeTool.name}</span>
-              </>
+            {isHome ? (
+                <span className="font-medium text-gray-900">首页</span>
+            ) : (
+                <>
+                    <button 
+                    onClick={() => setActiveToolId(null)}
+                    className="hover:text-primary-600 transition-colors flex items-center gap-1"
+                    >
+                    {categories.find(c => c.id === activeCategoryId)?.name}
+                    </button>
+                    {activeTool && (
+                    <>
+                        <span>/</span>
+                        <span className="font-medium text-gray-900">{activeTool.name}</span>
+                    </>
+                    )}
+                </>
             )}
           </div>
         </header>
 
         <main className="flex-1 overflow-auto p-4 md:p-8">
           <div className="w-full mx-auto">
-            {!activeTool ? (
-              // Category View (Tool Grid)
-              <div className="animate-fade-in max-w-5xl mx-auto">
-                 <div className="mb-8">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                      {activeCategory?.name}
-                    </h1>
-                    <p className="text-gray-500">
-                      选择一个工具开始使用
-                    </p>
-                 </div>
-                 
-                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {activeCategory?.tools.map((tool) => (
-                      <button
-                        key={tool.id}
-                        onClick={() => handleToolSelect(tool.id)}
-                        className="flex flex-col text-left p-6 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-primary-200 hover:ring-1 hover:ring-primary-200 transition-all duration-200 group"
-                      >
-                        <div className="w-12 h-12 bg-primary-50 text-primary-600 rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary-600 group-hover:text-white transition-colors">
-                          <tool.icon size={24} />
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                          {tool.name}
-                        </h3>
-                        <p className="text-sm text-gray-500 line-clamp-2">
-                          {tool.description}
-                        </p>
-                      </button>
-                    ))}
-                    {activeCategory?.tools.length === 0 && (
-                       <div className="col-span-full py-12 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-xl">
-                          <div className="flex justify-center mb-2">
-                             <Code2 size={48} className="opacity-20"/>
-                          </div>
-                          <p>该分类下暂无工具</p>
-                       </div>
-                    )}
-                 </div>
-              </div>
+            {isHome ? (
+                <Home categories={categories} onSelectTool={handleToolSelect} />
             ) : (
-              // Tool Detail View - Layout controlled by activeTool.layoutClass
-              <div className={`animate-fade-in bg-white rounded-xl border border-gray-200 shadow-sm min-h-[500px] ${activeTool.layoutClass || 'w-full'}`}>
-                 <div className="border-b border-gray-100 p-6 flex items-center gap-4">
-                    <div className="p-2 bg-primary-50 text-primary-600 rounded-lg">
-                       <activeTool.icon size={24} />
+                <>
+                    {!activeTool ? (
+                    // Category View (Tool Grid)
+                    <div className="animate-fade-in max-w-5xl mx-auto">
+                        <div className="mb-8">
+                            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                            {activeCategory?.name}
+                            </h1>
+                            <p className="text-gray-500">
+                            {activeCategory?.description}
+                            </p>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {activeCategory?.tools.map((tool) => (
+                            <button
+                                key={tool.id}
+                                onClick={() => handleToolSelect(tool.id)}
+                                className="flex flex-col text-left p-6 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-primary-200 hover:ring-1 hover:ring-primary-200 transition-all duration-200 group"
+                            >
+                                <div className="w-12 h-12 bg-gray-50 text-gray-600 rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary-600 group-hover:text-white transition-colors">
+                                <tool.icon size={24} />
+                                </div>
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                                {tool.name}
+                                </h3>
+                                <p className="text-sm text-gray-500 line-clamp-2">
+                                {tool.description}
+                                </p>
+                            </button>
+                            ))}
+                            {activeCategory?.tools.length === 0 && (
+                            <div className="col-span-full py-12 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-xl">
+                                <div className="flex justify-center mb-2">
+                                    <Code2 size={48} className="opacity-20"/>
+                                </div>
+                                <p>该分类下暂无工具</p>
+                            </div>
+                            )}
+                        </div>
                     </div>
-                    <div>
-                      <h2 className="text-xl font-bold text-gray-900">{activeTool.name}</h2>
-                      <p className="text-sm text-gray-500">{activeTool.description}</p>
+                    ) : (
+                    // Tool Detail View
+                    <div className={`animate-fade-in bg-white rounded-xl border border-gray-200 shadow-sm min-h-[500px] ${activeTool.layoutClass || 'w-full'}`}>
+                        <div className="border-b border-gray-100 p-6 flex items-center gap-4">
+                            <div className="p-2 bg-primary-50 text-primary-600 rounded-lg">
+                            <activeTool.icon size={24} />
+                            </div>
+                            <div>
+                            <h2 className="text-xl font-bold text-gray-900">{activeTool.name}</h2>
+                            <p className="text-sm text-gray-500">{activeTool.description}</p>
+                            </div>
+                        </div>
+                        <div className="p-6">
+                            {activeTool.component}
+                        </div>
                     </div>
-                 </div>
-                 <div className="p-6">
-                    {activeTool.component}
-                 </div>
-              </div>
+                    )}
+                </>
             )}
           </div>
         </main>

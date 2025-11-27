@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import React, { useState, useEffect, useRef } from 'react';
 import { Copy, Hash, Check, Upload, FileText, X, Loader2 } from 'lucide-react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
@@ -116,7 +117,7 @@ const Md5Generator: React.FC = () => {
 
   const copyToClipboard = () => {
     if (!hash) return;
-    navigator.clipboard.writeText(hash);
+    (navigator as any).clipboard.writeText(hash);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -139,7 +140,7 @@ const Md5Generator: React.FC = () => {
               : 'text-gray-500 hover:text-gray-700'
           }`}
         >
-          文本加密
+          文本 MD5
         </button>
         <button
           onClick={() => setActiveTab('file')}
@@ -149,7 +150,7 @@ const Md5Generator: React.FC = () => {
               : 'text-gray-500 hover:text-gray-700'
           }`}
         >
-          文件加密
+          文件 MD5
         </button>
       </div>
 
@@ -158,35 +159,35 @@ const Md5Generator: React.FC = () => {
           <label className="block text-sm font-medium text-gray-700">输入文本</label>
           <textarea
             value={textInput}
-            onChange={(e) => setTextInput(e.target.value)}
-            placeholder="输入需要加密的文本..."
+            onChange={(e) => setTextInput((e.target as HTMLTextAreaElement).value)}
+            placeholder="输入文本以计算 MD5..."
             className="w-full h-32 p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-100 focus:border-primary-500 transition-all resize-none text-gray-800"
           />
         </div>
       ) : (
         <div className="space-y-4 animate-fade-in">
+          {/* Always render input to prevent file access errors */}
+          <input 
+            id="md5-file-upload" 
+            type="file" 
+            className="hidden" 
+            onChange={handleFileSelect}
+          />
+
           {!file ? (
             <div
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               className={`
-                border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center text-center transition-all cursor-pointer bg-gray-50
+                h-64 border-2 border-dashed rounded-xl flex flex-col items-center justify-center text-center transition-all cursor-pointer bg-gray-50
                 ${isDragging ? 'border-primary-500 bg-primary-50' : 'border-gray-300 hover:border-primary-400 hover:bg-gray-100'}
               `}
               onClick={() => document.getElementById('md5-file-upload')?.click()}
             >
-              <input 
-                id="md5-file-upload" 
-                type="file" 
-                className="hidden" 
-                onChange={handleFileSelect}
-              />
-              <div className="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center mb-4 text-primary-500">
-                <Upload size={32} />
-              </div>
-              <p className="text-lg font-medium text-gray-700 mb-1">点击或拖拽文件到此处</p>
-              <p className="text-sm text-gray-500">支持任意类型文件，在本地计算，不会上传到服务器</p>
+              <Upload size={32} className="text-gray-400 mb-2" />
+              <p className="text-sm font-medium text-gray-700">点击或拖拽文件到此处</p>
+              <p className="text-xs text-gray-400 mt-1">支持任意类型文件，本地计算，不上传服务器</p>
             </div>
           ) : (
             <div className="bg-white border border-gray-200 rounded-xl p-6">
@@ -211,7 +212,7 @@ const Md5Generator: React.FC = () => {
               {isCalculating ? (
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm text-gray-600">
-                    <span>Calculating MD5...</span>
+                    <span>Calculating...</span>
                     <span>{progress.toFixed(0)}%</span>
                   </div>
                   <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -241,7 +242,7 @@ const Md5Generator: React.FC = () => {
             ) : (
                <div className="flex items-center text-gray-400 italic gap-2">
                  {isCalculating ? <Loader2 className="animate-spin" size={16}/> : null}
-                 {isCalculating ? 'Calculating...' : '等待输入...'}
+                 {isCalculating ? '计算中...' : '等待输入...'}
                </div>
             )}
           </div>

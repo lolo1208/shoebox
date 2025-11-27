@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import React, { useEffect, useRef, useState } from 'react';
 import { Download, QrCode as QrIcon } from 'lucide-react';
 import QRCode from 'qrcode';
@@ -60,7 +61,7 @@ const QrCodeGenerator: React.FC = () => {
           <label className="block text-sm font-medium text-gray-700">内容 (文本或 URL)</label>
           <textarea
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => setText((e.target as HTMLTextAreaElement).value)}
             placeholder="输入链接或文本..."
             className="w-full h-32 p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-100 focus:border-primary-500 transition-all resize-none text-gray-800"
           />
@@ -83,7 +84,7 @@ const QrCodeGenerator: React.FC = () => {
                         max="1024"
                         step="32"
                         value={size}
-                        onChange={(e) => setSize(parseInt(e.target.value))}
+                        onChange={(e) => setSize(parseInt((e.target as HTMLInputElement).value))}
                         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600"
                     />
                 </div>
@@ -95,7 +96,7 @@ const QrCodeGenerator: React.FC = () => {
                             <input 
                                 type="color" 
                                 value={fgColor}
-                                onChange={(e) => setFgColor(e.target.value)}
+                                onChange={(e) => setFgColor((e.target as HTMLInputElement).value)}
                                 className="w-10 h-10 p-1 bg-white border border-gray-200 rounded-lg cursor-pointer"
                             />
                             <span className="text-sm font-mono text-gray-500 uppercase">{fgColor}</span>
@@ -107,7 +108,7 @@ const QrCodeGenerator: React.FC = () => {
                             <input 
                                 type="color" 
                                 value={bgColor}
-                                onChange={(e) => setBgColor(e.target.value)}
+                                onChange={(e) => setBgColor((e.target as HTMLInputElement).value)}
                                 className="w-10 h-10 p-1 bg-white border border-gray-200 rounded-lg cursor-pointer"
                             />
                             <span className="text-sm font-mono text-gray-500 uppercase">{bgColor}</span>

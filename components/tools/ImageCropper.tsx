@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import React, { useState, useEffect, useRef } from 'react';
 import { Upload, Download, RefreshCw, X, FileImage, ArrowLeftToLine, ArrowRightToLine, ArrowUpToLine, ArrowDownToLine, FoldHorizontal, FoldVertical, Crosshair } from 'lucide-react';
 
@@ -249,6 +250,9 @@ const ImageCropper: React.FC = () => {
     >
       {/* Left Sidebar */}
       <div className="w-full lg:w-80 shrink-0 space-y-6">
+        {/* Fix: Always mount input */}
+        <input id="crop-upload" type="file" accept="image/*" className="hidden" onChange={(e) => (e.target as HTMLInputElement).files?.[0] && setFile((e.target as HTMLInputElement).files![0])} />
+
         {!file ? (
              <div
                 onDragOver={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
@@ -260,7 +264,6 @@ const ImageCropper: React.FC = () => {
                     ${isDraggingFile ? 'border-primary-500 bg-primary-50' : 'border-gray-300 hover:border-primary-400 hover:bg-gray-100'}
                 `}
             >
-                <input id="crop-upload" type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && setFile(e.target.files[0])} />
                 <Upload size={32} className="text-gray-400 mb-2" />
                 <p className="text-sm font-medium text-gray-700">点击或拖拽上传</p>
             </div>
@@ -306,7 +309,7 @@ const ImageCropper: React.FC = () => {
                              <label className="text-xs text-gray-500 block mb-1">X 坐标</label>
                              <input 
                                 type="number" value={cropX} 
-                                onChange={(e) => handleInputChange('x', e.target.value)}
+                                onChange={(e) => handleInputChange('x', (e.target as HTMLInputElement).value)}
                                 className="w-full p-2 border border-gray-300 rounded-lg text-sm"
                              />
                          </div>
@@ -314,7 +317,7 @@ const ImageCropper: React.FC = () => {
                              <label className="text-xs text-gray-500 block mb-1">Y 坐标</label>
                              <input 
                                 type="number" value={cropY} 
-                                onChange={(e) => handleInputChange('y', e.target.value)}
+                                onChange={(e) => handleInputChange('y', (e.target as HTMLInputElement).value)}
                                 className="w-full p-2 border border-gray-300 rounded-lg text-sm"
                              />
                          </div>
@@ -322,7 +325,7 @@ const ImageCropper: React.FC = () => {
                              <label className="text-xs text-gray-500 block mb-1">宽度 (W)</label>
                              <input 
                                 type="number" value={cropW} 
-                                onChange={(e) => handleInputChange('w', e.target.value)}
+                                onChange={(e) => handleInputChange('w', (e.target as HTMLInputElement).value)}
                                 className="w-full p-2 border border-gray-300 rounded-lg text-sm"
                              />
                          </div>
@@ -330,7 +333,7 @@ const ImageCropper: React.FC = () => {
                              <label className="text-xs text-gray-500 block mb-1">高度 (H)</label>
                              <input 
                                 type="number" value={cropH} 
-                                onChange={(e) => handleInputChange('h', e.target.value)}
+                                onChange={(e) => handleInputChange('h', (e.target as HTMLInputElement).value)}
                                 className="w-full p-2 border border-gray-300 rounded-lg text-sm"
                              />
                          </div>
