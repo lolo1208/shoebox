@@ -606,8 +606,15 @@ const ImageComposition: React.FC = () => {
                      </div>
                  ))}
                  {elements.length === 0 && (
-                     <div className="text-center text-gray-400 py-8 text-sm">
-                         暂无图层，请添加图片
+                     <div 
+                        onClick={() => document.getElementById('comp-upload')?.click()}
+                        className="flex flex-col items-center justify-center py-10 text-center cursor-pointer hover:bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 hover:border-primary-300 transition-all group"
+                     >
+                         <div className="w-12 h-12 bg-gray-100 group-hover:bg-primary-100 rounded-full flex items-center justify-center mb-3 text-gray-400 group-hover:text-primary-600 transition-colors">
+                             <Plus size={24} />
+                         </div>
+                         <div className="text-sm font-bold text-gray-700">添加图片</div>
+                         <div className="text-xs text-gray-400 mt-1">支持多选导入</div>
                      </div>
                  )}
              </div>

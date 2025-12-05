@@ -22,7 +22,8 @@ import {
   Grid,
   Layers,
   FileVideo,
-  Music
+  Music,
+  ImageMinus
 } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import Home from './components/Home';
@@ -41,6 +42,7 @@ import ImageGridSlicer from './components/tools/ImageGridSlicer';
 import ImageComposition from './components/tools/ImageComposition';
 import VideoCommandGenerator from './components/tools/VideoCommandGenerator';
 import AudioConverter from './components/tools/AudioConverter';
+import BackgroundRemover from './components/tools/BackgroundRemover';
 import Logo from './components/Logo';
 import { Category, CategoryId } from './types';
 
@@ -93,14 +95,6 @@ const categories: Category[] = [
         layoutClass: 'w-full'
       },
       {
-        id: 'img-comp',
-        name: '画布拼贴',
-        description: '无限画布、多图层拖拽合成，支持自由旋转、缩放与层级调整',
-        icon: Layers,
-        component: <ImageComposition />,
-        layoutClass: 'w-full'
-      },
-      {
         id: 'img-resize',
         name: '图像尺寸调整',
         description: '修改图片分辨率，支持像素/百分比缩放及等比锁定',
@@ -122,6 +116,22 @@ const categories: Category[] = [
         description: '将图片按行列网格切分为多张小图，并打包为 ZIP 下载',
         icon: Grid,
         component: <ImageGridSlicer />,
+        layoutClass: 'w-full'
+      },
+      {
+        id: 'img-comp',
+        name: '画布拼贴',
+        description: '无限画布、多图层拖拽合成，支持自由旋转、缩放与层级调整',
+        icon: Layers,
+        component: <ImageComposition />,
+        layoutClass: 'w-full'
+      },
+      {
+        id: 'bg-remove',
+        name: '智能抠图',
+        description: '基于 AI 自动识别并移除图片背景，支持人像、商品与物体',
+        icon: ImageMinus,
+        component: <BackgroundRemover />,
         layoutClass: 'w-full'
       },
       {

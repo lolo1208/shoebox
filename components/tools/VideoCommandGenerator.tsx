@@ -1,6 +1,7 @@
+
 /// <reference lib="dom" />
 import React, { useState, useEffect, useRef } from 'react';
-import { Upload, FileVideo, Terminal, Copy, Check, Info, Film, Cpu, Zap, Volume2, RefreshCw, Captions, Settings2, FolderInput, ExternalLink, Calculator, AlertTriangle, Plus, Trash2, FileText } from 'lucide-react';
+import { Film, Upload, FileVideo, Terminal, Copy, Check, Info, Cpu, Zap, Volume2, RefreshCw, Captions, Settings2, FolderInput, ExternalLink, Calculator, AlertTriangle, Plus, Trash2, FileText, Server, Smartphone, Monitor } from 'lucide-react';
 // @ts-ignore
 import MediaInfoFactory from 'mediainfo.js';
 
@@ -37,6 +38,55 @@ interface VideoMetadata {
   audio: TrackInfo[];
   subtitles: TrackInfo[];
 }
+
+// --- Presets Definition ---
+type PresetKey = 'compat' | 'compress' | 'high' | 'nas';
+
+interface PresetConfig {
+    id: PresetKey;
+    title: string;
+    desc: string;
+    icon: React.ReactNode;
+    config: {
+        container: string;
+        videoEncoder: string;
+        crf: number;
+        preset: string;
+        audioEncoder: string;
+        scale: string;
+    }
+}
+
+const PRESETS: PresetConfig[] = [
+    {
+        id: 'nas',
+        title: 'NAS 存档',
+        desc: 'H.265 (CRF 23) + MP4 (1080p)。针对群晖优化，画质清晰，支持缩略图预览与苹果设备播放。',
+        icon: <Server size={20} />,
+        config: { container: 'mp4', videoEncoder: 'libx265', crf: 23, preset: 'medium', audioEncoder: 'aac', scale: '1080p' }
+    },
+    {
+        id: 'compat',
+        title: '兼容优先',
+        desc: 'H.264 (CRF 23) + MP4。兼容性最好，适合老旧设备、浏览器直接播放与分享。',
+        icon: <Smartphone size={20} />,
+        config: { container: 'mp4', videoEncoder: 'libx264', crf: 23, preset: 'medium', audioEncoder: 'aac', scale: 'original' }
+    },
+    {
+        id: 'compress',
+        title: '极限压缩',
+        desc: 'H.265 (CRF 28)。牺牲部分画质以换取最小体积，适合存档冷数据。',
+        icon: <Zap size={20} />,
+        config: { container: 'mp4', videoEncoder: 'libx265', crf: 28, preset: 'slow', audioEncoder: 'aac', scale: 'original' }
+    },
+    {
+        id: 'high',
+        title: '画质优先',
+        desc: 'H.264 (CRF 18) + MKV。接近无损的视觉体验，保留原始音轨，体积较大。',
+        icon: <Monitor size={20} />,
+        config: { container: 'mkv', videoEncoder: 'libx264', crf: 18, preset: 'slow', audioEncoder: 'copy', scale: 'original' }
+    }
+];
 
 const formatDuration = (secondsStr: string): string => {
   const seconds = parseFloat(secondsStr);
@@ -89,12 +139,13 @@ const VideoCommandGenerator: React.FC = () => {
   const [externalSubs, setExternalSubs] = useState<ExternalSubtitle[]>([]);
 
   // FFmpeg Settings
+  // Initialize with NAS preset defaults
   const [container, setContainer] = useState('mp4');
-  const [videoEncoder, setVideoEncoder] = useState('libx264');
+  const [videoEncoder, setVideoEncoder] = useState('libx265'); 
   const [crf, setCrf] = useState(23);
   const [preset, setPreset] = useState('medium');
   const [audioEncoder, setAudioEncoder] = useState('aac');
-  const [scale, setScale] = useState('original');
+  const [scale, setScale] = useState('1080p');
   const [customScaleW, setCustomScaleW] = useState(1920);
   
   const [command, setCommand] = useState('');
@@ -147,7 +198,6 @@ const VideoCommandGenerator: React.FC = () => {
     try {
       const mediainfo = await MediaInfoFactory({ 
         format: 'object',
-        // Use a public CDN for the WASM file to ensure it loads correctly in both Preview and Production
         locateFile: () => 'https://unpkg.com/mediainfo.js@0.2.1/dist/MediaInfoModule.wasm'
       });
       
@@ -167,13 +217,11 @@ const VideoCommandGenerator: React.FC = () => {
       const result = await mediainfo.analyzeData(getSize, readChunk);
       
       if (result && result.media && result.media.track) {
-        // Cast to any to avoid TypeScript errors with dynamic MediaInfo properties
         const general = result.media.track.find((t: any) => t['@type'] === 'General') as any;
         const videoTracks = result.media.track.filter((t: any) => t['@type'] === 'Video');
         const audioTracks = result.media.track.filter((t: any) => t['@type'] === 'Audio');
         const subTracks = result.media.track.filter((t: any) => t['@type'] === 'Text');
 
-        // Parse Duration
         let duration = 'Unknown';
         let rawDuration = 0;
         if (general?.Duration) {
@@ -181,13 +229,11 @@ const VideoCommandGenerator: React.FC = () => {
              duration = formatDuration(general.Duration);
         }
 
-        // Parse Size
         let fileSize = 'Unknown';
         let rawBitRate = 0;
         if (general?.FileSize_String4) fileSize = general.FileSize_String4;
         else if (general?.FileSize) fileSize = formatSize(general.FileSize);
 
-        // Calculate overall bitrate if available or infer from size/duration
         if (general?.OverallBitRate) {
             rawBitRate = parseInt(general.OverallBitRate);
         } else if (general?.FileSize && rawDuration > 0) {
@@ -219,7 +265,7 @@ const VideoCommandGenerator: React.FC = () => {
           fileSize: fileSize,
           rawBitRate: rawBitRate,
           video: videoTracks.map((v: any) => ({
-            codec: v.Format, // e.g., AVC, HEVC
+            codec: v.Format, 
             codecId: v.CodecID, 
             width: parseInt(v.Width),
             height: parseInt(v.Height),
@@ -230,11 +276,9 @@ const VideoCommandGenerator: React.FC = () => {
           subtitles: subList
         });
         
-        // Auto-select ALL audio tracks
         const allAudioIds = new Set(audioList.map((a: any) => a.id));
         setSelectedAudioTracks(allAudioIds as Set<number>);
 
-        // Auto-select ALL subtitle tracks
         const allSubIds = new Set(subList.map((s: any) => s.id));
         setSelectedSubTracks(allSubIds as Set<number>);
       }
@@ -256,42 +300,31 @@ const VideoCommandGenerator: React.FC = () => {
       updateFn(newSet);
   };
 
-  // Improved Estimation Logic
   useEffect(() => {
     if (!metadata || metadata.rawDuration <= 0) {
         setEstimatedSize(null);
         return;
     }
 
-    // 1. Determine Base Bitrate Source
-    // If we have raw bitrate from source, use it as a reference point for complexity.
-    // If not, default to standard model (3000kbps for 1080p).
     let estimatedVideoKbps = 3000;
     
-    // Detect Source Efficiency
     const isSourceHEVC = metadata.video.some(v => v.codec.includes('HEVC') || v.codec.includes('265'));
     const isTargetHEVC = videoEncoder.includes('265') || videoEncoder.includes('hevc');
     const isTargetNVENC = videoEncoder.includes('nvenc');
 
     if (metadata.rawBitRate > 0) {
-        // Use source bitrate as base complexity, assuming visual transparency goal
-        // Remove audio part (approx) to get video part
         const approxAudio = Math.max(128 * metadata.audio.length, 256);
         let sourceVideoKbps = Math.max(500, (metadata.rawBitRate / 1000) - approxAudio);
         
-        // Adjust for Source Efficiency:
-        // If Source is HEVC (High Efficiency), it "contains" more quality per bit.
-        // Converting HEVC to AVC requires MORE bits to keep that quality.
         if (isSourceHEVC && !isTargetHEVC) {
-            sourceVideoKbps = sourceVideoKbps * 1.6; // Penalty for HEVC -> AVC
+            sourceVideoKbps = sourceVideoKbps * 1.6; 
         } else if (!isSourceHEVC && isTargetHEVC) {
-            sourceVideoKbps = sourceVideoKbps * 0.6; // Gain for AVC -> HEVC
+            sourceVideoKbps = sourceVideoKbps * 0.6; 
         }
         
         estimatedVideoKbps = sourceVideoKbps;
     }
 
-    // 2. Adjust for Resolution Changes
     let sourceW = 1920, sourceH = 1080;
     if (metadata.video.length > 0) {
         sourceW = metadata.video[0].width;
@@ -315,22 +348,17 @@ const VideoCommandGenerator: React.FC = () => {
     const scaleFactor = (targetW * targetH) / (sourceW * sourceH);
     estimatedVideoKbps = estimatedVideoKbps * scaleFactor;
 
-    // 3. Adjust for CRF changes (Assuming source is roughly equivalent to CRF 23 visual quality if we used bitrate basis)
-    // Rule: +/- 6 CRF = double/half bitrate. 
-    // If we started from source bitrate, we assume that represents "Good" quality (approx CRF 20-23).
-    const crfDelta = 23 - crf; // positive if crf < 23 (higher quality/size)
+    const crfDelta = 23 - crf; 
     const crfFactor = Math.pow(2, crfDelta / 6); 
     estimatedVideoKbps = estimatedVideoKbps * crfFactor;
 
-    // 4. Adjust for Hardware Encoder (NVENC tends to be larger for same QP/CRF)
     if (isTargetNVENC) {
         estimatedVideoKbps = estimatedVideoKbps * 1.2;
     }
 
-    // 5. Audio Size
     let audioKbps = 0;
     if (audioEncoder === 'copy') {
-        audioKbps = 192 * selectedAudioTracks.size; // Conservative guess for copy
+        audioKbps = 192 * selectedAudioTracks.size; 
     } else if (audioEncoder === 'none') {
         audioKbps = 0;
     } else {
@@ -348,7 +376,6 @@ const VideoCommandGenerator: React.FC = () => {
 
   }, [metadata, scale, customScaleW, crf, videoEncoder, audioEncoder, selectedAudioTracks]);
 
-  // Generate Command
   useEffect(() => {
     const newWarnings: string[] = [];
     let cleanPath = workDir.trim();
@@ -361,21 +388,14 @@ const VideoCommandGenerator: React.FC = () => {
     };
 
     const inputName = file ? file.name : 'input.mp4';
-    
-    // Input 0: Video
     let cmd = `ffmpeg -i ${getPath(inputName)}`;
     
-    // Input 1..N: External Subs
     externalSubs.forEach(sub => {
         cmd += ` -i ${getPath(sub.file.name)}`;
     });
 
-    // --- MAPPING ---
-
-    // Map Video: -map 0:v:0 (First video track from Input 0)
     cmd += ` -map 0:v:0`;
     
-    // Map Selected Audio
     if (audioEncoder !== 'none') {
         const sortedAudio = Array.from<number>(selectedAudioTracks).sort((a, b) => a - b);
         sortedAudio.forEach(id => {
@@ -383,13 +403,10 @@ const VideoCommandGenerator: React.FC = () => {
         });
     }
 
-    // Map Internal Subs
     const sortedSubs = Array.from<number>(selectedSubTracks).sort((a, b) => a - b);
     let outputSubIndex = 0;
-    
     const isMp4 = container === 'mp4' || container === 'mov';
 
-    // Internal Subtitles Processing
     sortedSubs.forEach(id => {
         const subTrack = metadata?.subtitles.find(s => s.id === id);
         if (isMp4 && subTrack && isBitmapSubtitle(subTrack.format)) {
@@ -400,35 +417,25 @@ const VideoCommandGenerator: React.FC = () => {
         }
     });
 
-    // External Subtitles Processing
     externalSubs.forEach((sub, idx) => {
-        // External inputs start at index 1
         const inputIdx = idx + 1;
         cmd += ` -map ${inputIdx}:0`;
-        
-        // Metadata for external subs
-        // Need to know the output stream index. 
-        // Video is stream 0. Audio tracks are 1..N. Subs follow.
-        // This is complex in ffmpeg to predict exact index without -map_metadata logic, 
-        // but explicit metadata tagging usually works with s:s:{idx relative to subtitles}
-        
-        // Set Language
         cmd += ` -metadata:s:s:${outputSubIndex} language=${sub.language}`;
-        // Set Title
         cmd += ` -metadata:s:s:${outputSubIndex} title="${sub.title}"`;
-        
         outputSubIndex++;
     });
 
-
-    // --- ENCODING ---
-
-    // Video Codec
     cmd += ` -c:v ${videoEncoder}`;
-    
-    // Fix 10-bit input crashing 8-bit encoders: Force yuv420p (8-bit)
-    if (videoEncoder.includes('264')) {
+
+    // Fix: Force yuv420p for H.264 AND H.265 to ensure Web/Synology compatibility
+    // This solves "blurry" playback (which is caused by Synology transcoding incompatible profiles)
+    // and thumbnail generation issues.
+    if (videoEncoder.includes('264') || videoEncoder.includes('265') || videoEncoder.includes('hevc')) {
         cmd += ` -pix_fmt yuv420p`;
+    }
+    
+    if (container === 'mp4' && (videoEncoder === 'libx265' || videoEncoder.includes('hevc'))) {
+        cmd += ` -tag:v hvc1`;
     }
 
     if (videoEncoder === 'libx264' || videoEncoder === 'libx265') {
@@ -437,7 +444,6 @@ const VideoCommandGenerator: React.FC = () => {
        cmd += ` -cq ${crf} -preset p4`; 
     }
 
-    // Scale
     if (scale !== 'original') {
        if (scale === '720p') {
            cmd += ` -vf "scale=-2:min(720\\,ih)"`;
@@ -448,7 +454,6 @@ const VideoCommandGenerator: React.FC = () => {
        }
     }
 
-    // Audio Settings
     if (audioEncoder === 'copy') {
       cmd += ` -c:a copy`;
     } else if (audioEncoder === 'none') {
@@ -458,8 +463,7 @@ const VideoCommandGenerator: React.FC = () => {
       if (audioEncoder === 'aac') cmd += ` -b:a 128k`;
     }
 
-    // Subtitle Settings (Global)
-    if (outputSubIndex > 0) { // If we have any subs mapped
+    if (outputSubIndex > 0) { 
         if (isMp4) {
             cmd += ` -c:s mov_text`;
         } else {
@@ -467,7 +471,11 @@ const VideoCommandGenerator: React.FC = () => {
         }
     }
 
-    // Output filename
+    // Fix: Add faststart for MP4/MOV to solve "freezing when seeking"
+    if (container === 'mp4' || container === 'mov') {
+        cmd += ` -movflags +faststart`;
+    }
+
     const ext = container;
     const baseName = file ? file.name.substring(0, file.name.lastIndexOf('.')) : 'output';
     cmd += ` ${getPath(`${baseName}_compressed.${ext}`)}`;
@@ -482,26 +490,22 @@ const VideoCommandGenerator: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const applyPreset = (type: 'compat' | 'compress' | 'high') => {
-      if (type === 'compat') {
-          setContainer('mp4');
-          setVideoEncoder('libx264');
-          setCrf(23);
-          setPreset('medium');
-          setAudioEncoder('aac');
-      } else if (type === 'compress') {
-          setContainer('mp4');
-          setVideoEncoder('libx265');
-          setCrf(28);
-          setPreset('slow');
-          setAudioEncoder('aac');
-      } else if (type === 'high') {
-          setContainer('mkv');
-          setVideoEncoder('libx264');
-          setCrf(18);
-          setPreset('slow');
-          setAudioEncoder('copy');
-      }
+  const applyPreset = (p: PresetConfig) => {
+      setContainer(p.config.container);
+      setVideoEncoder(p.config.videoEncoder);
+      setCrf(p.config.crf);
+      setPreset(p.config.preset);
+      setAudioEncoder(p.config.audioEncoder);
+      setScale(p.config.scale);
+  };
+
+  const isPresetActive = (p: PresetConfig) => {
+      return container === p.config.container &&
+             videoEncoder === p.config.videoEncoder &&
+             crf === p.config.crf &&
+             // preset === p.config.preset && // Don't enforce speed preset strictness
+             audioEncoder === p.config.audioEncoder &&
+             scale === p.config.scale;
   };
 
   return (
@@ -510,13 +514,15 @@ const VideoCommandGenerator: React.FC = () => {
       <div className="w-full lg:w-96 shrink-0 space-y-6 flex flex-col h-full overflow-hidden">
         {/* File Upload */}
         <div 
-            className="shrink-0 h-32 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-primary-500 hover:bg-primary-50 transition-colors bg-gray-50"
+            className="shrink-0 h-56 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer border-gray-200 hover:border-primary-300 hover:bg-gray-50 transition-all group text-center px-4"
             onClick={() => document.getElementById('vid-upload')?.click()}
         >
             <input id="vid-upload" type="file" accept="video/*,.mkv,.flv,.avi,.mov,.wmv" className="hidden" onChange={handleFileChange} />
-            <Upload size={32} className="text-gray-400 mb-2" />
-            <p className="text-sm font-medium text-gray-700">选择视频文件</p>
-            <p className="text-xs text-gray-400 mt-1">支持 MP4, MKV, MOV 等</p>
+            <div className="w-16 h-16 bg-gray-100 group-hover:bg-primary-100 rounded-full flex items-center justify-center mb-4 text-gray-400 group-hover:text-primary-600 transition-colors shadow-sm">
+                <Film size={32} />
+            </div>
+            <p className="text-lg font-bold text-gray-800 mb-1">导入视频</p>
+            <p className="text-sm text-gray-500">支持 MP4, MKV, MOV 等格式<br/>本地分析元数据</p>
         </div>
 
         {isAnalyzing && (
@@ -673,11 +679,34 @@ const VideoCommandGenerator: React.FC = () => {
           <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm overflow-y-auto custom-scrollbar">
               <div className="flex justify-between items-center mb-6">
                   <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2"><Settings2 size={20}/> 转码配置</h2>
-                  <div className="flex gap-2">
-                      <button onClick={() => applyPreset('compat')} className="px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">兼容优先</button>
-                      <button onClick={() => applyPreset('compress')} className="px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">极限压缩</button>
-                      <button onClick={() => applyPreset('high')} className="px-3 py-1.5 text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">画质优先</button>
-                  </div>
+              </div>
+
+              {/* Presets Cards */}
+              <div className="grid grid-cols-2 gap-3 mb-8">
+                  {PRESETS.map(preset => {
+                      const isActive = isPresetActive(preset);
+                      return (
+                          <button
+                            key={preset.id}
+                            onClick={() => applyPreset(preset)}
+                            className={`
+                                flex flex-col items-start p-3 rounded-xl border-2 transition-all text-left group
+                                ${isActive 
+                                    ? 'border-primary-500 bg-primary-50 shadow-sm' 
+                                    : 'border-gray-100 bg-gray-50 hover:border-primary-200 hover:bg-white'}
+                            `}
+                          >
+                              <div className={`flex items-center gap-2 mb-1 ${isActive ? 'text-primary-700' : 'text-gray-700'}`}>
+                                  {preset.icon}
+                                  <span className="font-bold text-sm">{preset.title}</span>
+                                  {isActive && <Check size={14} className="ml-auto text-primary-600" />}
+                              </div>
+                              <p className="text-xs text-gray-500 leading-tight">
+                                  {preset.desc}
+                              </p>
+                          </button>
+                      );
+                  })}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -5,7 +5,7 @@ import QRCode from 'qrcode';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 const QrCodeGenerator: React.FC = () => {
-  const [text, setText] = useLocalStorage<string>('tool-qr-text', 'https://example.com');
+  const [text, setText] = useLocalStorage<string>('tool-qr-text', 'https://shoebox.lolo.link');
   const [size, setSize] = useLocalStorage<number>('tool-qr-size', 256);
   const [fgColor, setFgColor] = useLocalStorage<string>('tool-qr-fg', '#000000');
   const [bgColor, setBgColor] = useLocalStorage<string>('tool-qr-bg', '#ffffff');

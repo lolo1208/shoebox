@@ -1,6 +1,6 @@
 /// <reference lib="dom" />
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Download, RefreshCw, X, Image as ImageIcon } from 'lucide-react';
+import { Stamp, Download, RefreshCw, X, Image as ImageIcon } from 'lucide-react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 const WatermarkGenerator: React.FC = () => {
@@ -137,8 +137,8 @@ const WatermarkGenerator: React.FC = () => {
         <div className="lg:col-span-1 space-y-4">
              <div 
                 className={`
-                   border-2 border-dashed rounded-xl h-40 flex flex-col items-center justify-center cursor-pointer transition-colors
-                   ${isDragging ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-primary-400 hover:bg-gray-50'}
+                   border-2 border-dashed rounded-xl h-48 flex flex-col items-center justify-center cursor-pointer transition-all
+                   ${isDragging ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-primary-300 hover:bg-gray-50 group'}
                    ${file ? 'bg-gray-50' : ''}
                 `}
                 onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
@@ -156,14 +156,17 @@ const WatermarkGenerator: React.FC = () => {
                 
                 {file ? (
                     <div className="text-center px-4">
-                        <ImageIcon className="mx-auto text-primary-500 mb-2" size={32} />
+                        <ImageIcon className="mx-auto text-gray-400 group-hover:text-primary-600 mb-2 transition-colors" size={32} />
                         <p className="font-medium text-gray-700 truncate max-w-[200px]">{file.name}</p>
-                        <p className="text-xs text-gray-500 mt-1">点击更换图片</p>
+                        <p className="text-xs text-gray-500 mt-1">点击更换底图</p>
                     </div>
                 ) : (
-                    <div className="text-center">
-                        <Upload className="mx-auto text-gray-400 mb-2" size={24} />
-                        <p className="text-sm text-gray-600">点击或拖拽上传图片</p>
+                    <div className="flex flex-col items-center text-center">
+                        <div className="w-12 h-12 bg-gray-100 group-hover:bg-primary-100 rounded-full flex items-center justify-center mb-3 text-gray-400 group-hover:text-primary-600 transition-colors shadow-sm">
+                            <Stamp size={24} />
+                        </div>
+                        <p className="text-base font-bold text-gray-800">选择底图</p>
+                        <p className="text-xs text-gray-500 mt-1">拖拽或点击导入</p>
                     </div>
                 )}
              </div>

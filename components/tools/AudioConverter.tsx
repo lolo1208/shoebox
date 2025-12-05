@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Upload, Download, Play, Pause, Volume2, Music, RefreshCw, FileAudio, FileVideo, ChevronRight, ChevronLeft, Settings2, Info, Check, Timer, Clock } from 'lucide-react';
+import { FileAudio, Download, Play, Pause, Volume2, Music, RefreshCw, FileVideo, ChevronRight, ChevronLeft, Settings2, Info, Check, Timer, Clock } from 'lucide-react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { toBlobURL } from '@ffmpeg/util';
 
@@ -643,15 +643,15 @@ const AudioConverter: React.FC = () => {
       {/* Upload */}
       {!file && (
           <div 
-            className="flex-1 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-primary-500 hover:bg-primary-50 transition-colors bg-gray-50 min-h-[400px]"
+            className="flex-1 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer border-gray-200 hover:border-primary-300 hover:bg-gray-50 transition-all group min-h-[400px]"
             onClick={() => document.getElementById('ac-upload')?.click()}
           >
               <input id="ac-upload" type="file" accept="audio/*,video/*,.mkv,.flv" className="hidden" onChange={handleFileChange} />
-              <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mb-6 text-primary-600 shadow-sm">
-                  <Music size={40} />
+              <div className="w-20 h-20 bg-gray-100 group-hover:bg-primary-100 rounded-full flex items-center justify-center mb-6 text-gray-400 group-hover:text-primary-600 transition-colors shadow-sm">
+                  <FileAudio size={40} />
               </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-2">导入音频或视频</h3>
-              <p className="text-gray-500">支持 MP3, WAV, M4A, MP4, MKV, FLV 等几乎所有格式</p>
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">选择媒体文件</h3>
+              <p className="text-gray-500">拖拽音频或视频至此，开始剪辑与转换</p>
           </div>
       )}
 

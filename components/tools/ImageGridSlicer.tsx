@@ -1,6 +1,6 @@
 /// <reference lib="dom" />
 import React, { useState, useEffect, useRef } from 'react';
-import { Upload, Download, RefreshCw, X, FileImage, Grid, ArrowRight } from 'lucide-react';
+import { Grid, Upload, Download, RefreshCw, X, FileImage, ArrowRight } from 'lucide-react';
 import JSZip from 'jszip';
 
 const ImageGridSlicer: React.FC = () => {
@@ -136,12 +136,15 @@ const ImageGridSlicer: React.FC = () => {
                 onDrop={handleDrop}
                 onClick={() => document.getElementById('slice-upload')?.click()}
                 className={`
-                    h-64 border-2 border-dashed rounded-xl flex flex-col items-center justify-center text-center transition-all cursor-pointer bg-gray-50
-                    ${isDragging ? 'border-primary-500 bg-primary-50' : 'border-gray-300 hover:border-primary-400 hover:bg-gray-100'}
+                    h-64 border-2 border-dashed rounded-xl flex flex-col items-center justify-center text-center transition-all cursor-pointer
+                    ${isDragging ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-primary-300 hover:bg-gray-50 group'}
                 `}
             >
-                <Upload size={32} className="text-gray-400 mb-2" />
-                <p className="text-sm font-medium text-gray-700">点击或拖拽上传</p>
+                <div className="w-16 h-16 bg-gray-100 group-hover:bg-primary-100 rounded-full flex items-center justify-center mb-4 text-gray-400 group-hover:text-primary-600 transition-colors shadow-sm">
+                    <Grid size={32} />
+                </div>
+                <p className="text-lg font-bold text-gray-800 mb-1">选择图片</p>
+                <p className="text-sm text-gray-500 px-4">制作九宫格或自定义切片</p>
             </div>
         ) : (
             <div className="bg-white border border-gray-200 rounded-xl p-6 relative">

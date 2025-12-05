@@ -16,6 +16,32 @@ export default defineConfig({
         return html;
       },
     },
+    {
+      name: 'block-wasm-emission',
+      resolveId(id) {
+        // Intercept .wasm imports from libraries (like onnxruntime-web)
+        if (id.endsWith('.wasm')) {
+          return id;
+        }
+      },
+      load(id) {
+        if (id.endsWith('.wasm')) {
+          // Return a mock export. This prevents Vite from processing the file as an asset
+          // via standard import mechanisms.
+          return 'export default "/mock-wasm-path"'; 
+        }
+      },
+      generateBundle(_options, bundle) {
+        // This is the safety net: Iterate through all generated assets and delete any .wasm files.
+        // This catches files referenced via new URL('...', import.meta.url) which bypass the load hook.
+        for (const fileName in bundle) {
+          if (fileName.endsWith('.wasm')) {
+            console.log('Forcefully removing WASM asset from build:', fileName);
+            delete bundle[fileName];
+          }
+        }
+      }
+    }
   ],
   // This ensures assets use relative paths (./) instead of absolute paths (/)
   base: './',
@@ -28,6 +54,7 @@ export default defineConfig({
           'vendor-utils': ['crypto-js', 'marked', 'qrcode', 'upng-js', 'html2canvas'],
           'vendor-zip': ['jszip'],
           'vendor-media': ['mediainfo.js', '@ffmpeg/ffmpeg', '@ffmpeg/util'],
+          'vendor-ai': ['@xenova/transformers', '@imgly/background-removal'],
         },
       },
     },

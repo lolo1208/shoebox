@@ -1,6 +1,6 @@
 /// <reference lib="dom" />
 import React, { useState, useEffect, useRef } from 'react';
-import { Copy, Hash, Check, Upload, FileText, X, Loader2 } from 'lucide-react';
+import { Copy, Hash, Check, FileSearch, FileText, X, Loader2 } from 'lucide-react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import CryptoJS from 'crypto-js';
 
@@ -180,14 +180,16 @@ const Md5Generator: React.FC = () => {
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               className={`
-                h-64 border-2 border-dashed rounded-xl flex flex-col items-center justify-center text-center transition-all cursor-pointer bg-gray-50
-                ${isDragging ? 'border-primary-500 bg-primary-50' : 'border-gray-300 hover:border-primary-400 hover:bg-gray-100'}
+                h-64 border-2 border-dashed rounded-xl flex flex-col items-center justify-center text-center transition-all cursor-pointer
+                ${isDragging ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-primary-300 hover:bg-gray-50 group'}
               `}
               onClick={() => document.getElementById('md5-file-upload')?.click()}
             >
-              <Upload size={32} className="text-gray-400 mb-2" />
-              <p className="text-sm font-medium text-gray-700">点击或拖拽文件到此处</p>
-              <p className="text-xs text-gray-400 mt-1">支持任意类型文件，本地计算，不上传服务器</p>
+              <div className="w-16 h-16 bg-gray-100 group-hover:bg-primary-100 rounded-full flex items-center justify-center mb-4 text-gray-400 group-hover:text-primary-600 transition-colors shadow-sm">
+                  <FileSearch size={32} />
+              </div>
+              <p className="text-xl font-bold text-gray-800 mb-2">选择文件</p>
+              <p className="text-sm text-gray-500">支持任意文件格式，本地计算不上传</p>
             </div>
           ) : (
             <div className="bg-white border border-gray-200 rounded-xl p-6">
@@ -249,23 +251,12 @@ const Md5Generator: React.FC = () => {
           {hash && (
             <button
               onClick={copyToClipboard}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-white text-gray-500 border border-gray-200 rounded-lg shadow-sm hover:text-primary-600 hover:border-primary-200 transition-colors"
-              title="复制结果"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-white text-gray-500 rounded-lg shadow-sm border border-gray-200 hover:text-primary-600 hover:border-primary-200 transition-all"
             >
               {copied ? <Check size={18} className="text-green-500" /> : <Copy size={18} />}
             </button>
           )}
         </div>
-      </div>
-      
-      <div className="bg-blue-50 p-4 rounded-lg flex items-start gap-3 text-sm text-blue-700">
-         <Hash size={20} className="shrink-0 mt-0.5" />
-         <div>
-            <p className="font-semibold">关于安全</p>
-            <p className="opacity-90 mt-1">
-              本工具的所有计算均在您的浏览器本地进行（Client-side），文件不会被上传到任何服务器，请放心使用。
-            </p>
-         </div>
       </div>
     </div>
   );
