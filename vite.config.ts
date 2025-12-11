@@ -7,6 +7,49 @@ export default defineConfig({
   plugins: [
     react(),
     {
+      name: 'mock-node-modules',
+      resolveId(id) {
+        // Intercept requests for the aliases defined in resolve.alias
+        if (id === 'virtual:buffer' || id === 'virtual:long') {
+          return '\0' + id;
+        }
+      },
+      load(id) {
+        if (id === '\0virtual:buffer') {
+          // Minimal Buffer mock to satisfy imports
+          return `
+            export const Buffer = {
+              isBuffer: () => false,
+              from: (data) => data instanceof Uint8Array ? data : new Uint8Array(data),
+              alloc: (size) => new Uint8Array(size),
+              concat: (arr) => {
+                 let len = 0;
+                 for (let i = 0; i < arr.length; i++) len += arr[i].length;
+                 const out = new Uint8Array(len);
+                 let offset = 0;
+                 for (let i = 0; i < arr.length; i++) {
+                   out.set(arr[i], offset);
+                   offset += arr[i].length;
+                 }
+                 return out;
+              }
+            };
+            export default Buffer;
+          `;
+        }
+        if (id === '\0virtual:long') {
+          // Minimal Long mock
+          return `
+            export default {
+              fromBits: () => 0,
+              fromNumber: () => 0,
+              fromString: () => 0
+            };
+          `;
+        }
+      }
+    },
+    {
       name: 'remove-cdn-on-build',
       transformIndexHtml(html) {
         // Only run this during build
@@ -43,7 +86,12 @@ export default defineConfig({
       }
     }
   ],
-  // This ensures assets use relative paths (./) instead of absolute paths (/)
+  resolve: {
+    alias: {
+      'buffer': 'virtual:buffer',
+      'long': 'virtual:long'
+    }
+  },
   base: './',
   build: {
     rollupOptions: {
@@ -51,10 +99,10 @@ export default defineConfig({
         manualChunks: {
           'vendor-react': ['react', 'react-dom'],
           'vendor-ui': ['lucide-react'],
-          'vendor-utils': ['crypto-js', 'marked', 'qrcode', 'upng-js', 'html2canvas'],
+          'vendor-utils': ['crypto-js', 'marked', 'qrcode', 'upng-js', 'html2canvas', 'highlight.js'],
           'vendor-zip': ['jszip'],
           'vendor-media': ['mediainfo.js', '@ffmpeg/ffmpeg', '@ffmpeg/util'],
-          'vendor-ai': ['@xenova/transformers', '@imgly/background-removal'],
+          'vendor-ai': ['@imgly/background-removal']
         },
       },
     },

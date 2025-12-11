@@ -127,6 +127,7 @@ const VideoCommandGenerator: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [metadata, setMetadata] = useState<VideoMetadata | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   
   // Working Directory
   const [workDir, setWorkDir] = useState('');
@@ -160,6 +161,26 @@ const VideoCommandGenerator: React.FC = () => {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const f = e.target.files[0];
+      setFile(f);
+      analyzeFile(f);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const f = e.dataTransfer.files[0];
       setFile(f);
       analyzeFile(f);
     }
@@ -514,8 +535,14 @@ const VideoCommandGenerator: React.FC = () => {
       <div className="w-full lg:w-96 shrink-0 space-y-6 flex flex-col h-full overflow-hidden">
         {/* File Upload */}
         <div 
-            className="shrink-0 h-56 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer border-gray-200 hover:border-primary-300 hover:bg-gray-50 transition-all group text-center px-4"
+            className={`
+                shrink-0 h-56 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all group text-center px-4
+                ${isDragging ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-primary-300 hover:bg-gray-50'}
+            `}
             onClick={() => document.getElementById('vid-upload')?.click()}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
         >
             <input id="vid-upload" type="file" accept="video/*,.mkv,.flv,.avi,.mov,.wmv" className="hidden" onChange={handleFileChange} />
             <div className="w-16 h-16 bg-gray-100 group-hover:bg-primary-100 rounded-full flex items-center justify-center mb-4 text-gray-400 group-hover:text-primary-600 transition-colors shadow-sm">

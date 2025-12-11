@@ -8,6 +8,7 @@ const AudioConverter: React.FC = () => {
   // --- Core State ---
   const [file, setFile] = useState<File | null>(null);
   const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   
   // FFmpeg State
   const [ffmpeg, setFfmpeg] = useState<FFmpeg | null>(null);
@@ -129,6 +130,24 @@ const AudioConverter: React.FC = () => {
       loadFile(e.target.files[0]);
     }
     e.target.value = '';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      loadFile(e.dataTransfer.files[0]);
+    }
   };
 
   const loadFile = async (f: File) => {
@@ -643,8 +662,14 @@ const AudioConverter: React.FC = () => {
       {/* Upload */}
       {!file && (
           <div 
-            className="flex-1 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer border-gray-200 hover:border-primary-300 hover:bg-gray-50 transition-all group min-h-[400px]"
+            className={`
+                flex-1 border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all group min-h-[400px]
+                ${isDragging ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-primary-300 hover:bg-gray-50'}
+            `}
             onClick={() => document.getElementById('ac-upload')?.click()}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
           >
               <input id="ac-upload" type="file" accept="audio/*,video/*,.mkv,.flv" className="hidden" onChange={handleFileChange} />
               <div className="w-20 h-20 bg-gray-100 group-hover:bg-primary-100 rounded-full flex items-center justify-center mb-6 text-gray-400 group-hover:text-primary-600 transition-colors shadow-sm">
