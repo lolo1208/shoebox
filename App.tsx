@@ -23,7 +23,8 @@ import {
   Layers,
   FileVideo,
   Music,
-  ImageMinus
+  ImageMinus,
+  Clock
 } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import Home from './components/Home';
@@ -43,6 +44,7 @@ import ImageComposition from './components/tools/ImageComposition';
 import VideoCommandGenerator from './components/tools/VideoCommandGenerator';
 import AudioConverter from './components/tools/AudioConverter';
 import BackgroundRemover from './components/tools/BackgroundRemover';
+import TimestampConverter from './components/tools/TimestampConverter';
 import Logo from './components/Logo';
 import { Category, CategoryId } from './types';
 
@@ -54,6 +56,14 @@ const categories: Category[] = [
     icon: Type,
     description: '包含 JSON 格式化、密码生成、UUID 生成、哈希计算等常用文本处理工具。',
     tools: [
+      {
+        id: 'timestamp',
+        name: '时间与日期',
+        description: '实时时间戳、日期互转、公农历转换及时间差计算',
+        icon: Clock,
+        component: <TimestampConverter />,
+        layoutClass: 'max-w-5xl mx-auto'
+      },
       {
         id: 'password-gen',
         name: '随机密码生成',

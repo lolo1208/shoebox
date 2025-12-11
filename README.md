@@ -14,7 +14,7 @@ A comprehensive, privacy-first developer toolbox designed with a clean UI. It fe
 ### 🛠️ Tool Categories
 
 *   **Text Tools**:
-    *   **JSON Formatter**: Validate, minify, beautify, and repair JSON with a tree view.
+    *   **Time & Date**: Real-time timestamp, date conversion, solar/lunar calendar conversion, and duration calculator.
     *   **Generators**: Strong Passwords, UUIDs (v4/v5), MD5 Hashes.
 *   **Image Tools**:
     *   **Background Remover**: AI-powered background removal running locally (WebAssembly).
@@ -28,6 +28,7 @@ A comprehensive, privacy-first developer toolbox designed with a clean UI. It fe
     *   **Audio Converter**: Visual waveform editing, trimming, fading, and format conversion.
     *   **Video Command Generator**: Analyze video metadata locally and generate FFmpeg compression commands.
 *   **Developer Tools**:
+    *   **JSON Formatter**: Validate, minify, beautify, and repair JSON with a tree view.
     *   **Easing Visualizer**: Interactive CSS/JS easing function visualization.
 
 ## 🚀 Getting Started
@@ -98,6 +99,7 @@ This will generate a `dist` folder containing the compiled assets. You can deplo
     - `ffmpeg.wasm` & `mediainfo.js` (Media processing)
     - `@imgly/background-removal` (AI Vision)
     - `html2canvas` & `upng-js` (Image processing)
+    - `lunar-javascript` (Calendar conversion)
 
 ## 📄 License
 
@@ -118,7 +120,7 @@ This project is licensed under the MIT License.
 ### 🛠️ 工具分类
 
 *   **文本工具**:
-    *   **JSON 格式化**: 校验、压缩、美化、自动修复 JSON，支持树状预览。
+    *   **时间与日期**: 实时时间戳、日期格式转换、公农历互转及时间差计算。
     *   **生成器**: 强密码生成、UUID (v4/v5) 生成、MD5 哈希计算。
 *   **图像工具**:
     *   **智能抠图**: 基于 WebAssembly 的本地 AI 自动移除背景。
@@ -132,6 +134,7 @@ This project is licensed under the MIT License.
     *   **音频转换**: 可视化波形剪辑、裁剪、淡入淡出及格式转换。
     *   **视频命令生成**: 本地分析视频元数据（编码、码率等），生成最佳 FFmpeg 压缩命令。
 *   **开发者工具**:
+    *   **JSON 格式化**: 校验、压缩、美化、自动修复 JSON，支持树状预览。
     *   **缓动函数**: 交互式 CSS/JS 缓动曲线可视化。
 
 ## 🚀 快速开始
@@ -202,6 +205,7 @@ npm run build
     - `ffmpeg.wasm` & `mediainfo.js` (多媒体处理)
     - `@imgly/background-removal` (AI 视觉)
     - `html2canvas` & `upng-js` (图像处理)
+    - `lunar-javascript` (日历转换)
 
 ## 📄 开源协议
 

@@ -99,7 +99,7 @@ export default defineConfig({
         manualChunks: {
           'vendor-react': ['react', 'react-dom'],
           'vendor-ui': ['lucide-react'],
-          'vendor-utils': ['crypto-js', 'marked', 'qrcode', 'upng-js', 'html2canvas', 'highlight.js'],
+          'vendor-utils': ['crypto-js', 'marked', 'qrcode', 'upng-js', 'html2canvas', 'highlight.js', 'lunar-javascript'],
           'vendor-zip': ['jszip'],
           'vendor-media': ['mediainfo.js', '@ffmpeg/ffmpeg', '@ffmpeg/util'],
           'vendor-ai': ['@imgly/background-removal']
