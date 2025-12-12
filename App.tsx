@@ -24,7 +24,8 @@ import {
   FileVideo,
   Music,
   ImageMinus,
-  Clock
+  Clock,
+  Terminal
 } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import Home from './components/Home';
@@ -45,6 +46,7 @@ import VideoCommandGenerator from './components/tools/VideoCommandGenerator';
 import AudioConverter from './components/tools/AudioConverter';
 import BackgroundRemover from './components/tools/BackgroundRemover';
 import TimestampConverter from './components/tools/TimestampConverter';
+import CodeRunner from './components/tools/CodeRunner';
 import Logo from './components/Logo';
 import { Category, CategoryId } from './types';
 
@@ -215,6 +217,14 @@ const categories: Category[] = [
         icon: Activity,
         component: <EasingVisualizer />,
         layoutClass: 'max-w-7xl mx-auto'
+      },
+      {
+        id: 'code-runner',
+        name: '在线代码运行',
+        description: '支持 50+ 种语言的在线编译与运行，提供即时反馈',
+        icon: Terminal,
+        component: <CodeRunner />,
+        layoutClass: 'w-full'
       }
     ]
   }

@@ -561,7 +561,7 @@ const TimestampConverter: React.FC = () => {
                         </div>
 
                         <div className="flex justify-center text-gray-300">
-                            <ArrowDown size={20} className="animate-bounce duration-1000" />
+                            <ArrowDown size={20} className="" />
                         </div>
 
                         <div className="space-y-2">
@@ -610,7 +610,7 @@ const TimestampConverter: React.FC = () => {
                         </div>
 
                         <div className="flex justify-center text-gray-300">
-                            <ArrowDown size={20} className="animate-bounce duration-1000" />
+                            <ArrowDown size={20} className="" />
                         </div>
 
                         <div className="space-y-2">
