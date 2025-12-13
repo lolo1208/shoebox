@@ -31,6 +31,7 @@ A comprehensive, privacy-first developer toolbox designed with a clean UI. It fe
     *   **JSON Formatter**: Validate, minify, beautify, and repair JSON with a tree view.
     *   **Easing Visualizer**: Interactive CSS/JS easing function visualization.
     *   **Code Runner**: Run code in 50+ languages online with instant output.
+    *   **Check Host**: Global network connectivity check (Ping, HTTP, DNS, MTR) using distributed probes.
 
 ## 🚀 Getting Started
 
@@ -138,6 +139,7 @@ This project is licensed under the MIT License.
     *   **JSON 格式化**: 校验、压缩、美化、自动修复 JSON，支持树状预览。
     *   **缓动函数**: 交互式 CSS/JS 缓动曲线可视化。
     *   **在线代码运行**: 支持 50+ 种语言的在线编译与运行。
+    *   **全球网络检测**: 利用 Globalping 分布式网络检测全球各地的 Ping/HTTP/DNS/路由 连通性。
 
 ## 🚀 快速开始
 

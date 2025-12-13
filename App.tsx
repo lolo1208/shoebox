@@ -25,7 +25,8 @@ import {
   Music,
   ImageMinus,
   Clock,
-  Terminal
+  Terminal,
+  Globe
 } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import Home from './components/Home';
@@ -47,6 +48,7 @@ import AudioConverter from './components/tools/AudioConverter';
 import BackgroundRemover from './components/tools/BackgroundRemover';
 import TimestampConverter from './components/tools/TimestampConverter';
 import CodeRunner from './components/tools/CodeRunner';
+import CheckHost from './components/tools/CheckHost';
 import Logo from './components/Logo';
 import { Category, CategoryId } from './types';
 
@@ -220,10 +222,18 @@ const categories: Category[] = [
       },
       {
         id: 'code-runner',
-        name: '在线代码运行',
+        name: '在线运行代码',
         description: '支持 50+ 种语言的在线编译与运行，提供即时反馈',
         icon: Terminal,
         component: <CodeRunner />,
+        layoutClass: 'w-full'
+      },
+      {
+        id: 'check-host',
+        name: '全球网络检测',
+        description: '利用 Globalping 分布式网络检测全球各地的 Ping/HTTP/DNS/路由 连通性',
+        icon: Globe,
+        component: <CheckHost />,
         layoutClass: 'w-full'
       }
     ]
