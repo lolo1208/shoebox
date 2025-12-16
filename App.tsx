@@ -29,7 +29,8 @@ import {
   Gauge,
   Network,
   FileText,
-  Film
+  Film,
+  Github
 } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import Home from './components/Home';
@@ -359,6 +360,16 @@ const App: React.FC = () => {
                 </>
             )}
           </div>
+
+          <a 
+            href="https://github.com/lolo1208/shoebox" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-gray-400 hover:text-gray-900 transition-colors p-2 rounded-full hover:bg-gray-100"
+            aria-label="View on GitHub"
+          >
+            <Github size={20} />
+          </a>
         </header>
 
         <main className="flex-1 overflow-auto p-4 md:p-8">
