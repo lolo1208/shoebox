@@ -1,0 +1,103 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #f9f9fa;
+  color: #1c1f23;
+}
+
+/* Custom scrollbar for markdown preview */
+.markdown-body::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.markdown-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+.markdown-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Custom scrollbar for Dark elements (Terminal) */
+.custom-scrollbar-dark::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.custom-scrollbar-dark::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+.custom-scrollbar-dark::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+/* Highlight.js Minimal GitHub-like Theme for CodeRunner */
+/* Reset first */
+.hljs {
+    display: block;
+    overflow-x: auto;
+    padding: 0;
+    color: #24292e;
+    background: transparent;
+}
+.hljs-comment,
+.hljs-quote {
+    color: #6a737d;
+    font-style: italic;
+}
+.hljs-doctag,
+.hljs-keyword,
+.hljs-formula {
+    color: #d73a49;
+}
+.hljs-section,
+.hljs-name,
+.hljs-selector-tag,
+.hljs-deletion,
+.hljs-subst {
+    color: #22863a;
+}
+.hljs-literal {
+    color: #005cc5;
+}
+.hljs-string,
+.hljs-regexp,
+.hljs-addition,
+.hljs-attribute,
+.hljs-meta .hljs-string {
+    color: #032f62;
+}
+.hljs-built_in,
+.hljs-class .hljs-title {
+    color: #6f42c1;
+}
+.hljs-attr,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-type,
+.hljs-selector-class,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-number {
+    color: #005cc5;
+}
+.hljs-symbol,
+.hljs-bullet,
+.hljs-link,
+.hljs-meta,
+.hljs-selector-id,
+.hljs-title {
+    color: #6f42c1;
+}
+.hljs-emphasis {
+    font-style: italic;
+}
+.hljs-strong {
+    font-weight: bold;
+}
+.hljs-link {
+    text-decoration: underline;
+}

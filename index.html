@@ -1,0 +1,100 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LOLO' Shoebox</title>
+    <!-- Add flag-icons CSS via CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.3.2/css/flag-icons.min.css" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23006add%22><path d=%22M3 6C3 4.89543 3.89543 4 5 4H19C20.1046 4 21 4.89543 21 6V8H3V6ZM3 10V18C3 19.1046 3.89543 20 5 20H19C20.1046 20 21 19.1046 21 18V10H3ZM10 14C10 13.4477 10.4477 13 11 13H13C13.5523 13 14 13.4477 14 14C14 14.5523 13.5523 15 13 15H11C10.4477 15 10 14.5523 10 14Z%22/></svg>" type="image/svg+xml">
+    <!-- 
+      Tailwind CSS CDN for Preview/Dev environments without local build step.
+      This block has id="dev-cdn" and will be REMOVED by Vite during 'npm run build'.
+    -->
+    <script id="dev-cdn" src="https://cdn.tailwindcss.com"></script>
+    <script id="dev-cdn">
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: '#eaf5ff',
+                100: '#d0eaff',
+                200: '#a6d6ff',
+                300: '#7cc1ff',
+                400: '#53acff',
+                500: '#2a97ff',
+                600: '#006add',
+                700: '#004fa3',
+                800: '#00356b',
+                900: '#001b36',
+              },
+              gray: {
+                50: '#f9f9fa',
+                100: '#f4f5f6',
+                200: '#e6e8ea',
+                300: '#c6cace',
+                400: '#a7abb0',
+                500: '#888d92',
+                600: '#6b7075',
+                700: '#4f5358',
+                800: '#32363a',
+                900: '#1c1f23',
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.3s ease-out',
+              'slide-up': 'slideUp 0.4s ease-out',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              slideUp: {
+                '0%': { transform: 'translateY(10px)', opacity: '0' },
+                '100%': { transform: 'translateY(0)', opacity: '1' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+<script type="importmap">
+{
+  "imports": {
+    "vite": "https://aistudiocdn.com/vite@^7.2.4",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "jszip": "https://aistudiocdn.com/jszip@^3.10.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "html2canvas": "https://aistudiocdn.com/html2canvas@^1.4.1",
+    "dom": "https://aistudiocdn.com/dom@^0.0.3",
+    "@ffmpeg/util": "https://aistudiocdn.com/@ffmpeg/util@^0.12.2",
+    "@ffmpeg/ffmpeg": "https://aistudiocdn.com/@ffmpeg/ffmpeg@^0.12.15",
+    "marked": "https://aistudiocdn.com/marked@^17.0.1",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
+    "qrcode": "https://aistudiocdn.com/qrcode@^1.5.4",
+    "crypto-js": "https://aistudiocdn.com/crypto-js@^4.2.0",
+    "mediainfo.js": "https://aistudiocdn.com/mediainfo.js@^0.3.6",
+    "upng-js": "https://aistudiocdn.com/upng-js@^2.1.0",
+    "lodash": "https://aistudiocdn.com/lodash@^4.17.21",
+    "@imgly/background-removal": "https://aistudiocdn.com/@imgly/background-removal@^1.7.0",
+    "highlight.js": "https://aistudiocdn.com/highlight.js@^11.9.0",
+    "lunar-javascript": "https://aistudiocdn.com/lunar-javascript@^1.6.12",
+    "webworker": "https://esm.sh/webworker@^0.8.4"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
