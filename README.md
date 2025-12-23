@@ -28,6 +28,7 @@ A comprehensive, privacy-first developer toolbox designed with a clean UI. It fe
     *   **Generators**: Strong Password Generator, UUID (v4/v5) Generator, MD5 Calculator.
 *   **Developer**:
     *   **JSON Formatter**: Validate, minify, beautify, and repair JSON.
+    *   **Texture Packer**: Pack multiple sprites into a single atlas using the high-efficiency **MaxRects** algorithm. Supports **Cocos Creator** (.plist) export with custom padding, extrusion, and transparent trimming.
     *   **Code Runner**: Run code in 50+ languages online.
     *   **Easing Visualizer**: Interactive CSS/JS easing functions.
 *   **Network**:

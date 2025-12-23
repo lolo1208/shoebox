@@ -26,7 +26,8 @@ import {
   Network,
   FileText,
   Film,
-  Tags
+  Tags,
+  LayoutGrid
 } from 'lucide-react';
 import { Category, CategoryId } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -53,6 +54,7 @@ import CodeRunner from '../components/tools/CodeRunner';
 import CheckHost from '../components/tools/CheckHost';
 import SpeedTest from '../components/tools/SpeedTest';
 import MusicTagEditor from '../components/tools/MusicTagEditor';
+import TexturePacker from '../components/tools/TexturePacker';
 
 export const useTools = () => {
   const { t } = useLanguage();
@@ -222,6 +224,14 @@ export const useTools = () => {
           description: t('tool.json_format.desc'),
           icon: Braces,
           component: <JsonFormatter />,
+          layoutClass: 'w-full'
+        },
+        {
+          id: 'texture-packer',
+          name: t('tool.texture_packer.name'),
+          description: t('tool.texture_packer.desc'),
+          icon: LayoutGrid,
+          component: <TexturePacker />,
           layoutClass: 'w-full'
         },
         {

@@ -1,5 +1,6 @@
+
 {
   "name": "LOLO' Shoebox",
-  "description": "A privacy-first developer toolbox containing image, media, text, and network tools that run entirely in your browser.",
+  "description": "LOLO' Shoebox: An ultra-secure, instant-access, privacy-first local toolbox. Integrated with 20+ productivity tools including AI background removal, multimedia transcoding, code execution, and global network diagnostics via WebAssembly and local AI. Adhering to the 'Zero Data Upload' principle, all processing is performed locally in your browser for a private and efficient geek-level workflow.",
   "requestFramePermissions": []
 }
