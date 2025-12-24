@@ -88,7 +88,9 @@ export const en = {
   'tool.speed_test.name': "Speed Test",
   'tool.speed_test.desc': "Accurately test download/upload speeds with latency and jitter analysis.",
   'tool.texture_packer.name': "Texture Packer",
-  'tool.texture_packer.desc': "Pack multiple sprites into a single atlas, export for Cocos Creator and other game engines.",
+  'tool.texture_packer.desc': "Pack multiple sprites into a single atlas, export for game engines.",
+  'tool.bmfont_gen.name': "Bitmap Font Generator",
+  'tool.bmfont_gen.desc': "Create bitmap fonts from images, supporting multiple game engine formats.",
 
   // Tool: JSON
   'json.format': "Format",
@@ -541,7 +543,26 @@ export const en = {
   'tp.not_packed_warning': "{n} sprites could not be packed",
   'tp.atlas_name': "Atlas Name",
   'tp.atlas_name_ph': "Enter atlas name...",
-  'tp.bg_tooltip': "Preview only, export remains transparent",
+  'tp.bg_tooltip': "Background only for preview, export is transparent",
   'tp.bg_white': "White",
   'tp.bg_dark': "Dark",
+
+  // Tool: Bitmap Font
+  'bf.settings': "Font Settings",
+  'bf.char_mapping': "Mapping",
+  'bf.char_hint': "Char",
+  'bf.auto_map': "Auto Inferred",
+  'bf.export_name': "Export Name",
+  'bf.export_btn': "Export Font Pack",
+  'bf.file_list': "Characters",
+  'bf.not_valid_warning': "{n} chars have invalid mapping",
+  'bf.preview_fnt': "Preview",
+  'bf.empty_hint': "Drag 0-9, A-Z images here",
+  'bf.duplicate_char': "Duplicate: {char}",
+  'bf.mapping_title': "Character Mapping",
+  'bf.format': "Export Format",
+  'bf.format_text': "BMFont (Text)",
+  'bf.format_xml': "BMFont (XML)",
+  'bf.format_json': "JSON (Generic)",
+  'bf.bg_tooltip': "Background only for preview, export is transparent",
 };

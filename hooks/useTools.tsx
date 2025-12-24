@@ -27,7 +27,8 @@ import {
   FileText,
   Film,
   Tags,
-  LayoutGrid
+  LayoutGrid,
+  Type
 } from 'lucide-react';
 import { Category, CategoryId } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -55,6 +56,7 @@ import CheckHost from '../components/tools/CheckHost';
 import SpeedTest from '../components/tools/SpeedTest';
 import MusicTagEditor from '../components/tools/MusicTagEditor';
 import TexturePacker from '../components/tools/TexturePacker';
+import BitmapFontGenerator from '../components/tools/BitmapFontGenerator';
 
 export const useTools = () => {
   const { t } = useLanguage();
@@ -232,6 +234,14 @@ export const useTools = () => {
           description: t('tool.texture_packer.desc'),
           icon: LayoutGrid,
           component: <TexturePacker />,
+          layoutClass: 'w-full'
+        },
+        {
+          id: 'bmfont-gen',
+          name: t('tool.bmfont_gen.name'),
+          description: t('tool.bmfont_gen.desc'),
+          icon: Type,
+          component: <BitmapFontGenerator />,
           layoutClass: 'w-full'
         },
         {

@@ -1,4 +1,3 @@
-
 # LOLO' Shoebox
 
 A comprehensive, privacy-first developer toolbox designed with a clean UI. It features a wide array of tools for text, image, and audio/video processing, all running entirely in your browser.
@@ -11,29 +10,42 @@ A comprehensive, privacy-first developer toolbox designed with a clean UI. It fe
 
 ## 🌟 Features
 
-**LOLO' Shoebox** is built with a "Client-Side Only" philosophy. Your data (images, passwords, code) generally never leaves your device (unless using specific network tools like Check Host or Code Runner).
+**LOLO' Shoebox** is built with a "Client-Side Only" philosophy. Your data (images, passwords, code) never leaves your device (unless using specific network tools like Check Host or Speed Test).
 
 ### 🛠️ Tool Categories
 
-*   **Image**:
-    *   **Converters**: Image Compression & Format Conversion (JPG/PNG).
-    *   **Editors**: Resize, Crop, Grid Slicer, Smart Background Remover (AI), Canvas Composition.
-    *   **Generators**: Watermark, Markdown to Image, QR Code Generator.
-*   **Media**:
-    *   **Audio Converter**: Edit, trim, fade, and convert audio files.
-    *   **Video Command Generator**: Analyze video metadata locally and generate FFmpeg compression commands.
-    *   **Music Tag Editor**: Fix messy music files instantly. Repair titles, artists, and album info. Auto-fill missing covers and lyrics.
-*   **Text & Data**:
-    *   **Time & Date**: Real-time timestamp, date conversion, solar/lunar calendar conversion.
-    *   **Generators**: Strong Password Generator, UUID (v4/v5) Generator, MD5 Calculator.
-*   **Developer**:
-    *   **JSON Formatter**: Validate, minify, beautify, and repair JSON.
-    *   **Texture Packer**: Pack multiple sprites into a single atlas using the high-efficiency **MaxRects** algorithm. Supports **Cocos Creator** (.plist) export with custom padding, extrusion, and transparent trimming.
-    *   **Code Runner**: Run code in 50+ languages online.
-    *   **Easing Visualizer**: Interactive CSS/JS easing functions.
-*   **Network**:
-    *   **Check Host**: Global connectivity check (Ping, HTTP, DNS, MTR).
-    *   **Speed Test**: Network bandwidth speed test.
+#### 🖼️ Image
+*   **Image Converter**: Convert between JPG, PNG, WEBP, and GIF. Features quality adjustment for JPG and lossy compression with color quantization for PNG to significantly reduce file size.
+*   **Image Resizer**: Change image dimensions by pixels or percentage. Supports aspect ratio locking and high-quality canvas resampling.
+*   **Image Cropper**: Precise image cropping with coordinate control and preset alignments. Features a visual UI for interactive area selection.
+*   **Image Slicer**: Split large images into a grid (e.g., 3x3 for social media). Automatically packages sliced files into a ZIP for download.
+*   **AI Background Remover**: Powered by local AI models (`imgly-bg-removal`). Detects and removes backgrounds entirely on your GPU/CPU without uploading to any server.
+*   **Image Composition**: A lightweight canvas editor. Drag and drop multiple images, rotate, scale, and adjust layers (Z-index) to create social media posters or simple designs.
+*   **Watermark Generator**: Add repeating text watermarks to your images. Customize color, opacity, spacing, and rotation to protect your documents.
+*   **Markdown to Image**: Render Markdown text into high-quality JPEG images. Includes syntax highlighting for code blocks and customizable styles.
+*   **QR Code Generator**: Generate custom QR codes with adjustable size, foreground, and background colors.
+
+#### 🎬 Media
+*   **Audio Converter**: A full-featured audio editor in the browser. Supports trimming, volume adjustment, fade-in/out effects, and exporting to MP3, M4A, WAV, or OGG using `ffmpeg.wasm`.
+*   **Video Compressor**: Locally analyzes video metadata (bitrate, tracks) and generates optimized FFmpeg commands. Perfect for creating NAS-compatible MP4 files or extreme compression for archiving.
+*   **Music Tag Editor**: Fix ID3 tags for MP3 files. Search and auto-fill titles, artists, and albums from Netease, QQ Music, or iTunes. Supports embedded cover art and lyrics.
+
+#### 文本与数据 Text & Data
+*   **Date & Time**: A versatile time tool featuring Unix timestamp conversion, Solar/Lunar calendar conversion, and a duration calculator between two dates.
+*   **Password Generator**: Create high-entropy secure passwords. Customize length and character types (Uppercase, Lowercase, Numbers, Symbols).
+*   **UUID Generator**: Generate batches of Version 4 (Random) UUIDs or Version 5 (Namespace-based) UUIDs for consistent identity mapping.
+*   **MD5 Calculator**: Compute MD5 hashes for plain text or large local files using chunked reading to prevent browser freezing.
+
+#### 👨‍💻 Developer
+*   **JSON Formatter**: More than just a beautifier. It validates, minifies, sorts keys alphabetically, and features a "Smart Repair" function to fix common JSON syntax errors.
+*   **Texture Packer**: A game development essential. Packs multiple sprites into a single atlas using the **MaxRects** algorithm. Exports Cocos Creator compatible `.plist` and PNG files.
+*   **Bitmap Font Generator**: Convert individual character images into a professional Bitmap Font (.fnt). Supports ASCII mapping, automatic inference, and exports in Text, XML, or JSON formats.
+*   **Code Runner**: Execute snippets in 50+ programming languages online via the Piston API. Features syntax highlighting and support for command-line arguments.
+*   **Easing Functions**: Visualizes common CSS/JS easing curves (In, Out, InOut). Includes interactive hover animations to preview the speed changes.
+
+#### 🌐 Network
+*   **Global Check Host**: Distributed network diagnostics. Check Ping, HTTP, DNS, and Traceroute status from multiple global nodes via Globalping API.
+*   **Speed Test**: High-precision bandwidth test. Measures download/upload speeds, latency, and jitter with real-time graphical visualization.
 
 ## 🚀 Getting Started
 
@@ -79,17 +91,7 @@ A comprehensive, privacy-first developer toolbox designed with a clean UI. It fe
     ```bash
     npm run dev
     ```
-    Open `http://localhost:5173` (or the port shown in your terminal) to view the app.
-
-## 📦 Building for Production
-
-To create a production-ready build:
-
-```bash
-npm run build
-```
-
-This will generate a `dist` folder containing the compiled assets. You can deploy this folder to any static hosting service (GitHub Pages, Vercel, Netlify, Nginx, etc.).
+    Open `http://localhost:5173` to view the app.
 
 ## 🛠️ Technologies
 
@@ -102,9 +104,6 @@ This will generate a `dist` folder containing the compiled assets. You can deplo
     - `@imgly/background-removal` (AI Vision)
     - `html2canvas` & `upng-js` (Image processing)
     - `lunar-javascript` (Calendar conversion)
-- **External APIs**:
-    - **Piston API** (`https://emkc.org/api/v2/piston`): Used by the **Code Runner** tool to execute code securely.
-    - **Globalping API** (`https://api.globalping.io/v1`): Used by the **Check Host** tool for distributed network testing.
 
 ## 📄 License
 

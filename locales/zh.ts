@@ -88,7 +88,9 @@ export const zh = {
   'tool.speed_test.name': "宽带测速",
   'tool.speed_test.desc': "精准检测网络下行与上行速度，支持延迟与抖动分析，实时图形化展示",
   'tool.texture_packer.name': "纹理图集打包",
-  'tool.texture_packer.desc': "将多个碎图打包为单张图集大图，支持 Cocos Creator 等游戏引擎格式导出",
+  'tool.texture_packer.desc': "将多个碎图打包为单张图集大图，支持游戏引擎通用格式导出",
+  'tool.bmfont_gen.name': "Bitmap Font 生成器",
+  'tool.bmfont_gen.desc': "从碎图生成位图字体图集，支持导出多种游戏引擎兼容的格式",
 
   // Tool: JSON
   'json.format': "格式化",
@@ -544,4 +546,23 @@ export const zh = {
   'tp.bg_tooltip': "背景仅供预览，导出仍为透明",
   'tp.bg_white': "白色",
   'tp.bg_dark': "深色",
+
+  // Tool: Bitmap Font
+  'bf.settings': "字体设置",
+  'bf.char_mapping': "字符映射",
+  'bf.char_hint': "输入字符",
+  'bf.auto_map': "自动推断",
+  'bf.export_name': "导出名称",
+  'bf.export_btn': "打包并下载",
+  'bf.file_list': "字符图片",
+  'bf.not_valid_warning': "{n} 个字符映射无效",
+  'bf.preview_fnt': "预览",
+  'bf.empty_hint': "拖拽 0-9, A-Z 等散碎图片到这里",
+  'bf.duplicate_char': "重复映射: {char}",
+  'bf.mapping_title': "字符映射",
+  'bf.format': "导出格式",
+  'bf.format_text': "BMFont (文本)",
+  'bf.format_xml': "BMFont (XML)",
+  'bf.format_json': "JSON (通用)",
+  'bf.bg_tooltip': "背景仅供预览，导出仍为透明",
 };
