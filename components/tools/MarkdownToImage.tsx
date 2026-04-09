@@ -75,6 +75,7 @@ const MARKDOWN_STYLES = `
 const MarkdownToImage: React.FC = () => {
   const { t } = useLanguage();
   const [input, setInput] = useLocalStorage<string>('tool-md-img-input', '# Hello Shoebox\n\nThis is a **markdown** to image tool.\n\n```typescript\n// Sample Code\nconst hello: string = "world";\nconsole.log(hello);\n```\n\n- Simple\n- Fast\n- Beautiful\n\nTry inline code: `const a = 1;` looks great now.');
+  const [quality, setQuality] = useLocalStorage<number>('tool-md-img-quality', 0.8);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isMarkedReady, setIsMarkedReady] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -155,7 +156,7 @@ const MarkdownToImage: React.FC = () => {
 
       const link = document.createElement('a');
       link.download = 'lolo-shoebox-markdown.jpg';
-      link.href = canvas.toDataURL('image/jpeg', 0.9);
+      link.href = canvas.toDataURL('image/jpeg', quality);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -185,16 +186,33 @@ const MarkdownToImage: React.FC = () => {
 
       {/* Preview Side */}
       <div className="flex-1 flex flex-col space-y-4">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
              <label className="text-sm font-medium text-gray-700">{t('md.preview')}</label>
-             <button
-                onClick={handleDownload}
-                disabled={isGenerating}
-                className="flex items-center gap-2 px-4 py-1.5 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-             >
-                {isGenerating ? <RefreshCw className="animate-spin" size={16} /> : <Download size={16} />}
-                {t('md.download')}
-             </button>
+             
+             <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm">
+                    <span className="text-xs text-gray-500 whitespace-nowrap">{t('md.quality')}</span>
+                    <input 
+                        type="range" 
+                        min="0.1" 
+                        max="1.0" 
+                        step="0.05" 
+                        value={quality}
+                        onChange={(e) => setQuality(parseFloat(e.target.value))}
+                        className="w-24 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600"
+                    />
+                    <span className="text-xs font-mono text-primary-600 w-8 text-right">{Math.round(quality * 100)}%</span>
+                </div>
+
+                <button
+                    onClick={handleDownload}
+                    disabled={isGenerating}
+                    className="flex items-center gap-2 px-4 py-1.5 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                >
+                    {isGenerating ? <RefreshCw className="animate-spin" size={16} /> : <Download size={16} />}
+                    {t('md.download')}
+                </button>
+             </div>
         </div>
         
         <div className="flex-1 bg-gray-100 border border-gray-200 rounded-xl p-4 overflow-auto flex items-start justify-center">

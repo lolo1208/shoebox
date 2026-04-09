@@ -206,6 +206,9 @@ export const en = {
   'md.edit': "Editor",
   'md.preview': "Live Preview",
   'md.download': "Download Image",
+  'md.quality': "Quality",
+  'md.quality_low': "Low (Small)",
+  'md.quality_high': "High (Large)",
 
   // Tool: Easing
   'easing.desc': "Visualizes common CSS/JS easing functions. Hover over cards to see the animation speed.",

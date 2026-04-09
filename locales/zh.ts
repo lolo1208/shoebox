@@ -206,6 +206,9 @@ export const zh = {
   'md.edit': "Markdown 编辑",
   'md.preview': "实时预览",
   'md.download': "下载图片",
+  'md.quality': "图像质量",
+  'md.quality_low': "低 (小)",
+  'md.quality_high': "高 (大)",
 
   // Tool: Easing
   'easing.desc': "展示了常见的缓动函数曲线。鼠标悬停在卡片上，右侧的垂直进度条将演示该缓动效果的速度变化。",
