@@ -75,6 +75,8 @@ export const en = {
   'tool.password_gen.desc': "Generate strong passwords with custom character types and lengths.",
   'tool.uuid_gen.name': "UUID Generator",
   'tool.uuid_gen.desc': "Generate V4 (Random) and V5 (Namespace-based) UUIDs.",
+  'tool.key_gen.name': "Key Generator",
+  'tool.key_gen.desc': "Generate random keys in Hex, Base64, URL Safe, and other formats",
   'tool.md5_hash.name': "MD5 Calculator",
   'tool.md5_hash.desc': "Calculate MD5 hashes for text or local files.",
   'tool.json_format.name': "JSON Formatter",
@@ -147,6 +149,17 @@ export const en = {
   'qr.bg_color': "Background",
   'qr.download': "Download Image",
   'qr.empty': "Enter content to generate QR code",
+
+  // Tool: Key Gen
+  'key.type': "Key Type",
+  'key.length': "Byte Length",
+  'key.count': "Count",
+  'key.generate': "Generate Keys",
+  'key.hex': "Hex",
+  'key.base64': "Base64",
+  'key.base64url': "Base64 URL Safe",
+  'key.utf8': "UTF-8 String",
+  'key.bits': "{n} bits",
 
   // Tool: Image Converter
   'img_conv.upload_title': "Import Image",

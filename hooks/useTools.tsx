@@ -52,6 +52,7 @@ import AudioConverter from '../components/tools/AudioConverter';
 import BackgroundRemover from '../components/tools/BackgroundRemover';
 import TimestampConverter from '../components/tools/TimestampConverter';
 import CodeRunner from '../components/tools/CodeRunner';
+import KeyGenerator from '../components/tools/KeyGenerator';
 import CheckHost from '../components/tools/CheckHost';
 import SpeedTest from '../components/tools/SpeedTest';
 import MusicTagEditor from '../components/tools/MusicTagEditor';
@@ -203,6 +204,14 @@ export const useTools = () => {
           icon: Fingerprint,
           component: <UuidGenerator />,
           layoutClass: 'max-w-3xl mx-auto'
+        },
+        {
+          id: 'key-gen',
+          name: t('tool.key_gen.name'),
+          description: t('tool.key_gen.desc'),
+          icon: KeyRound,
+          component: <KeyGenerator />,
+          layoutClass: 'max-w-4xl mx-auto'
         },
         {
           id: 'md5-hash',

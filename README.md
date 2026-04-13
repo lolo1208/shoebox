@@ -30,10 +30,11 @@ A comprehensive, privacy-first developer toolbox designed with a clean UI. It fe
 *   **Video Compressor**: Locally analyzes video metadata (bitrate, tracks) and generates optimized FFmpeg commands. Perfect for creating NAS-compatible MP4 files or extreme compression for archiving.
 *   **Music Tag Editor**: Fix ID3 tags for MP3 files. Search and auto-fill titles, artists, and albums from Netease, QQ Music, or iTunes. Supports embedded cover art and lyrics.
 
-#### 文本与数据 Text & Data
+#### 🔢 Text & Data
 *   **Date & Time**: A versatile time tool featuring Unix timestamp conversion, Solar/Lunar calendar conversion, and a duration calculator between two dates.
 *   **Password Generator**: Create high-entropy secure passwords. Customize length and character types (Uppercase, Lowercase, Numbers, Symbols).
 *   **UUID Generator**: Generate batches of Version 4 (Random) UUIDs or Version 5 (Namespace-based) UUIDs for consistent identity mapping.
+*   **Key Generator**: Generate random keys in Hex, Base64, and URL Safe formats for development and security purposes.
 *   **MD5 Calculator**: Compute MD5 hashes for plain text or large local files using chunked reading to prevent browser freezing.
 
 #### 👨‍💻 Developer

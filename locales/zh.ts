@@ -71,10 +71,12 @@ export const zh = {
   'tool.music_tag.desc': "告别播放器乱码。一键修复音乐标题、歌手及专辑信息，支持自动补全缺失的封面与歌词，还原完美的音乐名片。",
   'tool.timestamp.name': "时间与日期",
   'tool.timestamp.desc': "实时时间戳、日期互转、公农历转换及时间差计算",
-  'tool.password_gen.name': "随机密码生成",
+  'tool.password_gen.name': "密码生成",
   'tool.password_gen.desc': "可自定义字符类型与长度的高强度密码生成器",
   'tool.uuid_gen.name': "UUID 生成",
   'tool.uuid_gen.desc': "支持 V4 (随机) 与 V5 (基于命名空间) 的 UUID 生成",
+  'tool.key_gen.name': "密钥生成",
+  'tool.key_gen.desc': "生成随机的 Hex、Base64、URL Safe 等各种格式的密钥数据",
   'tool.md5_hash.name': "MD5 计算器",
   'tool.md5_hash.desc': "支持文本摘要计算与本地文件 MD5 哈希值计算",
   'tool.json_format.name': "JSON 格式化",
@@ -147,6 +149,17 @@ export const zh = {
   'qr.bg_color': "背景色",
   'qr.download': "下载图片",
   'qr.empty': "输入内容以生成二维码",
+
+  // Tool: Key Gen
+  'key.type': "密钥类型",
+  'key.length': "字节长度 (Bytes)",
+  'key.count': "生成数量",
+  'key.generate': "生成密钥",
+  'key.hex': "Hex (十六进制)",
+  'key.base64': "Base64",
+  'key.base64url': "Base64 URL Safe",
+  'key.utf8': "UTF-8 字符串",
+  'key.bits': "{n} 位",
 
   // Tool: Image Converter
   'img_conv.upload_title': "导入图片",
