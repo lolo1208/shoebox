@@ -77,6 +77,8 @@ export const en = {
   'tool.uuid_gen.desc': "Generate V4 (Random) and V5 (Namespace-based) UUIDs.",
   'tool.key_gen.name': "Key Generator",
   'tool.key_gen.desc': "Generate random keys in Hex, Base64, URL Safe, and other formats",
+  'tool.text_crypto.name': "Text Crypto",
+  'tool.text_crypto.desc': "Encrypt and decrypt text using various algorithms like AES, DES, RC4",
   'tool.md5_hash.name': "MD5 Calculator",
   'tool.md5_hash.desc': "Calculate MD5 hashes for text or local files.",
   'tool.json_format.name': "JSON Formatter",
@@ -160,6 +162,21 @@ export const en = {
   'key.base64url': "Base64 URL Safe",
   'key.utf8': "UTF-8 String",
   'key.bits': "{n} bits",
+
+  // Tool: Text Crypto
+  'crypto.mode_encrypt': "Encrypt",
+  'crypto.mode_decrypt': "Decrypt",
+  'crypto.algo': "Algorithm",
+  'crypto.key': "Key",
+  'crypto.input_encrypt_label': "Content to Encrypt",
+  'crypto.input_encrypt_ph': "Enter text to encrypt...",
+  'crypto.output_encrypt_label': "Encryption Result",
+  'crypto.input_decrypt_label': "Content to Decrypt",
+  'crypto.input_decrypt_ph': "Enter text to decrypt...",
+  'crypto.output_decrypt_label': "Decryption Result",
+  'crypto.encrypt_btn': "Run Encryption",
+  'crypto.error_decrypt': "Decryption failed. Check your key or algorithm.",
+  'crypto.copied': "Result copied",
 
   // Tool: Image Converter
   'img_conv.upload_title': "Import Image",

@@ -7,6 +7,7 @@ import {
   KeyRound, 
   Fingerprint, 
   Hash, 
+  Lock,
   QrCode,
   FileImage, 
   Activity,
@@ -53,6 +54,7 @@ import BackgroundRemover from '../components/tools/BackgroundRemover';
 import TimestampConverter from '../components/tools/TimestampConverter';
 import CodeRunner from '../components/tools/CodeRunner';
 import KeyGenerator from '../components/tools/KeyGenerator';
+import TextCrypto from '../components/tools/TextCrypto';
 import CheckHost from '../components/tools/CheckHost';
 import SpeedTest from '../components/tools/SpeedTest';
 import MusicTagEditor from '../components/tools/MusicTagEditor';
@@ -220,6 +222,14 @@ export const useTools = () => {
           icon: Hash,
           component: <Md5Generator />,
           layoutClass: 'max-w-3xl mx-auto'
+        },
+        {
+          id: 'text-crypto',
+          name: t('tool.text_crypto.name'),
+          description: t('tool.text_crypto.desc'),
+          icon: Lock,
+          component: <TextCrypto />,
+          layoutClass: 'w-full'
         }
       ]
     },

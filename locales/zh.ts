@@ -77,6 +77,8 @@ export const zh = {
   'tool.uuid_gen.desc': "支持 V4 (随机) 与 V5 (基于命名空间) 的 UUID 生成",
   'tool.key_gen.name': "密钥生成",
   'tool.key_gen.desc': "生成随机的 Hex、Base64、URL Safe 等各种格式的密钥数据",
+  'tool.text_crypto.name': "文本加解密",
+  'tool.text_crypto.desc': "支持 AES, DES, RC4 等多种算法的文本加密与解密工具",
   'tool.md5_hash.name': "MD5 计算器",
   'tool.md5_hash.desc': "支持文本摘要计算与本地文件 MD5 哈希值计算",
   'tool.json_format.name': "JSON 格式化",
@@ -160,6 +162,23 @@ export const zh = {
   'key.base64url': "Base64 URL Safe",
   'key.utf8': "UTF-8 字符串",
   'key.bits': "{n} 位",
+
+  // Tool: Text Crypto
+  'crypto.mode_encrypt': "加密",
+  'crypto.mode_decrypt': "解密",
+  'crypto.algo': "加密算法",
+  'crypto.key': "密钥 (Key)",
+  'crypto.input_encrypt_label': "需加密内容",
+  'crypto.input_encrypt_ph': "请输入要加密的文本内容...",
+  'crypto.output_encrypt_label': "加密结果",
+  'crypto.input_decrypt_label': "已加密内容",
+  'crypto.input_decrypt_ph': "请输入要解密的文本内容...",
+  'crypto.output_decrypt_label': "解密结果",
+  'crypto.encrypt_btn': "执行加密",
+  'crypto.decrypt_btn': "执行解密",
+  'crypto.key_ph': "输入密钥...",
+  'crypto.error_decrypt': "解密失败，请检查密钥或算法是否正确",
+  'crypto.copied': "已复制结果",
 
   // Tool: Image Converter
   'img_conv.upload_title': "导入图片",
