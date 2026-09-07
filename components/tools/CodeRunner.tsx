@@ -367,11 +367,12 @@ const CodeRunner: React.FC = () => {
     const fetchRuntimes = async () => {
       try {
         const res = await fetch('https://emkc.org/api/v2/piston/runtimes');
-        if (!res.ok) throw new Error('Failed to fetch runtimes');
+        if (!res.ok) throw new Error(`Failed to fetch runtimes: ${res.status}`);
         const data: Runtime[] = await res.json();
         setRuntimes(data);
-      } catch (err) {
-        setError('无法连接到 Piston API，请检查网络连接。');
+      } catch (err: any) {
+        console.error('Failed to fetch runtimes:', err);
+        setError(`无法连接到 Piston API (${err.message})，请检查网络连接或稍后再试。`);
       } finally {
         setLoadingRuntimes(false);
       }
@@ -449,6 +450,7 @@ const CodeRunner: React.FC = () => {
       }
   };
 
+  // 3. Execution Action
   const runCode = async () => {
       if (!code.trim()) return;
       if (!activeRuntime) {
@@ -459,14 +461,13 @@ const CodeRunner: React.FC = () => {
       setIsRunning(true);
       setOutput('');
       setExecutionMeta(null);
+      setError(null);
       
       try {
           const finalArgs = args.filter(a => a !== '');
 
           // Helper to determine proper file name/extension based on language
-          // This is critical for Deno/TS to correctly parse types
           const getFileName = (lang: string) => {
-              // Priority: Check selected group first to handle ambiguous cases (like Deno running as TypeScript)
               if (selectedGroup === 'TypeScript') return 'main.ts';
               if (selectedGroup === 'C++') return 'main.cpp';
               if (selectedGroup === 'C#') return 'Program.cs';
@@ -498,7 +499,9 @@ const CodeRunner: React.FC = () => {
 
           const res = await fetch('https://emkc.org/api/v2/piston/execute', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: { 
+                  'Content-Type': 'application/json'
+              },
               body: JSON.stringify({
                   language: activeRuntime.language,
                   version: activeRuntime.version,
@@ -512,12 +515,15 @@ const CodeRunner: React.FC = () => {
               })
           });
 
-          if (!res.ok) throw new Error(`Execution failed: ${res.statusText}`);
+          if (!res.ok) {
+              const statusText = res.statusText || `Status ${res.status}`;
+              throw new Error(`Execution failed: ${statusText}. The Piston API public instance may be down or restricted.`);
+          }
           
           const result: ExecutionResult = await res.json();
-          setOutput(result.run.output || (result.run.stderr ? `Error:\n${result.run.stderr}` : 'No output'));
+          const runOutput = result.run.output || (result.run.stderr ? `Error:\n${result.run.stderr}` : 'No output');
+          setOutput(runOutput);
           
-          // Store full execution details
           setExecutionMeta({
               language: result.language,
               version: result.version,
@@ -528,7 +534,9 @@ const CodeRunner: React.FC = () => {
           });
 
       } catch (err: any) {
+          console.error('Code execution failed:', err);
           setOutput(`Execution Error: ${err.message}`);
+          setError(`执行失败: ${err.message}`);
       } finally {
           setIsRunning(false);
       }

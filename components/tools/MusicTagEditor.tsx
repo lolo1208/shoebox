@@ -6,6 +6,8 @@ import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useLanguage } from '../../contexts/LanguageContext';
 // Fix: ID3Writer is a default export in the ESM bundle
 import ID3Writer from 'browser-id3-writer';
+// @ts-ignore
+import jsmediatags from 'jsmediatags/dist/jsmediatags.min.js';
 
 // --- Types ---
 
@@ -85,6 +87,82 @@ const fetchItunesJsonp = (term: string): Promise<any> => {
   });
 };
 
+// Helper to read ID3 tags from local MP3 file using jsmediatags
+const readMp3Tags = (file: File): Promise<{ tags: TargetTags; coverBlob: Blob | null; coverUrl: string; coverSize: string }> => {
+  return new Promise((resolve) => {
+    jsmediatags.read(file, {
+      onSuccess: (result) => {
+        const rawTags = result.tags || {};
+        
+        const title = rawTags.title ? String(rawTags.title).trim() : '';
+        const artist = rawTags.artist ? String(rawTags.artist).trim() : '';
+        const album = rawTags.album ? String(rawTags.album).trim() : '';
+        const year = rawTags.year ? String(rawTags.year).trim() : '';
+        const track = rawTags.track ? String(rawTags.track).trim() : '';
+
+        const disc = rawTags.TPOS ? String(rawTags.TPOS.data || rawTags.TPOS || '').trim() : '';
+        const lyricist = rawTags.TEXT ? String(rawTags.TEXT.data || rawTags.TEXT || '').trim() : '';
+        const composer = rawTags.TCOM ? String(rawTags.TCOM.data || rawTags.TCOM || '').trim() : '';
+
+        let lyrics = '';
+        if (rawTags.USLT) {
+          if (typeof rawTags.USLT === 'string') {
+            lyrics = rawTags.USLT;
+          } else if (rawTags.USLT.data) {
+            lyrics = typeof rawTags.USLT.data === 'string'
+              ? rawTags.USLT.data
+              : (rawTags.USLT.data.lyrics || '');
+          }
+        } else if (rawTags.lyrics) {
+          lyrics = typeof rawTags.lyrics === 'string' ? rawTags.lyrics : String(rawTags.lyrics);
+        }
+
+        let coverBlob: Blob | null = null;
+        let coverUrl = '';
+        let coverSize = '';
+
+        if (rawTags.picture) {
+          try {
+            const { data, format } = rawTags.picture;
+            const byteArray = new Uint8Array(data);
+            coverBlob = new Blob([byteArray], { type: format || 'image/jpeg' });
+            coverUrl = URL.createObjectURL(coverBlob);
+            coverSize = `${(coverBlob.size / 1024).toFixed(1)} KB`;
+          } catch (e) {
+            console.warn('Failed to parse embedded album art:', e);
+          }
+        }
+
+        resolve({
+          tags: {
+            title,
+            artist,
+            album,
+            year,
+            track,
+            disc,
+            lyricist,
+            composer,
+            lyrics,
+          },
+          coverBlob,
+          coverUrl,
+          coverSize
+        });
+      },
+      onError: (error) => {
+        console.warn('jsmediatags read error:', error);
+        resolve({
+          tags: INITIAL_TAGS,
+          coverBlob: null,
+          coverUrl: '',
+          coverSize: ''
+        });
+      }
+    });
+  });
+};
+
 const MusicTagEditor: React.FC = () => {
   const { t } = useLanguage();
   
@@ -153,6 +231,8 @@ const MusicTagEditor: React.FC = () => {
       return `${origin}${path}`.replace(/\/$/, '');
   };
 
+  const coverFileInputRef = useRef<HTMLInputElement>(null);
+
   const getSourceCoverUrl = (url: string) => {
       if (!url) return '';
       // iTunes URLs are direct (CORS usually ok or handling via img tag)
@@ -161,6 +241,39 @@ const MusicTagEditor: React.FC = () => {
           return url;
       }
       return `${getApiBase()}/api/proxy-image?url=${encodeURIComponent(url)}`;
+  };
+
+  const handleLocalCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const imgFile = e.target.files?.[0];
+      if (!imgFile) return;
+
+      if (!imgFile.type.startsWith('image/')) {
+          showToast('请选择有效的图片文件', 'error');
+          return;
+      }
+
+      setTargetCoverBlob(imgFile);
+      const url = URL.createObjectURL(imgFile);
+      if (targetCoverUrl) URL.revokeObjectURL(targetCoverUrl);
+      setTargetCoverUrl(url);
+
+      const img = new Image();
+      img.onload = () => {
+          setTargetCoverSize(`${img.naturalWidth}x${img.naturalHeight} (${(imgFile.size / 1024).toFixed(1)}KB)`);
+      };
+      img.src = url;
+
+      showToast(t('mt.upload_cover_btn') + ' 成功', 'success');
+  };
+
+  const handleRemoveCover = () => {
+      if (targetCoverUrl) URL.revokeObjectURL(targetCoverUrl);
+      setTargetCoverBlob(null);
+      setTargetCoverUrl('');
+      setTargetCoverSize('');
+      if (coverFileInputRef.current) {
+          coverFileInputRef.current.value = '';
+      }
   };
 
   const handleFile = async (f: File) => {
@@ -180,8 +293,33 @@ const MusicTagEditor: React.FC = () => {
       setSelectedKey(null);
       setDetailError(null);
 
-      // Auto fill keyword
-      const query = f.name.replace(/\.mp3$/i, '').replace(/\s-\s/g, ' ');
+      // Read embedded ID3 tags from the MP3 file
+      const { tags, coverBlob, coverUrl, coverSize } = await readMp3Tags(f);
+
+      setTargetTags(tags);
+      if (coverBlob && coverUrl) {
+          setTargetCoverBlob(coverBlob);
+          setTargetCoverUrl(coverUrl);
+
+          const img = new Image();
+          img.onload = () => {
+              setTargetCoverSize(`${img.naturalWidth}x${img.naturalHeight} (${(coverBlob.size / 1024).toFixed(1)}KB)`);
+          };
+          img.src = coverUrl;
+      }
+
+      const hasMeta = Object.values(tags).some(val => Boolean(val.trim())) || Boolean(coverBlob);
+      if (hasMeta) {
+          showToast(t('mt.original_tags_loaded'), 'success');
+      }
+
+      // Auto fill keyword using extracted title/artist or filename
+      let query = f.name.replace(/\.mp3$/i, '').replace(/\s-\s/g, ' ');
+      if (tags.title && tags.artist) {
+          query = `${tags.artist} ${tags.title}`;
+      } else if (tags.title) {
+          query = tags.title;
+      }
       setKeyword(query);
       
       // Auto search if we have any valid source
@@ -728,20 +866,81 @@ const MusicTagEditor: React.FC = () => {
                 </div>
                 <div className="flex flex-col">
                     <div className="p-4 space-y-4">
-                        <div className="flex items-center gap-4 bg-gray-50 p-2 rounded-lg border border-gray-100">
-                            <div 
-                                className={`w-12 h-12 bg-white border border-gray-200 rounded flex items-center justify-center overflow-hidden shrink-0 ${targetCoverUrl ? 'cursor-zoom-in hover:opacity-90 transition-opacity' : ''}`}
-                                onClick={() => targetCoverUrl && setPreviewModalUrl(targetCoverUrl)}
-                            >
-                                {targetCoverUrl ? (
-                                    <img src={targetCoverUrl} alt="New Cover" className="w-full h-full object-cover" />
-                                ) : (
-                                    <span className="text-[8px] text-gray-400 text-center">{t('mt.preview_cover')}</span>
-                                )}
+                        <div className="bg-gray-50 p-3 rounded-lg border border-gray-100 space-y-2">
+                            <div className="flex items-center justify-between">
+                                <label className="text-xs font-bold text-gray-600 flex items-center gap-1">
+                                    <Disc size={14} className="text-primary-600" />
+                                    {t('mt.album_cover')}
+                                </label>
+                                <div className="flex items-center gap-1.5">
+                                    <input 
+                                        type="file" 
+                                        ref={coverFileInputRef} 
+                                        accept="image/*" 
+                                        className="hidden" 
+                                        onChange={handleLocalCoverChange} 
+                                    />
+                                    <button 
+                                        type="button"
+                                        onClick={() => coverFileInputRef.current?.click()}
+                                        className="text-xs px-2.5 py-1 bg-white border border-gray-200 hover:border-primary-300 text-gray-700 hover:text-primary-600 rounded shadow-sm transition-all flex items-center gap-1 font-medium cursor-pointer"
+                                    >
+                                        <Upload size={12} />
+                                        {t('mt.upload_cover_btn')}
+                                    </button>
+                                    {targetCoverUrl && (
+                                        <button 
+                                            type="button"
+                                            onClick={handleRemoveCover}
+                                            className="text-xs px-2 py-1 bg-white border border-gray-200 hover:border-red-300 text-gray-500 hover:text-red-600 rounded shadow-sm transition-all flex items-center gap-1 cursor-pointer"
+                                            title={t('mt.remove_cover')}
+                                        >
+                                            <X size={12} />
+                                            {t('mt.remove')}
+                                        </button>
+                                    )}
+                                </div>
                             </div>
-                            <div className="text-xs text-gray-500">
-                                <div>{targetCoverSize || '-'}</div>
-                                {targetCoverUrl && <div className="text-green-600 font-medium flex items-center gap-1"><Check size={12}/> Ready</div>}
+
+                            <div className="flex items-center gap-3">
+                                <div 
+                                    className={`w-14 h-14 bg-white border border-gray-200 rounded-lg flex items-center justify-center overflow-hidden shrink-0 relative group ${targetCoverUrl ? 'cursor-zoom-in hover:shadow' : 'border-dashed cursor-pointer'}`}
+                                    onClick={() => {
+                                        if (targetCoverUrl) {
+                                            setPreviewModalUrl(targetCoverUrl);
+                                        } else {
+                                            coverFileInputRef.current?.click();
+                                        }
+                                    }}
+                                >
+                                    {targetCoverUrl ? (
+                                        <>
+                                            <img src={targetCoverUrl} alt="New Cover" className="w-full h-full object-cover" />
+                                            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                                                <Maximize2 size={16} />
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="flex flex-col items-center gap-0.5 text-gray-400 p-1 text-center">
+                                            <Upload size={14} />
+                                            <span className="text-[9px]">{t('mt.click_to_upload')}</span>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="text-xs text-gray-500 flex-1 min-w-0">
+                                    <div className="font-medium truncate">
+                                        {targetCoverUrl ? (
+                                            <span className="text-green-600 flex items-center gap-1">
+                                                <Check size={13} /> {t('mt.cover_ready')}
+                                            </span>
+                                        ) : (
+                                            <span className="text-gray-400">{t('mt.no_cover')}</span>
+                                        )}
+                                    </div>
+                                    <div className="text-[11px] text-gray-400 truncate mt-0.5">
+                                        {targetCoverSize || (targetCoverUrl ? '' : 'JPG, PNG, WEBP')}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div className="grid grid-cols-12 gap-3">

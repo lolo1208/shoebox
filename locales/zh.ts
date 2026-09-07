@@ -79,6 +79,8 @@ export const zh = {
   'tool.key_gen.desc': "生成随机的 Hex、Base64、URL Safe 等各种格式的密钥数据",
   'tool.text_crypto.name': "文本加解密",
   'tool.text_crypto.desc': "支持 AES, DES, RC4 等多种算法的文本加密与解密工具",
+  'tool.dns_txt.name': "DNS TXT 查询",
+  'tool.dns_txt.desc': "查询域名的 DNS TXT 记录，支持阿里云、谷歌、Cloudflare 等主流 DNS 服务器",
   'tool.md5_hash.name': "MD5 计算器",
   'tool.md5_hash.desc': "支持文本摘要计算与本地文件 MD5 哈希值计算",
   'tool.json_format.name': "JSON 格式化",
@@ -91,6 +93,8 @@ export const zh = {
   'tool.check_host.desc': "利用 Globalping 分布式网络检测全球各地的 Ping/HTTP/DNS/路由 连通性",
   'tool.speed_test.name': "宽带测速",
   'tool.speed_test.desc': "精准检测网络下行与上行速度，支持延迟与抖动分析，实时图形化展示",
+  'tool.random_port.name': "随机端口号",
+  'tool.random_port.desc': "避开已知占用端口生成安全的随机端口号，并提供常用端口及协议查询",
   'tool.texture_packer.name': "纹理图集打包",
   'tool.texture_packer.desc': "将多个碎图打包为单张图集大图，支持游戏引擎通用格式导出",
   'tool.bmfont_gen.name': "Bitmap Font 生成器",
@@ -179,6 +183,19 @@ export const zh = {
   'crypto.key_ph': "输入密钥...",
   'crypto.error_decrypt': "解密失败，请检查密钥或算法是否正确",
   'crypto.copied': "已复制结果",
+
+  // Tool: DNS TXT Query
+  'dns.domain': "域名",
+  'dns.domain_ph': "请输入域名，如 example.com",
+  'dns.provider': "DNS 提供商",
+  'dns.query_btn': "查询记录",
+  'dns.status_loading': "查询中...",
+  'dns.status_error': "查询失败，请检查域名或网络",
+  'dns.status_not_found': "未找到 TXT 记录",
+  'dns.result_title': "查询结果",
+  'dns.provider_aliyun': "Alidns (阿里云)",
+  'dns.provider_google': "Google DNS",
+  'dns.provider_cloudflare': "Cloudflare",
 
   // Tool: Image Converter
   'img_conv.upload_title': "导入图片",
@@ -373,6 +390,14 @@ export const zh = {
   'mt.select_tip': "请先选择一条结果",
   'mt.error_api': "API 请求失败",
   'mt.success_write': "标签写入成功！",
+  'mt.original_tags_loaded': "已自动读取 MP3 内置元数据",
+  'mt.upload_cover_btn': "选择本地图片",
+  'mt.remove_cover': "移除封面",
+  'mt.album_cover': "专辑封面",
+  'mt.click_to_upload': "点击上传封面",
+  'mt.cover_ready': "包含专辑封面",
+  'mt.no_cover': "暂无专辑封面",
+  'mt.remove': "移除",
 
   // Tool: Timestamp
   'time.current': "当前",

@@ -29,7 +29,9 @@ import {
   Film,
   Tags,
   LayoutGrid,
-  Type
+  Type,
+  Search,
+  Radio
 } from 'lucide-react';
 import { Category, CategoryId } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -55,11 +57,13 @@ import TimestampConverter from '../components/tools/TimestampConverter';
 import CodeRunner from '../components/tools/CodeRunner';
 import KeyGenerator from '../components/tools/KeyGenerator';
 import TextCrypto from '../components/tools/TextCrypto';
+import DnsTxtQuery from '../components/tools/DnsTxtQuery';
 import CheckHost from '../components/tools/CheckHost';
 import SpeedTest from '../components/tools/SpeedTest';
 import MusicTagEditor from '../components/tools/MusicTagEditor';
 import TexturePacker from '../components/tools/TexturePacker';
 import BitmapFontGenerator from '../components/tools/BitmapFontGenerator';
+import RandomPortGenerator from '../components/tools/RandomPortGenerator';
 
 export const useTools = () => {
   const { t } = useLanguage();
@@ -302,6 +306,22 @@ export const useTools = () => {
           icon: Gauge,
           component: <SpeedTest />,
           layoutClass: 'w-full'
+        },
+        {
+          id: 'dns-txt',
+          name: t('tool.dns_txt.name'),
+          description: t('tool.dns_txt.desc'),
+          icon: Search,
+          component: <DnsTxtQuery />,
+          layoutClass: 'w-full'
+        },
+        {
+          id: 'random-port',
+          name: t('tool.random_port.name'),
+          description: t('tool.random_port.desc'),
+          icon: Radio,
+          component: <RandomPortGenerator />,
+          layoutClass: 'max-w-5xl mx-auto'
         }
       ]
     }

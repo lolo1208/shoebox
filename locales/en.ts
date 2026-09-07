@@ -79,6 +79,8 @@ export const en = {
   'tool.key_gen.desc': "Generate random keys in Hex, Base64, URL Safe, and other formats",
   'tool.text_crypto.name': "Text Crypto",
   'tool.text_crypto.desc': "Encrypt and decrypt text using various algorithms like AES, DES, RC4",
+  'tool.dns_txt.name': "DNS TXT Query",
+  'tool.dns_txt.desc': "Query DNS TXT records for a domain using major DNS providers like Aliyun, Google, Cloudflare",
   'tool.md5_hash.name': "MD5 Calculator",
   'tool.md5_hash.desc': "Calculate MD5 hashes for text or local files.",
   'tool.json_format.name': "JSON Formatter",
@@ -91,6 +93,8 @@ export const en = {
   'tool.check_host.desc': "Check global connectivity (Ping/HTTP/DNS/Route) using Globalping distributed network.",
   'tool.speed_test.name': "Speed Test",
   'tool.speed_test.desc': "Accurately test download/upload speeds with latency and jitter analysis.",
+  'tool.random_port.name': "Random Port",
+  'tool.random_port.desc': "Generate random available network ports excluding known ports, and query port specifications.",
   'tool.texture_packer.name': "Texture Packer",
   'tool.texture_packer.desc': "Pack multiple sprites into a single atlas, export for game engines.",
   'tool.bmfont_gen.name': "Bitmap Font Generator",
@@ -177,6 +181,19 @@ export const en = {
   'crypto.encrypt_btn': "Run Encryption",
   'crypto.error_decrypt': "Decryption failed. Check your key or algorithm.",
   'crypto.copied': "Result copied",
+
+  // Tool: DNS TXT Query
+  'dns.domain': "Domain",
+  'dns.domain_ph': "Enter domain, e.g., example.com",
+  'dns.provider': "DNS Provider",
+  'dns.query_btn': "Query Records",
+  'dns.status_loading': "Querying...",
+  'dns.status_error': "Query failed. Check domain or network",
+  'dns.status_not_found': "No TXT records found",
+  'dns.result_title': "Query Results",
+  'dns.provider_aliyun': "Alidns (阿里云)",
+  'dns.provider_google': "Google DNS",
+  'dns.provider_cloudflare': "Cloudflare",
 
   // Tool: Image Converter
   'img_conv.upload_title': "Import Image",
@@ -371,6 +388,14 @@ export const en = {
   'mt.select_tip': "Select a result from the left",
   'mt.error_api': "API Error",
   'mt.success_write': "Tags written successfully!",
+  'mt.original_tags_loaded': "Embedded MP3 metadata loaded automatically",
+  'mt.upload_cover_btn': "Local Image",
+  'mt.remove_cover': "Remove Cover",
+  'mt.album_cover': "Album Cover",
+  'mt.click_to_upload': "Click to upload",
+  'mt.cover_ready': "Album cover included",
+  'mt.no_cover': "No album cover",
+  'mt.remove': "Remove",
 
   // Tool: Timestamp
   'time.current': "Current",
