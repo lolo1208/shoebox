@@ -156,19 +156,19 @@ export const useTools = () => {
       description: t('cat.media.desc'),
       tools: [
         {
-          id: 'audio-convert',
-          name: t('tool.audio_convert.name'),
-          description: t('tool.audio_convert.desc'),
-          icon: Music,
-          component: <AudioConverter />,
-          layoutClass: 'w-full'
-        },
-        {
           id: 'video-cmd',
           name: t('tool.video_cmd.name'),
           description: t('tool.video_cmd.desc'),
           icon: Film,
           component: <VideoCommandGenerator />,
+          layoutClass: 'w-full'
+        },
+        {
+          id: 'audio-convert',
+          name: t('tool.audio_convert.name'),
+          description: t('tool.audio_convert.desc'),
+          icon: Music,
+          component: <AudioConverter />,
           layoutClass: 'w-full'
         },
         {

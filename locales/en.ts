@@ -155,6 +155,10 @@ export const en = {
   'qr.bg_color': "Background",
   'qr.download': "Download Image",
   'qr.empty': "Enter content to generate QR code",
+  'qr.logo': "Add a center image",
+  'qr.logo_upload': "Choose image",
+  'qr.logo_remove': "Remove image",
+  'qr.logo_size': "Image size",
 
   // Tool: Key Gen
   'key.type': "Key Type",
@@ -317,6 +321,7 @@ export const en = {
   'vid.container': "Container",
   'vid.v_codec': "Video Codec",
   'vid.a_codec': "Audio Codec",
+  'vid.track_title': "Track title",
   'vid.crf': "CRF (Quality)",
   'vid.preset': "Preset",
   'vid.scale': "Scale",
@@ -356,7 +361,7 @@ export const en = {
 
   // Tool: Music Tag Editor
   'mt.upload_title': "Upload MP3",
-  'mt.upload_desc': "Click or Drag MP3 here",
+  'mt.upload_desc': "Click or drag audio here (MP3, FLAC, M4A, etc.)",
   'mt.api_url': "QQ Music, Netease API URL",
   'mt.api_tip': "Required for search & lyrics (e.g. http://127.0.0.1:10801)",
   'mt.search': "Search",

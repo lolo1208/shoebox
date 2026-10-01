@@ -1,7 +1,7 @@
 
 /// <reference lib="dom" />
-import React, { useEffect, useRef, useState } from 'react';
-import { Download, QrCode as QrIcon } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Download, ImagePlus, QrCode as QrIcon, X } from 'lucide-react';
 import QRCode from 'qrcode';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -13,9 +13,9 @@ const QrCodeGenerator: React.FC = () => {
   const [fgColor, setFgColor] = useLocalStorage<string>('tool-qr-fg', '#000000');
   const [bgColor, setBgColor] = useLocalStorage<string>('tool-qr-bg', '#ffffff');
   const [dataUrl, setDataUrl] = useState<string>('');
+  const [logoUrl, setLogoUrl] = useState<string>('');
+  const [logoSize, setLogoSize] = useState(22);
   
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
   useEffect(() => {
     const generateQr = async () => {
       if (!text) {
@@ -26,12 +26,49 @@ const QrCodeGenerator: React.FC = () => {
         const url = await QRCode.toDataURL(text, {
           width: size,
           margin: 1,
+          errorCorrectionLevel: 'H',
           color: {
             dark: fgColor,
             light: bgColor,
           },
         });
-        setDataUrl(url);
+        if (!logoUrl) {
+          setDataUrl(url);
+          return;
+        }
+        const qrImage = new Image();
+        qrImage.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return;
+          ctx.drawImage(qrImage, 0, 0, size, size);
+          const avatar = new Image();
+          avatar.onload = () => {
+            const logoPx = size * logoSize / 100;
+            const padding = Math.max(4, Math.round(size * 0.018));
+            const box = logoPx + padding * 2;
+            const x = (size - box) / 2;
+            const y = (size - box) / 2;
+            ctx.fillStyle = bgColor;
+            ctx.beginPath();
+            ctx.roundRect(x, y, box, box, Math.max(4, size * 0.025));
+            ctx.fill();
+            ctx.save();
+            ctx.beginPath();
+            const imageX = size / 2 - logoPx / 2;
+            const imageY = size / 2 - logoPx / 2;
+            ctx.roundRect(imageX, imageY, logoPx, logoPx, Math.max(2, size * 0.018));
+            ctx.clip();
+            ctx.drawImage(avatar, imageX, imageY, logoPx, logoPx);
+            ctx.restore();
+            setDataUrl(canvas.toDataURL('image/png'));
+          };
+          avatar.onerror = () => setDataUrl(url);
+          avatar.src = logoUrl;
+        };
+        qrImage.src = url;
       } catch (err) {
         console.error(err);
       }
@@ -39,7 +76,17 @@ const QrCodeGenerator: React.FC = () => {
 
     const timer = setTimeout(generateQr, 100);
     return () => clearTimeout(timer);
-  }, [text, size, fgColor, bgColor]);
+  }, [text, size, fgColor, bgColor, logoUrl, logoSize]);
+
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = () => setLogoUrl(String(reader.result));
+    reader.readAsDataURL(file);
+    event.target.value = '';
+  };
 
   const handleDownload = () => {
     if (!dataUrl) return;
@@ -112,6 +159,20 @@ const QrCodeGenerator: React.FC = () => {
                         </div>
                     </div>
                 </div>
+            </div>
+            <div className="border-t border-gray-100 pt-4 space-y-3">
+              <label className="block text-sm font-medium text-gray-600">{t('qr.logo')}</label>
+              <div className="flex items-center gap-3">
+                <label className="inline-flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
+                  <ImagePlus size={16} />{t('qr.logo_upload')}
+                  <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                </label>
+                {logoUrl && <button type="button" onClick={() => setLogoUrl('')} className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-red-600"><X size={16} />{t('qr.logo_remove')}</button>}
+              </div>
+              {logoUrl && <div>
+                <label className="block text-sm text-gray-600 mb-2">{t('qr.logo_size')}: {logoSize}%</label>
+                <input type="range" min="14" max="30" step="1" value={logoSize} onChange={(e) => setLogoSize(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary-600" />
+              </div>}
             </div>
         </div>
       </div>

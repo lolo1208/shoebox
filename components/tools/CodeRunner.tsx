@@ -9,22 +9,19 @@ import { useLanguage } from '../../contexts/LanguageContext';
 // --- Types ---
 
 interface Runtime {
+  name: string;
   language: string;
   version: string;
-  aliases: string[];
-  runtime?: string;
+  compiler: string;
+  'display-name'?: string;
 }
 
 interface ExecutionResult {
-  run: {
-    stdout: string;
-    stderr: string;
-    output: string;
-    code: number;
-    signal: string | null;
-  };
-  language: string;
-  version: string;
+  status: string;
+  compiler_output: string;
+  compiler_error: string;
+  program_output: string;
+  program_error: string;
 }
 
 // --- Constants ---
@@ -32,42 +29,14 @@ interface ExecutionResult {
 // Languages that typically don't accept standard CLI args in this context
 const NO_ARGS_LANGS = ['sql', 'brainfuck', 'befunge93', 'cow', 'jelly', 'rockstar'];
 
-// Language Group Mapping: Map Piston language keys to a Display Group Name
-// This allows merging "python" and "python2" into "Python", or "csharp" and "dotnet" into "C#"
+// Wandbox compiler language names are used as display groups.
 const LANGUAGE_GROUPS: Record<string, string> = {
-  'python': 'Python',
-  'python2': 'Python',
-  'c++': 'C++',
-  'gcc': 'C++',
-  'csharp': 'C#',
-  'csharp.net': 'C#',
-  'javascript': 'JavaScript',
-  'typescript': 'TypeScript',
-  'go': 'Go',
-  'java': 'Java',
-  'rust': 'Rust',
-  'php': 'PHP',
-  'ruby': 'Ruby',
-  'swift': 'Swift',
-  'kotlin': 'Kotlin',
-  'bash': 'Bash',
-  'perl': 'Perl',
-  'r': 'R',
-  'lua': 'Lua',
-  'scala': 'Scala',
-  'clojure': 'Clojure',
-  'elixir': 'Elixir',
-  'haskell': 'Haskell',
-  'ocaml': 'OCaml',
-  'erlang': 'Erlang',
-  'dart': 'Dart',
-  'nasm': 'Assembly',
-  'nasm64': 'Assembly',
-  'c': 'C',
-  'basic': 'Visual Basic',
-  'basic.net': 'Visual Basic',
-  'fsharp': 'F#',
-  'fsharp.net': 'F#',
+  'Python': 'Python', 'C++': 'C++', 'C': 'C', 'C#': 'C#', 'F#': 'F#',
+  'JavaScript': 'JavaScript', 'TypeScript': 'TypeScript', 'Go': 'Go', 'Java': 'Java',
+  'Rust': 'Rust', 'PHP': 'PHP', 'Ruby': 'Ruby', 'Swift': 'Swift', 'Kotlin': 'Kotlin',
+  'Bash': 'Bash', 'Perl': 'Perl', 'R': 'R', 'Lua': 'Lua', 'Scala': 'Scala',
+  'Clojure': 'Clojure', 'Haskell': 'Haskell', 'OCaml': 'OCaml', 'Erlang': 'Erlang',
+  'Dart': 'Dart', 'SQL': 'SQL',
 };
 
 // Fallback formatter for languages not in the group map
@@ -76,7 +45,7 @@ const formatName = (lang: string) => {
     return lang.charAt(0).toUpperCase() + lang.slice(1);
 };
 
-// Piston language name -> highlight.js language name mapping (if different)
+// Wandbox language name -> highlight.js language name mapping (if different)
 const LANG_MAP: Record<string, string> = {
   'c++': 'cpp',
   'csharp': 'csharp',
@@ -284,7 +253,7 @@ const CodeRunner: React.FC = () => {
   // selectedRuntimeKey stores "language:version" to uniquely identify specific runtime
   const [selectedRuntimeKey, setSelectedRuntimeKey] = useState<string>(''); 
   
-  const [code, setCode] = useLocalStorage<string>('tool-cr-code', HELLO_EXAMPLES['Python']);
+  const [code, setCode] = useLocalStorage<string>('tool-cr-code-wandbox', HELLO_EXAMPLES['Python']);
   // Changed from string to string[] for multiple args support
   const [args, setArgs] = useLocalStorage<string[]>('tool-cr-args-list', ['']);
   
@@ -352,8 +321,7 @@ const CodeRunner: React.FC = () => {
   // 3. Current Selected Runtime Object
   const activeRuntime = React.useMemo(() => {
       if (!selectedRuntimeKey) return groupRuntimes[0];
-      const [lang, ver] = selectedRuntimeKey.split(':');
-      return groupRuntimes.find(r => r.language === lang && r.version === ver) || groupRuntimes[0];
+      return groupRuntimes.find(r => r.compiler === selectedRuntimeKey) || groupRuntimes[0];
   }, [groupRuntimes, selectedRuntimeKey]);
 
   // Check if args supported based on raw language name
@@ -366,13 +334,17 @@ const CodeRunner: React.FC = () => {
   useEffect(() => {
     const fetchRuntimes = async () => {
       try {
-        const res = await fetch('https://emkc.org/api/v2/piston/runtimes');
-        if (!res.ok) throw new Error(`Failed to fetch runtimes: ${res.status}`);
+        const res = await fetch('https://wandbox.org/api/list.json');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: Runtime[] = await res.json();
-        setRuntimes(data);
+        // Wandbox calls the compiler ID "name"; normalize it for execution.
+        const normalized = data
+          .filter(r => r.name && r.language)
+          .map(r => ({ ...r, compiler: r.name, version: r.version || 'HEAD' }));
+        setRuntimes(normalized);
       } catch (err: any) {
         console.error('Failed to fetch runtimes:', err);
-        setError(`无法连接到 Piston API (${err.message})，请检查网络连接或稍后再试。`);
+        setError(`无法连接到 Wandbox API (${err.message})，请检查网络连接或稍后再试。`);
       } finally {
         setLoadingRuntimes(false);
       }
@@ -384,11 +356,11 @@ const CodeRunner: React.FC = () => {
   useEffect(() => {
       if (groupRuntimes.length > 0) {
           // If current selection is invalid for this group, pick the first (best) one
-          const currentIsValid = groupRuntimes.some(r => `${r.language}:${r.version}` === selectedRuntimeKey);
+          const currentIsValid = groupRuntimes.some(r => r.compiler === selectedRuntimeKey);
           
           if (!currentIsValid) {
               const best = groupRuntimes[0];
-              setSelectedRuntimeKey(`${best.language}:${best.version}`);
+              setSelectedRuntimeKey(best.compiler);
           }
       } else {
           setSelectedRuntimeKey('');
@@ -466,71 +438,31 @@ const CodeRunner: React.FC = () => {
       try {
           const finalArgs = args.filter(a => a !== '');
 
-          // Helper to determine proper file name/extension based on language
-          const getFileName = (lang: string) => {
-              if (selectedGroup === 'TypeScript') return 'main.ts';
-              if (selectedGroup === 'C++') return 'main.cpp';
-              if (selectedGroup === 'C#') return 'Program.cs';
-              if (selectedGroup === 'Visual Basic') return 'main.vb';
-              if (selectedGroup === 'F#') return 'main.fs';
-
-              const map: Record<string, string> = {
-                  'java': 'Main.java',
-                  'javascript': 'main.js',
-                  'python': 'main.py',
-                  'c': 'main.c',
-                  'go': 'main.go',
-                  'rust': 'main.rs',
-                  'swift': 'main.swift',
-                  'kotlin': 'main.kt',
-                  'php': 'main.php',
-                  'ruby': 'main.rb',
-                  'bash': 'main.sh',
-                  'perl': 'main.pl',
-                  'r': 'main.r',
-                  'lua': 'main.lua',
-                  'scala': 'main.scala',
-                  'dart': 'main.dart',
-                  'elixir': 'main.exs',
-                  'clojure': 'main.clj',
-              };
-              return map[lang] || 'main.code';
-          };
-
-          const res = await fetch('https://emkc.org/api/v2/piston/execute', {
+          const res = await fetch('https://wandbox.org/api/compile.json', {
               method: 'POST',
-              headers: { 
-                  'Content-Type': 'application/json'
-              },
+              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                  language: activeRuntime.language,
-                  version: activeRuntime.version,
-                  args: finalArgs,
-                  files: [
-                      {
-                          name: getFileName(activeRuntime.language),
-                          content: code
-                      }
-                  ]
+                  compiler: activeRuntime.compiler,
+                  code,
+                  'compiler-option-raw': '',
+                  'runtime-option-raw': finalArgs.join(' '),
+                  stdin: ''
               })
           });
 
           if (!res.ok) {
               const statusText = res.statusText || `Status ${res.status}`;
-              throw new Error(`Execution failed: ${statusText}. The Piston API public instance may be down or restricted.`);
+              throw new Error(`Wandbox 执行请求失败：${statusText}`);
           }
           
           const result: ExecutionResult = await res.json();
-          const runOutput = result.run.output || (result.run.stderr ? `Error:\n${result.run.stderr}` : 'No output');
+          const runOutput = result.program_output || result.program_error || result.compiler_error || result.compiler_output || 'No output';
           setOutput(runOutput);
           
           setExecutionMeta({
-              language: result.language,
-              version: result.version,
-              run: {
-                  code: result.run.code,
-                  signal: result.run.signal
-              }
+              language: activeRuntime.language,
+              version: activeRuntime.version,
+              run: { code: Number(result.status), signal: null }
           });
 
       } catch (err: any) {
@@ -564,16 +496,7 @@ const CodeRunner: React.FC = () => {
       setTimeout(() => setOutputCopied(false), 2000);
   };
 
-  const getVersionLabel = (r: Runtime, allRuntimes: Runtime[]) => {
-      const isUnique = allRuntimes.filter(x => x.version === r.version).length === 1;
-      let label = `v${r.version}`;
-      if (r.runtime) {
-          label += ` (${r.runtime})`;
-      } else if (r.language !== selectedGroup.toLowerCase() && r.language !== selectedGroup.toLowerCase().replace('#', 'sharp')) {
-          label += ` (${r.language})`;
-      }
-      return label;
-  };
+  const getVersionLabel = (r: Runtime, _allRuntimes: Runtime[]) => `${r['display-name'] || r.compiler} (${r.version})`;
 
   return (
     <div className="flex flex-col h-full gap-4">
@@ -624,7 +547,7 @@ const CodeRunner: React.FC = () => {
                                     title={isSingleVersion ? t('code.single_ver') : t('code.select_ver')}
                                 >
                                     {groupRuntimes.map(r => (
-                                        <option key={`${r.language}:${r.version}`} value={`${r.language}:${r.version}`}>
+                                        <option key={r.compiler} value={r.compiler}>
                                             {getVersionLabel(r, groupRuntimes)}
                                         </option>
                                     ))}

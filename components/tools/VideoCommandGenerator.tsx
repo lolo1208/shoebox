@@ -209,6 +209,13 @@ const VideoCommandGenerator: React.FC = () => {
       setExternalSubs(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s));
   };
 
+  const updateTrackTitle = (trackType: 'audio' | 'subtitles', id: number, title: string) => {
+      setMetadata(prev => prev ? {
+          ...prev,
+          [trackType]: prev[trackType].map(track => track.id === id ? { ...track, title } : track)
+      } : prev);
+  };
+
   const analyzeFile = async (f: File) => {
     setIsAnalyzing(true);
     setMetadata(null);
@@ -265,7 +272,7 @@ const VideoCommandGenerator: React.FC = () => {
 
         const audioList = audioTracks.map((a: any, index: number) => ({
             id: index,
-            format: a.Format,
+            format: a.Format || 'Unknown',
             language: a.Language || 'und',
             title: a.Title || '',
             details: `${a.Channels}ch ${a.SamplingRate ? (parseInt(a.SamplingRate)/1000).toFixed(1)+'kHz' : ''}`,
@@ -421,8 +428,10 @@ const VideoCommandGenerator: React.FC = () => {
     
     if (audioEncoder !== 'none') {
         const sortedAudio = Array.from<number>(selectedAudioTracks).sort((a, b) => a - b);
-        sortedAudio.forEach(id => {
+        sortedAudio.forEach((id, outputIndex) => {
             cmd += ` -map 0:a:${id}`;
+            const track = metadata?.audio.find(a => a.id === id);
+            if (track?.title) cmd += ` -metadata:s:a:${outputIndex} title="${track.title}"`;
         });
     }
 
@@ -436,6 +445,7 @@ const VideoCommandGenerator: React.FC = () => {
              newWarnings.push(t('vid.warn.bitmap', { id: (id+1), fmt: subTrack.format }));
         } else {
              cmd += ` -map 0:s:${id}`;
+             if (subTrack?.title) cmd += ` -metadata:s:s:${outputSubIndex} title="${subTrack.title}"`;
              outputSubIndex++;
         }
     });
@@ -501,7 +511,7 @@ const VideoCommandGenerator: React.FC = () => {
 
     const ext = container;
     const baseName = file ? file.name.substring(0, file.name.lastIndexOf('.')) : 'output';
-    cmd += ` ${getPath(`${baseName}_compressed.${ext}`)}`;
+    cmd += ` ${getPath(`${baseName}.compressed.${ext}`)}`;
 
     setCommand(cmd);
     setWarnings(newWarnings);
@@ -610,8 +620,15 @@ const VideoCommandGenerator: React.FC = () => {
                                             className="mt-0.5 rounded text-primary-600 focus:ring-primary-500"
                                         />
                                         <div className="text-xs">
-                                            <div className="font-semibold text-gray-700">{a.title || 'Untitled'} ({a.language})</div>
-                                            <div className="text-gray-500">{a.details}</div>
+                                            <input
+                                                type="text"
+                                                value={a.title}
+                                                onChange={(e) => updateTrackTitle('audio', a.id, e.target.value)}
+                                                placeholder={t('vid.track_title')}
+                                                aria-label={`${t('vid.track_title')} ${a.id + 1}`}
+                                                className="w-full mb-1 px-1.5 py-1 text-xs border border-gray-200 rounded bg-white"
+                                            />
+                                            <div className="text-gray-500">{t('vid.a_codec')}: {a.format} · {a.details} ({a.language})</div>
                                         </div>
                                     </label>
                                 ))}
@@ -635,8 +652,15 @@ const VideoCommandGenerator: React.FC = () => {
                                             className="mt-0.5 rounded text-primary-600 focus:ring-primary-500"
                                         />
                                         <div className="text-xs">
-                                            <div className="font-semibold text-gray-700">{s.title || 'Untitled'} ({s.language})</div>
-                                            <div className="text-gray-500">{s.details} {s.isDefault ? '[Default]' : ''}</div>
+                                            <input
+                                                type="text"
+                                                value={s.title}
+                                                onChange={(e) => updateTrackTitle('subtitles', s.id, e.target.value)}
+                                                placeholder={t('vid.track_title')}
+                                                aria-label={`${t('vid.track_title')} ${s.id + 1}`}
+                                                className="w-full mb-1 px-1.5 py-1 text-xs border border-gray-200 rounded bg-white"
+                                            />
+                                            <div className="text-gray-500">{s.language} {s.isDefault ? '[Default]' : ''}</div>
                                         </div>
                                     </label>
                                 ))}

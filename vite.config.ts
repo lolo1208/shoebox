@@ -93,6 +93,10 @@ export default defineConfig({
     }
   },
   base: './',
+  // FFmpeg's worker entry must be served as a real module, not rewritten by dep optimization.
+  optimizeDeps: {
+    exclude: ['@ffmpeg/ffmpeg', '@ffmpeg/util'],
+  },
   build: {
     rollupOptions: {
       output: {

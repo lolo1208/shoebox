@@ -6,6 +6,9 @@ import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useLanguage } from '../../contexts/LanguageContext';
 // Fix: ID3Writer is a default export in the ESM bundle
 import ID3Writer from 'browser-id3-writer';
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+import { fetchFile, toBlobURL } from '@ffmpeg/util';
+import MediaInfoFactory from 'mediainfo.js';
 // @ts-ignore
 import jsmediatags from 'jsmediatags/dist/jsmediatags.min.js';
 
@@ -88,7 +91,7 @@ const fetchItunesJsonp = (term: string): Promise<any> => {
 };
 
 // Helper to read ID3 tags from local MP3 file using jsmediatags
-const readMp3Tags = (file: File): Promise<{ tags: TargetTags; coverBlob: Blob | null; coverUrl: string; coverSize: string }> => {
+const readAudioTags = (file: File): Promise<{ tags: TargetTags; coverBlob: Blob | null; coverUrl: string; coverSize: string }> => {
   return new Promise((resolve) => {
     jsmediatags.read(file, {
       onSuccess: (result) => {
@@ -172,6 +175,10 @@ const MusicTagEditor: React.FC = () => {
   // State
   const [file, setFile] = useState<File | null>(null);
   const [fileBuffer, setFileBuffer] = useState<ArrayBuffer | null>(null);
+  const [bitrate, setBitrate] = useState('320');
+  const [originalBitrate, setOriginalBitrate] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
+  const ffmpegRef = useRef<FFmpeg | null>(null);
   const [keyword, setKeyword] = useState('');
   const [searchResults, setSearchResults] = useState<SongResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -277,12 +284,40 @@ const MusicTagEditor: React.FC = () => {
   };
 
   const handleFile = async (f: File) => {
-      if (!f.name.toLowerCase().endsWith('.mp3')) {
-          showToast('Only MP3 files are supported.', 'error');
+      const supported = /\.(mp3|flac|m4a|aac|ogg|oga|opus|wav|aiff|aif|wma)$/i.test(f.name);
+      if (!supported) {
+          showToast('Unsupported audio format.', 'error');
           return;
       }
       setFile(f);
+      setBitrate('320');
+      setOriginalBitrate(null);
       setFileBuffer(await f.arrayBuffer());
+      try {
+          const mediainfo = await MediaInfoFactory({
+              format: 'object',
+              locateFile: () => 'https://unpkg.com/mediainfo.js@0.2.1/dist/MediaInfoModule.wasm'
+          });
+          const result = await mediainfo.analyzeData(
+              () => f.size,
+              (chunkSize: number, offset: number) => new Promise<Uint8Array>((resolve, reject) => {
+                  const reader = new FileReader();
+                  reader.onload = event => event.target?.result
+                      ? resolve(new Uint8Array(event.target.result as ArrayBuffer))
+                      : reject(new Error('Unable to read audio metadata'));
+                  reader.onerror = reject;
+                  reader.readAsArrayBuffer(f.slice(offset, offset + chunkSize));
+              })
+          );
+          const audioTrack = result?.media?.track?.find((track: any) => track['@type'] === 'Audio');
+          const sourceBitrate = Number(audioTrack?.BitRate || audioTrack?.BitRate_Nominal);
+          if (Number.isFinite(sourceBitrate) && sourceBitrate > 0) {
+              setOriginalBitrate(String(Math.max(1, Math.round(sourceBitrate / 1000))));
+          }
+          mediainfo.close();
+      } catch (error) {
+          console.warn('Unable to detect source audio bitrate; using 320 kbps.', error);
+      }
       
       // Reset target
       setTargetTags(INITIAL_TAGS);
@@ -294,7 +329,7 @@ const MusicTagEditor: React.FC = () => {
       setDetailError(null);
 
       // Read embedded ID3 tags from the MP3 file
-      const { tags, coverBlob, coverUrl, coverSize } = await readMp3Tags(f);
+      const { tags, coverBlob, coverUrl, coverSize } = await readAudioTags(f);
 
       setTargetTags(tags);
       if (coverBlob && coverUrl) {
@@ -543,9 +578,30 @@ const MusicTagEditor: React.FC = () => {
   };
 
   const handleDownload = async () => {
-      if (!fileBuffer) return;
+      if (!fileBuffer || !file) return;
+      setIsExporting(true);
       try {
-          const writer = new (ID3Writer as any)(fileBuffer);
+          const ffmpeg = ffmpegRef.current ?? new FFmpeg();
+          ffmpegRef.current = ffmpeg;
+          if (!ffmpeg.loaded) {
+              const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
+              await ffmpeg.load({
+                  coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+                  wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+              });
+          }
+          const inputName = `input-${Date.now()}.${file.name.split('.').pop()?.toLowerCase() || 'audio'}`;
+          const outputName = `output-${Date.now()}.mp3`;
+          await ffmpeg.writeFile(inputName, await fetchFile(file));
+          const exportBitrate = bitrate.startsWith('original:')
+              ? String(Math.min(320, Number(bitrate.slice('original:'.length))))
+              : bitrate;
+          await ffmpeg.exec(['-i', inputName, '-vn', '-codec:a', 'libmp3lame', '-b:a', `${exportBitrate}k`, outputName]);
+          const encoded = await ffmpeg.readFile(outputName);
+          await ffmpeg.deleteFile(inputName);
+          await ffmpeg.deleteFile(outputName);
+          const mp3Buffer = new Uint8Array(encoded as Uint8Array).buffer;
+          const writer = new (ID3Writer as any)(mp3Buffer);
           const setFrame = (frame: string, val: any, isArr = false) => {
               if (val === null || val === undefined) return;
               const v = String(val).trim(); 
@@ -578,14 +634,16 @@ const MusicTagEditor: React.FC = () => {
           const url = URL.createObjectURL(taggedBlob);
           const link = document.createElement('a');
           link.href = url;
-          link.download = `[Tagged] ${file?.name}`;
+          link.download = `[Tagged] ${file.name.replace(/\.[^.]+$/, '')}.mp3`; 
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
           // showToast(t('mt.success_write'), 'success'); // Successful write toast optional
       } catch (e) {
           console.error(e);
-          showToast('Failed to write tags to file.', 'error');
+          showToast('Failed to export MP3. Please check the format and try again.', 'error');
+      } finally {
+          setIsExporting(false);
       }
   };
 
@@ -632,45 +690,23 @@ const MusicTagEditor: React.FC = () => {
             </div>
         )}
 
-        {/* Top Bar: Settings & File */}
-        <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
-            <div className="flex-1 w-full flex items-center gap-2">
-                <div className="relative flex-1">
-                    <input 
-                        type="text" 
-                        value={backendUrl}
-                        onChange={(e) => setBackendUrl(e.target.value)}
-                        placeholder={t('mt.api_url')}
-                        className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
-                    />
-                    <LinkIcon className="absolute left-3 top-2.5 text-gray-400" size={16} />
-                </div>
-            </div>
-
-            <div 
-                className={`
-                    flex-1 w-full border-2 border-dashed rounded-xl h-12 flex items-center justify-center cursor-pointer transition-all gap-2
-                    ${isDragging ? 'border-primary-500 bg-primary-50' : 'border-gray-300 hover:border-primary-400 hover:bg-gray-50'}
-                    ${file ? 'bg-green-50 border-green-300' : ''}
-                `}
-                onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-                onDragLeave={() => setIsDragging(false)}
-                onDrop={handleDrop}
-                onClick={() => document.getElementById('mt-upload')?.click()}
-            >
-                <input id="mt-upload" type="file" accept=".mp3" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
-                <Upload size={18} className={file ? "text-green-600" : "text-gray-400"} />
-                <span className={`text-sm font-medium ${file ? "text-green-700" : "text-gray-500"}`}>
-                    {file ? file.name : t('mt.upload_desc')}
-                </span>
-            </div>
-        </div>
-
         {/* Main Grid - Removed Fixed height to allow page-level scroll */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[600px]">
             
             {/* Left: Search (Internal scroll for list ONLY) */}
-            <div className="lg:col-span-3 bg-white border border-gray-200 rounded-xl flex flex-col shadow-sm h-full max-h-[800px]">
+            <div className="lg:col-span-3 lg:row-span-2 bg-white border border-gray-200 rounded-xl flex flex-col shadow-sm h-full max-h-[800px]">
+                <div className="p-3 border-b border-gray-100">
+                    <div className="relative">
+                        <input
+                            type="text"
+                            value={backendUrl}
+                            onChange={(e) => setBackendUrl(e.target.value)}
+                            placeholder={t('mt.api_url')}
+                            className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                        />
+                        <LinkIcon className="absolute left-3 top-2.5 text-gray-400" size={16} />
+                    </div>
+                </div>
                 <div className="p-4 border-b border-gray-100 bg-gray-50 space-y-3 shrink-0">
                     <div className="relative">
                         <input 
@@ -753,6 +789,21 @@ const MusicTagEditor: React.FC = () => {
                         <div className="text-center text-gray-400 py-10 text-sm">{t('mt.no_results')}</div>
                     )}
                 </div>
+            </div>
+
+            {/* Large drop zone above source and target cards */}
+            <div
+                className={`lg:col-span-9 w-full border-2 border-dashed rounded-xl min-h-40 px-6 py-8 flex flex-col items-center justify-center cursor-pointer transition-all gap-3 text-center ${isDragging ? 'border-primary-500 bg-primary-50 scale-[1.01]' : 'border-gray-300 hover:border-primary-400 hover:bg-gray-50'} ${file ? 'bg-green-50 border-green-300' : ''}`}
+                onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={handleDrop}
+                onClick={() => document.getElementById('mt-upload')?.click()}
+            >
+                <input id="mt-upload" type="file" accept=".mp3,.flac,.m4a,.aac,.ogg,.oga,.opus,.wav,.aiff,.aif,.wma" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
+                <Upload size={30} className={file ? "text-green-600" : "text-gray-400"} />
+                <span className={`text-sm font-medium break-all ${file ? "text-green-700" : "text-gray-500"}`}>
+                    {file ? file.name : t('mt.upload_desc')}
+                </span>
             </div>
 
             {/* Middle: Source Details - No Internal Scroll */}
@@ -987,14 +1038,24 @@ const MusicTagEditor: React.FC = () => {
                         />
                     </div>
                 </div>
-                <div className="p-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+                <div className="p-4 border-t border-gray-200 bg-gray-50 rounded-b-xl space-y-3">
+                    <label className="block text-xs font-medium text-gray-600">
+                        导出 MP3 码率
+                        <select value={bitrate} onChange={e => setBitrate(e.target.value)} className="mt-1 w-full p-2 border border-gray-300 rounded-lg bg-white text-sm">
+                            {originalBitrate && <option value={`original:${originalBitrate}`}>{originalBitrate} kbps (原始)</option>}
+                            <option value="128">128 kbps</option>
+                            <option value="192">192 kbps</option>
+                            <option value="256">256 kbps</option>
+                            <option value="320">320 kbps</option>
+                        </select>
+                    </label>
                     <button 
                         onClick={handleDownload}
-                        disabled={!file}
+                        disabled={!file || isExporting}
                         className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold shadow-md shadow-green-100 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <Download size={20} />
-                        {t('mt.write_btn')}
+                        {isExporting ? 'Converting and exporting…' : `${t('mt.write_btn')} · MP3`}
                     </button>
                 </div>
             </div>

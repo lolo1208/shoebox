@@ -41,7 +41,7 @@ A comprehensive, privacy-first developer toolbox designed with a clean UI. It fe
 *   **JSON Formatter**: More than just a beautifier. It validates, minifies, sorts keys alphabetically, and features a "Smart Repair" function to fix common JSON syntax errors.
 *   **Texture Packer**: A game development essential. Packs multiple sprites into a single atlas using the **MaxRects** algorithm. Exports Cocos Creator compatible `.plist` and PNG files.
 *   **Bitmap Font Generator**: Convert individual character images into a professional Bitmap Font (.fnt). Supports ASCII mapping, automatic inference, and exports in Text, XML, or JSON formats.
-*   **Code Runner**: Execute snippets in 50+ programming languages online via the Piston API. Features syntax highlighting and support for command-line arguments.
+*   **Code Runner**: Execute code snippets online using the Wandbox API, with syntax highlighting and compiler selection.
 *   **Easing Functions**: Visualizes common CSS/JS easing curves (In, Out, InOut). Includes interactive hover animations to preview the speed changes.
 
 #### 🌐 Network

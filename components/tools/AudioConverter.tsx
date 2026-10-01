@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { FileAudio, Download, Play, Pause, Volume2, Music, RefreshCw, FileVideo, ChevronRight, ChevronLeft, Settings2, Info, Check, Timer, Clock } from 'lucide-react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { toBlobURL } from '@ffmpeg/util';
+import MediaInfoFactory from 'mediainfo.js';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 const AudioConverter: React.FC = () => {
@@ -42,6 +43,7 @@ const AudioConverter: React.FC = () => {
   // Export Settings
   const [targetFormat, setTargetFormat] = useState('mp3');
   const [bitrate, setBitrate] = useState('192'); // kbps for lossy
+  const [originalBitrate, setOriginalBitrate] = useState<string | null>(null);
   
   // Effects
   const [fadeIn, setFadeIn] = useState(false);
@@ -154,6 +156,31 @@ const AudioConverter: React.FC = () => {
 
   const loadFile = async (f: File) => {
     setFile(f);
+    setOriginalBitrate(null);
+    setBitrate('192');
+    try {
+        const mediainfo = await MediaInfoFactory({
+            format: 'object',
+            locateFile: () => 'https://unpkg.com/mediainfo.js@0.2.1/dist/MediaInfoModule.wasm'
+        });
+        const result = await mediainfo.analyzeData(
+            () => f.size,
+            (chunkSize: number, offset: number) => new Promise<Uint8Array>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = event => event.target?.result
+                    ? resolve(new Uint8Array(event.target.result as ArrayBuffer))
+                    : reject(new Error('Unable to read audio metadata'));
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(f.slice(offset, offset + chunkSize));
+            })
+        );
+        const track = result?.media?.track?.find((item: any) => item['@type'] === 'Audio');
+        const rate = Number(track?.BitRate || track?.BitRate_Nominal);
+        if (Number.isFinite(rate) && rate > 0) setOriginalBitrate(String(Math.round(rate / 1000)));
+        mediainfo.close();
+    } catch (error) {
+        console.warn('Unable to detect source audio bitrate.', error);
+    }
     stopPlayback();
     setStatusMessage(t('audio.parsing'));
     setIsProcessing(true);
@@ -585,10 +612,11 @@ const AudioConverter: React.FC = () => {
 
           const args = ['-i', inputName, '-filter:a', filters.join(',')];
 
+          const selectedBitrate = bitrate.startsWith('original:') ? Math.min(320, Number(bitrate.slice(9))) : Number(bitrate);
           if (targetFormat === 'mp3') {
-              args.push('-c:a', 'libmp3lame', '-b:a', `${bitrate}k`);
+              args.push('-c:a', 'libmp3lame', '-b:a', `${selectedBitrate}k`);
           } else if (targetFormat === 'm4a') {
-              args.push('-c:a', 'aac', '-b:a', `${bitrate}k`);
+              args.push('-c:a', 'aac', '-b:a', `${selectedBitrate}k`);
           } else if (targetFormat === 'ogg') {
               args.push('-c:a', 'libvorbis', '-q:a', '4');
           } else if (targetFormat === 'wav') {
@@ -605,8 +633,8 @@ const AudioConverter: React.FC = () => {
           
           const link = document.createElement('a');
           link.href = url;
-          const origName = file.name.split('.')[0];
-          link.download = `${origName}_edit.${targetFormat}`;
+          const origName = file.name.replace(/\.[^.]+$/, '');
+          link.download = `[Edited] ${origName}.${targetFormat}`;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
@@ -640,7 +668,10 @@ const AudioConverter: React.FC = () => {
       const duration = trimEnd - trimStart;
       if (duration <= 0) return '0 KB';
       
-      let kbps = parseInt(bitrate);
+      let kbps = bitrate.startsWith('original:')
+          ? Math.min(320, Number(bitrate.slice(9)))
+          : Number(bitrate);
+      if (!Number.isFinite(kbps) || kbps <= 0) kbps = 192;
       if (targetFormat === 'wav') {
           kbps = 1411; 
       }
@@ -897,9 +928,10 @@ const AudioConverter: React.FC = () => {
                                     onChange={(e) => setBitrate(e.target.value)}
                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block p-2.5 min-w-[120px]"
                                   >
-                                      <option value="128">128 kbps ({t('audio.br_std')})</option>
-                                      <option value="192">192 kbps ({t('audio.br_high')})</option>
-                                      <option value="320">320 kbps ({t('audio.br_ultra')})</option>
+                                      {originalBitrate && <option value={`original:${originalBitrate}`}>{originalBitrate} kbps (原始)</option>}
+                                      <option value="128">128 kbps</option>
+                                      <option value="192">192 kbps</option>
+                                      <option value="320">320 kbps</option>
                                   </select>
                               </div>
                           )}

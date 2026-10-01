@@ -155,6 +155,10 @@ export const zh = {
   'qr.bg_color': "背景色",
   'qr.download': "下载图片",
   'qr.empty': "输入内容以生成二维码",
+  'qr.logo': "中间添加头像",
+  'qr.logo_upload': "选择图片",
+  'qr.logo_remove': "移除图片",
+  'qr.logo_size': "头像大小",
 
   // Tool: Key Gen
   'key.type': "密钥类型",
@@ -319,6 +323,7 @@ export const zh = {
   'vid.container': "封装格式",
   'vid.v_codec': "视频编码",
   'vid.a_codec': "音频编码",
+  'vid.track_title': "流标题",
   'vid.crf': "画质系数 (CRF)",
   'vid.preset': "编码速度",
   'vid.scale': "分辨率缩放",
@@ -358,7 +363,7 @@ export const zh = {
 
   // Tool: Music Tag Editor
   'mt.upload_title': "上传 MP3",
-  'mt.upload_desc': "点击或拖拽上传 MP3",
+  'mt.upload_desc': "点击或拖拽上传音频（MP3、FLAC、M4A 等）",
   'mt.api_url': "QQ音乐、网易云 API 地址",
   'mt.api_tip': "搜索与歌词获取需要 (例如 http://127.0.0.1:10801)",
   'mt.search': "搜索",
