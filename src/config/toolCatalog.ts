@@ -63,7 +63,7 @@ const JsonFormatter = lazyTool(() => import('@/features/tools/text/JsonFormatter
 const TimestampConverter = lazyTool(() => import('@/features/tools/text/TimestampConverter'));
 const TextDiff = lazyTool(() => import('@/features/tools/text/TextDiff'));
 const HttpStatusCode = lazyTool(() => import('@/features/tools/text/HttpStatusCode'));
-const ImageConverter = lazyTool(() => import('@/features/tools/image/ImageConverter'));
+const ImageConverter = lazyTool(() => import('@/features/tools/image/image-converter'));
 const ImageResizer = lazyTool(() => import('@/features/tools/image/ImageResizer'));
 const ImageCropper = lazyTool(() => import('@/features/tools/image/ImageCropper'));
 const QrCodeGenerator = lazyTool(() => import('@/features/tools/image/QrCodeGenerator'));

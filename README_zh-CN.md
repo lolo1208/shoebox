@@ -23,7 +23,7 @@
 *   **HTTP 状态码**: 收录 1xx–5xx 标准状态码，支持分类筛选与中英文搜索。
 
 #### 🖼️ 图像处理
-*   **图片格式转换**: JPG/PNG 等格式互转，可调质量与颜色深度以压缩体积。
+*   **图片转换与 PDF**: 批量转换 JPG/PNG/WebP（可调质量、颜色深度，多张打包 ZIP），或将多张图片排版导出为多页 PDF（纸张、方向、页边距、适配方式与无损/JPEG 压缩）。
 *   **图片尺寸调整**: 像素/百分比缩放，支持锁定纵横比。
 *   **图片裁剪**: 可视化自由裁剪，精确坐标与快捷对齐。
 *   **图片调色板**: 提取图片主色调生成调色板，支持图片取色、和谐配色，并可导出 CSS / Tailwind / JSON / GIMP / SVG / PNG。
@@ -89,8 +89,12 @@ src/
 
 ### 环境要求
 
-- [Node.js](https://nodejs.org/) (推荐 v18 以上)
-- [npm](https://www.npmjs.com/) 或 yarn
+- [Node.js](https://nodejs.org/) 20.19+ 或 22.12+（Vite 8 的要求）
+- [pnpm](https://pnpm.io/)（仓库提供 `pnpm-lock.yaml`）
+
+### 隐私与网络访问
+
+大部分文件处理在浏览器本地完成。网络工具和代码运行器会向外部服务发送请求或提交的代码，音乐元数据查询也会访问第三方 API；部分媒体工具还需从 CDN 下载 WebAssembly 资源。提交敏感数据前请确认请求目标，不应假设整个应用均可离线使用。
 
 ### 安装步骤
 
@@ -102,7 +106,7 @@ src/
 
 2.  **安装依赖**
     ```bash
-    npm install
+    pnpm install --frozen-lockfile
     ```
 
 3.  **配置 AI 模型 (重要)**
@@ -116,9 +120,18 @@ src/
     
 4.  **启动开发服务器**
     ```bash
-    npm run dev
+    pnpm dev
     ```
-    打开 `http://localhost:5173` 即可访问。
+    打开 Vite 输出的地址（通常为 `http://localhost:5173`）。
+
+### 构建与预览
+
+```bash
+pnpm build
+pnpm preview
+```
+
+构建产物位于 `dist/`，可部署到静态文件服务器。若需要智能抠图，还需部署上述模型资源；这些文件不纳入 Git。项目也定义了 `pnpm lint`，运行前需提供 ESLint 配置。
 
 ## 🛠️ 技术栈
 
@@ -129,9 +142,10 @@ src/
     - `ffmpeg.wasm`, `mediainfo.js` & `browser-id3-writer` (多媒体处理)
     - `@imgly/background-removal` (AI 视觉)
     - `html2canvas` & `upng-js` (图像处理)
+    - 内置 PDF 写入器（图片转 PDF，无第三方依赖）
     - `lunar-javascript` (公农历转换)
     - `js-yaml` (YAML 解析与生成)
 
 ## 📄 开源协议
 
-本项目采用 GNU General Public License v3.0 协议开源。详情请参阅 [LICENSE](./LICENSE) 文件。
+原项目文档注明采用 GPL-3.0，但仓库目前未包含许可证文件；具体许可信息请向项目所有者确认。

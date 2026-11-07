@@ -38,6 +38,7 @@ import {
   type CensorRegion as Region,
   type CensorDrag as Drag,
 } from '@/lib/image/censor';
+import { CHECKERBOARD_BACKGROUND } from '@/styles/checkerboard';
 
 const HANDLES: { h: Handle; cls: string }[] = [
   { h: 'nw', cls: '-left-1.5 -top-1.5 cursor-nwse-resize' },
@@ -50,8 +51,6 @@ const HANDLES: { h: Handle; cls: string }[] = [
   { h: 'w', cls: '-left-1.5 top-1/2 -translate-y-1/2 cursor-ew-resize' },
 ];
 
-const CHECKERBOARD =
-  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyMCcgaGVpZ2h0PScyMCcgZmlsbC1vcGFjaXR5PScwLjEnPjxyZWN0IHg9JzEwJyB3aWR0aD0nMTAnIGhlaWdodD0nMTAnIC8+PHJlY3QgeT0nMTAnIHdpZHRoPScxMCcgaGVpZ2h0PScxMCcgLz48L3N2Zz4=";
 
 const PixelateCensor: React.FC = () => {
   const { t } = useLanguage();
@@ -1139,7 +1138,7 @@ const PixelateCensor: React.FC = () => {
 
           <div
             className="flex-1 relative overflow-auto flex items-center justify-center p-6"
-            style={{ backgroundImage: `url("${CHECKERBOARD}")` }}
+            style={{ backgroundImage: CHECKERBOARD_BACKGROUND }}
           >
             {imgInfo ? (
               <div

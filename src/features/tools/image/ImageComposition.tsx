@@ -5,6 +5,7 @@ import { Upload, Download, RefreshCw, X, Plus, RotateCw, Trash2, ArrowUp, ArrowD
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Collapse from '@/components/ui/Collapse';
+import { CHECKERBOARD_BACKGROUND } from '@/styles/checkerboard';
 
 interface CanvasElement {
   id: string;
@@ -569,7 +570,6 @@ const ImageComposition: React.FC = () => {
     }
   };
 
-  const checkerboardPattern = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyMCcgaGVpZ2h0PScyMCcgZmlsbC1vcGFjaXR5PScwLjEnPjxyZWN0IHg9JzEwJyB3aWR0aD0nMTAnIGhlaWdodD0nMTAnIC8+PHJlY3QgeT0nMTAnIHdpZHRoPScxMCcgaGVpZ2h0PScxMCcgLz48L3N2Zz4=";
 
   return (
     <div className="flex flex-col lg:flex-row gap-8 h-full">
@@ -895,7 +895,7 @@ const ImageComposition: React.FC = () => {
       {/* Main Canvas Area */}
       <div className="flex-1 flex flex-col min-w-0 bg-gray-100 border border-gray-200 rounded-xl overflow-hidden">
            <div ref={canvasAreaRef} className="flex-1 overflow-auto relative flex items-center justify-center p-8 bg-gray-100"
-                style={{ backgroundImage: `url("${checkerboardPattern}")` }}
+                style={{ backgroundImage: CHECKERBOARD_BACKGROUND }}
                 onMouseDown={() => setSelectedId(null)}
            >
                {/* Canvas (outer box tracks zoomed size for correct scrolling) */}

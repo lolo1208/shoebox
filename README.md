@@ -23,7 +23,7 @@ Categories and tools are ordered by expected usage frequency.
 *   **HTTP Status Codes**: The full 1xx–5xx reference with filtering and search.
 
 #### 🖼️ Image
-*   **Image Converter**: Convert between JPG/PNG and tune quality/color depth.
+*   **Image Converter & PDF**: Batch convert images to JPG/PNG/WebP (quality, color depth, ZIP for batches), or lay multiple images out as a multi-page PDF with page size, orientation, margins, fit mode and lossless/JPEG compression.
 *   **Image Resizer**: Pixel/percentage scaling with aspect-ratio locking.
 *   **Image Cropper**: Visual free cropping with precise coordinates.
 *   **Color Palette**: Extract dominant colors from an image, sample any pixel, generate harmony schemes and export to CSS / Tailwind / JSON / GIMP / SVG / PNG.
@@ -89,8 +89,12 @@ To add a tool, create it under `src/features/tools/<domain>/` (complex tools can
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (Version 18+ recommended)
-- [npm](https://www.npmjs.com/) or yarn
+- [Node.js](https://nodejs.org/) 20.19+ or 22.12+ (required by Vite 8)
+- [pnpm](https://pnpm.io/) (the repository includes `pnpm-lock.yaml`)
+
+### Privacy and network access
+
+Most file processing runs locally in your browser. Network tools and the code runner send requests or submitted code to external services; music metadata lookup also contacts third-party APIs. Some media tools download WebAssembly resources from a CDN. Review the destination before submitting sensitive data, and do not assume the application works fully offline.
 
 ### Installation
 
@@ -102,7 +106,7 @@ To add a tool, create it under `src/features/tools/<domain>/` (complex tools can
 
 2.  **Install Dependencies**
     ```bash
-    npm install
+    pnpm install --frozen-lockfile
     ```
 
 3.  **Setup AI Model (Important)**
@@ -127,9 +131,18 @@ To add a tool, create it under `src/features/tools/<domain>/` (complex tools can
 
 4.  **Run Development Server**
     ```bash
-    npm run dev
+    pnpm dev
     ```
-    Open `http://localhost:5173` to view the app.
+    Open the URL printed by Vite (normally `http://localhost:5173`).
+
+### Build and preview
+
+```bash
+pnpm build
+pnpm preview
+```
+
+The production build is written to `dist/`. Deploy its contents with a static web server. If using background removal, include the model assets described above; they are not tracked in Git. The project also defines `pnpm lint`, which requires an ESLint configuration to be provided.
 
 ## 🛠️ Technologies
 
@@ -141,9 +154,10 @@ To add a tool, create it under `src/features/tools/<domain>/` (complex tools can
     - `ffmpeg.wasm`, `mediainfo.js` & `browser-id3-writer` (Media processing)
     - `@imgly/background-removal` (AI Vision)
     - `html2canvas` & `upng-js` (Image processing)
+    - Built-in PDF writer (images → PDF, no third-party dependency)
     - `lunar-javascript` (Calendar conversion)
     - `js-yaml` (YAML parsing and serialisation)
 
 ## 📄 License
 
-This project is licensed under the GNU General Public License v3.0. See the [LICENSE](./LICENSE) file for details.
+The existing project documentation identifies this project as GPL-3.0. A license file is not currently included in the repository; consult the project owner for licensing details.

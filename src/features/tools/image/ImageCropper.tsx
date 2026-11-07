@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Crop, Upload, Download, RefreshCw, X, FileImage, ArrowLeftToLine, ArrowRightToLine, ArrowUpToLine, ArrowDownToLine, FoldHorizontal, FoldVertical, Crosshair } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { CHECKERBOARD_BACKGROUND } from '@/styles/checkerboard';
 
 const ImageCropper: React.FC = () => {
   const { t } = useLanguage();
@@ -240,7 +241,6 @@ const ImageCropper: React.FC = () => {
     }
   };
 
-  const checkerboardPattern = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyMCcgaGVpZ2h0PScyMCcgZmlsbC1vcGFjaXR5PScwLjEnPjxyZWN0IHg9JzEwJyB3aWR0aD0nMTAnIGhlaWdodD0nMTAnIC8+PHJlY3QgeT0nMTAnIHdpZHRoPScxMCcgaGVpZ2h0PScxMCcgLz48L3N2Zz4=";
 
   const ButtonStyle = "p-2 bg-gray-100 rounded hover:bg-gray-200 text-gray-600 transition-colors";
 
@@ -373,7 +373,7 @@ const ImageCropper: React.FC = () => {
 
                <div 
                    className="flex-1 relative overflow-auto flex items-center justify-center p-8 select-none"
-                   style={{ backgroundImage: `url("${checkerboardPattern}")` }}
+                   style={{ backgroundImage: CHECKERBOARD_BACKGROUND }}
                    ref={containerRef}
                >
                    {imgSrc ? (

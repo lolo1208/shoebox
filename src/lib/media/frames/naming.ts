@@ -1,17 +1,18 @@
 /**
  * 抽帧结果的文件命名：模板渲染、时间码格式化与非法字符清洗。
+ * 通用规则见 @/lib/fileName。
  */
 
+import { sanitizeFileName as sanitizeFileNameBase } from '@/lib/fileName';
 import type { FrameFormat, NamingOptions } from './types';
+
+export { stripExtension } from '@/lib/fileName';
 
 /** 默认模板：{name}_{index} */
 export const DEFAULT_FRAME_TEMPLATE = '{name}_{index}';
 
 /** 模板支持的占位符，供 UI 展示提示 */
 export const FRAME_NAME_TOKENS = ['{name}', '{index}', '{time}', '{sec}', '{w}', '{h}'] as const;
-
-/** Windows / POSIX 均不允许的文件名字符 */
-const ILLEGAL_CHARS = /[\\/:*?"<>|\u0000-\u001f]/g;
 
 export const FRAME_FORMAT_EXT: Record<FrameFormat, string> = {
   png: 'png',
@@ -27,8 +28,7 @@ export const FRAME_FORMAT_MIME: Record<FrameFormat, string> = {
 
 /** 清洗文件名片段（保留扩展名分隔符由调用方处理） */
 export function sanitizeFileName(input: string): string {
-  const cleaned = input.replace(ILLEGAL_CHARS, '_').replace(/\s+/g, ' ').trim();
-  return cleaned.length > 0 ? cleaned.slice(0, 120) : 'frame';
+  return sanitizeFileNameBase(input, 'frame');
 }
 
 /** 秒 → 文件安全的时间码 HH-MM-SS-mmm */
@@ -46,12 +46,6 @@ export function formatTimecode(seconds: number): string {
 /** 秒 → 便于阅读的时间码 HH:MM:SS.mmm */
 export function formatClock(seconds: number): string {
   return formatTimecode(seconds).replace(/-(\d{3})$/, '.$1').replace(/-/g, ':');
-}
-
-/** 去掉扩展名的文件名主部 */
-export function stripExtension(fileName: string): string {
-  const dot = fileName.lastIndexOf('.');
-  return dot > 0 ? fileName.slice(0, dot) : fileName;
 }
 
 export interface FrameNameContext {

@@ -1,27 +1,15 @@
 /**
- * 视频转 GIF 的文件命名：扩展名剥离、非法字符清洗与下载文件名生成。
+ * 视频转 GIF 的文件命名：非法字符清洗与下载文件名生成。
+ * 通用规则见 @/lib/fileName。
  */
 
-/** Windows / POSIX 均不允许的文件名字符 */
-const ILLEGAL_CHARS = /[\\/:*?"<>|\u0000-\u001f]/g;
+import { sanitizeFileName } from '@/lib/fileName';
 
-/** 清洗后的文件名主部最大长度 */
-const MAX_STEM_LENGTH = 120;
+export { stripExtension } from '@/lib/fileName';
 
-/** 去掉扩展名的文件名主部 */
-export function stripExtension(fileName: string): string {
-  const dot = fileName.lastIndexOf('.');
-  return dot > 0 ? fileName.slice(0, dot) : fileName;
-}
-
-/** 清洗文件名主部：替换非法字符、压缩空白、去掉结尾的点与空格并截断 */
-export function sanitizeName(input: string, fallback = 'animation'): string {
-  const cleaned = input
-    .replace(ILLEGAL_CHARS, '_')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .replace(/[. ]+$/, '');
-  return cleaned.length > 0 ? cleaned.slice(0, MAX_STEM_LENGTH) : fallback;
+/** 清洗文件名主部，空值时回退到 animation */
+export function sanitizeName(input: string): string {
+  return sanitizeFileName(input, 'animation');
 }
 
 /**

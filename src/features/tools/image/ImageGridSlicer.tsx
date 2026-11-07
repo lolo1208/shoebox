@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Grid, Upload, Download, RefreshCw, X, FileImage, ArrowRight } from 'lucide-react';
 import JSZip from 'jszip';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { CHECKERBOARD_BACKGROUND } from '@/styles/checkerboard';
 
 const ImageGridSlicer: React.FC = () => {
   const { t } = useLanguage();
@@ -123,7 +124,6 @@ const ImageGridSlicer: React.FC = () => {
     }
   };
 
-  const checkerboardPattern = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyMCcgaGVpZ2h0PScyMCcgZmlsbC1vcGFjaXR5PScwLjEnPjxyZWN0IHg9JzEwJyB3aWR0aD0nMTAnIGhlaWdodD0nMTAnIC8+PHJlY3QgeT0nMTAnIHdpZHRoPScxMCcgaGVpZ2h0PScxMCcgLz48L3N2Zz4=";
 
   return (
     <div className="flex flex-col lg:flex-row gap-8 h-full">
@@ -219,7 +219,7 @@ const ImageGridSlicer: React.FC = () => {
             
             <div 
                 className="flex-1 flex items-center justify-center p-6 overflow-auto"
-                style={{ backgroundImage: `url("${checkerboardPattern}")` }}
+                style={{ backgroundImage: CHECKERBOARD_BACKGROUND }}
                 onWheel={handleWheel}
             >
                 {previewUrl ? (

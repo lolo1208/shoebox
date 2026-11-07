@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ImageMinus, Download, RefreshCw, X, Layers, Wand2, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { removeBackground, Config } from '@imgly/background-removal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { CHECKERBOARD_BACKGROUND } from '@/styles/checkerboard';
 
 const BackgroundRemover: React.FC = () => {
   const { t } = useLanguage();
@@ -114,7 +115,6 @@ const BackgroundRemover: React.FC = () => {
     document.body.removeChild(link);
   };
 
-  const checkerboardPattern = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyMCcgaGVpZ2h0PScyMCcgZmlsbC1vcGFjaXR5PScwLjEnPjxyZWN0IHg9JzEwJyB3aWR0aD0nMTAnIGhlaWdodD0nMTAnIC8+PHJlY3QgeT0nMTAnIHdpZHRoPScxMCcgaGVpZ2h0PScxMCcgLz48L3N2Zz4=";
 
   const getBgStyle = () => {
       switch (bgColor) {
@@ -123,7 +123,7 @@ const BackgroundRemover: React.FC = () => {
           case 'transparent': return { backgroundColor: 'transparent' };
           case 'checker': 
           default:
-              return { backgroundImage: `url("${checkerboardPattern}")` };
+              return { backgroundImage: CHECKERBOARD_BACKGROUND };
       }
   };
 
@@ -270,7 +270,7 @@ const BackgroundRemover: React.FC = () => {
                             
                             {/* Bg Toggles */}
                             <div className="flex gap-2 px-1">
-                                <button onClick={() => setBgColor('checker')} className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all ${bgColor === 'checker' ? 'border-primary-500 ring-2 ring-primary-100 scale-110' : 'border-gray-200 hover:border-gray-300'}`} style={{ backgroundImage: `url("${checkerboardPattern}")` }} title="Transparent"></button>
+                                <button onClick={() => setBgColor('checker')} className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all ${bgColor === 'checker' ? 'border-primary-500 ring-2 ring-primary-100 scale-110' : 'border-gray-200 hover:border-gray-300'}`} style={{ backgroundImage: CHECKERBOARD_BACKGROUND }} title="Transparent"></button>
                                 <button onClick={() => setBgColor('white')} className={`w-8 h-8 rounded-full border bg-white transition-all ${bgColor === 'white' ? 'border-primary-500 ring-2 ring-primary-100 scale-110' : 'border-gray-200 hover:border-gray-300'}`} title="White"></button>
                                 <button onClick={() => setBgColor('black')} className={`w-8 h-8 rounded-full border bg-slate-900 transition-all ${bgColor === 'black' ? 'border-primary-500 ring-2 ring-primary-100 scale-110' : 'border-gray-200 hover:border-gray-300'}`} title="Black"></button>
                             </div>

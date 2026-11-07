@@ -45,15 +45,14 @@ bun.lock
 bun.lockb
 yarn.lock
 package-lock.json
-yarn-error.log
 
-# Env files
+# Environment files; allow committed examples
 .env
-.env.local
-.env.*.local
-.env.test
+.env.*
+!.env.example
+!.env.*.example
 
-# Local AI models (downloaded at runtime)
+# Local AI model assets (installed separately)
 public/models/
 
 # Editors

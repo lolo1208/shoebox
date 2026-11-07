@@ -95,3 +95,36 @@ export function Segmented<T extends string>({ value, options, onChange }: Segmen
     </div>
   );
 }
+
+interface ChoiceChipsProps<T extends string | number> {
+  value: T;
+  options: { value: T; label: string }[];
+  onChange: (value: T) => void;
+  /** 每行显示的选项数，默认 4 */
+  columns?: number;
+}
+
+/** 选项按钮组：比分段控件容纳更多选项，适合分辨率、质量档位等枚举 */
+export function ChoiceChips<T extends string | number>({ value, options, onChange, columns = 4 }: ChoiceChipsProps<T>) {
+  return (
+    <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
+      {options.map(option => {
+        const active = option.value === value;
+        return (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => onChange(option.value)}
+            className={`rounded-md border px-2 py-1.5 text-xs font-medium tabular-nums transition-colors ${
+              active
+                ? 'border-primary-500 bg-primary-50 text-primary-700'
+                : 'border-gray-200 text-gray-600 hover:border-primary-300 hover:text-primary-600'
+            }`}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}

@@ -17,6 +17,7 @@ import JSZip from 'jszip';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useClipboard } from '@/hooks/useClipboard';
 import { downloadBlob } from '@/lib/download';
+import { CHECKERBOARD_BACKGROUND } from '@/styles/checkerboard';
 
 type FitMode = 'contain' | 'cover';
 type Platform = 'web' | 'ios' | 'android';
@@ -72,8 +73,6 @@ const ANDROID_DENSITY: Record<number, string> = {
 
 // Only the classic small sizes go into the .ico; large PNGs are linked separately.
 const ICO_SIZES = [16, 32, 48, 64];
-const CHECKERBOARD =
-  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyMCcgaGVpZ2h0PScyMCcgZmlsbC1vcGFjaXR5PScwLjEnPjxyZWN0IHg9JzEwJyB3aWR0aD0nMTAnIGhlaWdodD0nMTAnIC8+PHJlY3QgeT0nMTAnIHdpZHRoPScxMCcgaGVpZ2h0PScxMCcgLz48L3N2Zz4=";
 
 // One rendered image can be written under several platform-specific names.
 const outputNames = (platform: Platform, size: number): string[] => {
@@ -1025,7 +1024,7 @@ const FaviconGenerator: React.FC = () => {
                             >
                               <div
                                 className="h-24 w-full flex items-center justify-center rounded-lg"
-                                style={{ backgroundImage: `url("${CHECKERBOARD}")` }}
+                                style={{ backgroundImage: CHECKERBOARD_BACKGROUND }}
                               >
                                 {preview && (
                                   <img

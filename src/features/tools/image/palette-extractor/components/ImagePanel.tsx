@@ -6,9 +6,8 @@ import { pickImagePixel, rgbToHex } from '@/lib/image/palette';
 import type { RGB } from '@/lib/image/palette';
 import { formatBytes } from '@/lib/format';
 import type { ImageSource } from '../hooks/useImageSource';
+import { CHECKERBOARD_BACKGROUND } from '@/styles/checkerboard';
 
-const CHECKERBOARD =
-  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyMCcgaGVpZ2h0PScyMCcgZmlsbC1vcGFjaXR5PScwLjEnPjxyZWN0IHg9JzEwJyB3aWR0aD0nMTAnIGhlaWdodD0nMTAnIC8+PHJlY3QgeT0nMTAnIHdpZHRoPScxMCcgaGVpZ2h0PScxMCcgLz48L3N2Zz4=";
 
 interface ImagePanelProps {
   source: ImageSource | null;
@@ -142,7 +141,7 @@ const ImagePanel: React.FC<ImagePanelProps> = ({ source, errorKey, onFile, onCle
                 className={`rounded-lg overflow-hidden border flex items-center justify-center max-h-64 ${
                   dragging ? 'border-primary-400 ring-2 ring-primary-200' : 'border-gray-200'
                 }`}
-                style={{ backgroundImage: `url("${CHECKERBOARD}")` }}
+                style={{ backgroundImage: CHECKERBOARD_BACKGROUND }}
               >
                 <img
                   src={source.url}
