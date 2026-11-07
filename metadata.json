@@ -1,5 +1,5 @@
 {
   "name": "LOLO' Shoebox",
-  "description": "LOLO' Shoebox: The ultimate high-performance, privacy-first local developer toolbox. Featuring 20+ powerful tools including local AI background removal, multimedia transcoding, texture packing, and distributed network diagnostics. Powered by WebAssembly and Client-Side AI, it adheres to the 'Zero Data Upload' principle, ensuring your files and data stay strictly in your browser for an ultra-secure and efficient professional workflow.",
+  "description": "LOLO' Shoebox: a high-performance, privacy-first local toolbox with 41 tools across text, image, security, developer, network and media. Featuring local AI background removal, video frame capture, video-to-GIF conversion, multimedia transcoding, texture packing and distributed network diagnostics. Powered by WebAssembly and client-side AI, it follows the 'Zero Data Upload' principle: files and data stay in the browser.",
   "requestFramePermissions": []
 }

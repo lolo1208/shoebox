@@ -14,39 +14,76 @@ A comprehensive, privacy-first developer toolbox designed with a clean UI. It fe
 
 ### 🛠️ Tool Categories
 
-#### 🖼️ Image
-*   **Image Converter**: Convert between JPG, PNG, WEBP, and GIF. Features quality adjustment for JPG and lossy compression with color quantization for PNG to significantly reduce file size.
-*   **Image Resizer**: Change image dimensions by pixels or percentage. Supports aspect ratio locking and high-quality canvas resampling.
-*   **Image Cropper**: Precise image cropping with coordinate control and preset alignments. Features a visual UI for interactive area selection.
-*   **Image Slicer**: Split large images into a grid (e.g., 3x3 for social media). Automatically packages sliced files into a ZIP for download.
-*   **AI Background Remover**: Powered by local AI models (`imgly-bg-removal`). Detects and removes backgrounds entirely on your GPU/CPU without uploading to any server.
-*   **Image Composition**: A lightweight canvas editor. Drag and drop multiple images, rotate, scale, and adjust layers (Z-index) to create social media posters or simple designs.
-*   **Watermark Generator**: Add repeating text watermarks to your images. Customize color, opacity, spacing, and rotation to protect your documents.
-*   **Markdown to Image**: Render Markdown text into high-quality JPEG images. Includes syntax highlighting for code blocks and customizable styles.
-*   **QR Code Generator**: Generate custom QR codes with adjustable size, foreground, and background colors.
-
-#### 🎬 Media
-*   **Audio Converter**: A full-featured audio editor in the browser. Supports trimming, volume adjustment, fade-in/out effects, and exporting to MP3, M4A, WAV, or OGG using `ffmpeg.wasm`.
-*   **Video Compressor**: Locally analyzes video metadata (bitrate, tracks) and generates optimized FFmpeg commands. Perfect for creating NAS-compatible MP4 files or extreme compression for archiving.
-*   **Music Tag Editor**: Fix ID3 tags for MP3 files. Search and auto-fill titles, artists, and albums from Netease, QQ Music, or iTunes. Supports embedded cover art and lyrics.
+Categories and tools are ordered by expected usage frequency.
 
 #### 🔢 Text & Data
-*   **Date & Time**: A versatile time tool featuring Unix timestamp conversion, Solar/Lunar calendar conversion, and a duration calculator between two dates.
-*   **Password Generator**: Create high-entropy secure passwords. Customize length and character types (Uppercase, Lowercase, Numbers, Symbols).
-*   **UUID Generator**: Generate batches of Version 4 (Random) UUIDs or Version 5 (Namespace-based) UUIDs for consistent identity mapping.
-*   **Key Generator**: Generate random keys in Hex, Base64, and URL Safe formats for development and security purposes.
-*   **MD5 Calculator**: Compute MD5 hashes for plain text or large local files using chunked reading to prevent browser freezing.
+*   **JSON / YAML Formatter**: Validate, beautify, minify, sort keys and repair JSON, with two-way YAML conversion, error positions and tree preview.
+*   **Timestamp Converter**: Unix timestamp/date conversion, Solar/Lunar calendar conversion and duration calculation.
+*   **Text Diff**: Line/word/character comparison, split and unified views, inline highlights, export to standard `.diff`.
+*   **HTTP Status Codes**: The full 1xx–5xx reference with filtering and search.
+
+#### 🖼️ Image
+*   **Image Converter**: Convert between JPG/PNG and tune quality/color depth.
+*   **Image Resizer**: Pixel/percentage scaling with aspect-ratio locking.
+*   **Image Cropper**: Visual free cropping with precise coordinates.
+*   **Color Palette**: Extract dominant colors from an image, sample any pixel, generate harmony schemes and export to CSS / Tailwind / JSON / GIMP / SVG / PNG.
+*   **QR Code Generator**: Custom size and colors, gradients, dot modules, rounded eyes and center logo.
+*   **AI Background Remover**: Local AI background removal; images never leave the device.
+*   **Image Watermark**: Tiled text watermarks with color, opacity, spacing and angle controls.
+*   **Image Censor**: Select multiple regions and apply pixelation, blur or solid fill independently.
+*   **Image Grid Slicer**: Slice into a grid and download as ZIP.
+*   **Canvas Collage**: Multi-layer composition with rotation, scaling and z-index control.
+*   **EXIF Metadata**: Inspect and strip EXIF/GPS/XMP/IPTC/ICC, lossless rewrite and batch mode.
+*   **Favicon Generator**: Web / iOS / Android icon sets, PWA manifest and HTML snippet.
+*   **Markdown to Image**: Render Markdown into a long image with code highlighting.
+
+#### 🔐 Security & Encoding
+*   **Hash Calculator**: MD5 / SHA-1 / SHA-256 / SHA-384 / SHA-512 and HMAC for text and large files.
+*   **Base64 / Base32 / URL Codec**: Convert Base64 (standard / URL-safe), Base32 (RFC 4648 / Base32hex) and URL percent-encoding both ways, with text / file / hex input, padding and line-wrap options, a hex view for binary results and one-click download of decoded bytes.
+*   **Password & Key Generator**: Passwords and random keys on one page. Sampling uses the Web Crypto system entropy source with rejection sampling (no modulo bias) and is strictly uniform over the set of passwords allowed by the policy, so entropy is computed exactly as log₂(valid combinations). Supports character classes, length, two symbol sets (common / all ASCII punctuation), look-alike filtering, no-repeat mode and custom characters; keys come in Hex / Base64 / Base64 URL Safe / Base32 / printable ASCII, with live entropy, strength rating and offline cracking estimate.
+*   **UUID & ID Generator**: UUID v4/v5, ULID, NanoID and CUID in one place.
+*   **Text Encryption**: AES, DES, TripleDES, Rabbit and RC4.
 
 #### 👨‍💻 Developer
-*   **JSON Formatter**: More than just a beautifier. It validates, minifies, sorts keys alphabetically, and features a "Smart Repair" function to fix common JSON syntax errors.
-*   **Texture Packer**: A game development essential. Packs multiple sprites into a single atlas using the **MaxRects** algorithm. Exports Cocos Creator compatible `.plist` and PNG files.
-*   **Bitmap Font Generator**: Convert individual character images into a professional Bitmap Font (.fnt). Supports ASCII mapping, automatic inference, and exports in Text, XML, or JSON formats.
-*   **Code Runner**: Execute code snippets online using the Wandbox API, with syntax highlighting and compiler selection.
-*   **Easing Functions**: Visualizes common CSS/JS easing curves (In, Out, InOut). Includes interactive hover animations to preview the speed changes.
+*   **Code Runner**: Run 50+ languages through Wandbox with syntax highlighting.
+*   **Programmer Calculator**: HEX/DEC/OCT/BIN conversion, 8/16/32/64-bit widths, two's complement and bitwise ops.
+*   **Easing Curves**: Interactive CSS/JS easing function visualization.
+*   **Texture Atlas Packer**: MaxRects packing with Cocos Creator compatible plist and PNG export.
+*   **Bitmap Font Generator**: Pack character images into .fnt with Text/XML/JSON export.
 
 #### 🌐 Network
-*   **Global Check Host**: Distributed network diagnostics. Check Ping, HTTP, DNS, and Traceroute status from multiple global nodes via Globalping API.
-*   **Speed Test**: High-precision bandwidth test. Measures download/upload speeds, latency, and jitter with real-time graphical visualization.
+*   **HTTP Request Tester**: Custom method, params, headers and body, response/TLS inspection and cURL export.
+*   **DNS TXT Lookup**: Aliyun, Google and Cloudflare DoH providers.
+*   **Global Check Host**: Ping / HTTP / DNS / Traceroute through Globalping probes.
+*   **WHOIS Lookup**: Domain, IP and AS registration data with RDAP and text fallback.
+*   **Speed Test**: Download/upload speed, latency and jitter with live charts.
+*   **Port Toolkit**: Random ports excluding known ones, plus a port reference.
+
+#### 🎬 Media
+*   **Media Info**: Container, codec, bitrate, channels, subtitles and chapters.
+*   **Video Frame Extractor**: Grab frames by interval, even split or scene change, export PNG/JPG/WebP with timecode naming and ZIP download.
+*   **Video to GIF**: Trim a clip, pick frame rate, width and dithering, then encode a looping GIF with a global 256-color palette via ffmpeg.wasm.
+*   **Audio Converter & Trimmer**: Waveform trimming, volume and sample-rate conversion via ffmpeg.wasm.
+*   **FFmpeg Command Builder**: Parse video metadata locally and build transcoding commands visually.
+*   **Music Tag Editor**: Repair title, artist and album, fill covers and lyrics.
+
+### 📁 Project Structure
+
+```text
+src/
+├── components/        # shared views (layout / home / tool / ui / brand / media)
+├── config/            # tool catalog: groups, order, icons, components
+├── contexts/          # global contexts (language)
+├── features/tools/    # tool implementations by domain
+│   ├── text/ image/ security/ developer/ network/ media/
+├── hooks/             # shared hooks (storage, clipboard, tools)
+├── lib/               # pure logic (crypto / codec / secret / image / text / http / network / media / math / id)
+├── locales/           # Chinese and English copy
+├── styles/            # global styles
+└── types/             # type definitions
+```
+
+To add a tool, create it under `src/features/tools/<domain>/` (complex tools can be a folder with `index.ts`, the main component and a `components/` directory, e.g. `security/codec/`), register it in `src/config/toolCatalog.ts` at the right position, and add copy to `src/locales/zh.ts` and `en.ts`.
 
 ## 🚀 Getting Started
 
@@ -105,6 +142,7 @@ A comprehensive, privacy-first developer toolbox designed with a clean UI. It fe
     - `@imgly/background-removal` (AI Vision)
     - `html2canvas` & `upng-js` (Image processing)
     - `lunar-javascript` (Calendar conversion)
+    - `js-yaml` (YAML parsing and serialisation)
 
 ## 📄 License
 

@@ -1,6 +1,7 @@
 
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { fileURLToPath, URL } from 'node:url';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -88,6 +89,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
       'buffer': 'virtual:buffer',
       'long': 'virtual:long'
     }
@@ -103,7 +105,7 @@ export default defineConfig({
         manualChunks: {
           'vendor-react': ['react', 'react-dom'],
           'vendor-ui': ['lucide-react'],
-          'vendor-utils': ['crypto-js', 'marked', 'qrcode', 'upng-js', 'html2canvas', 'highlight.js', 'lunar-javascript'],
+          'vendor-utils': ['crypto-js', 'marked', 'qrcode', 'upng-js', 'html2canvas', 'highlight.js', 'lunar-javascript', 'js-yaml'],
           'vendor-zip': ['jszip'],
           'vendor-media': ['mediainfo.js', '@ffmpeg/ffmpeg', '@ffmpeg/util'],
           'vendor-ai': ['@imgly/background-removal']
