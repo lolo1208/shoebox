@@ -45,18 +45,54 @@ import {
   Terminal,
   Type,
 } from 'lucide-react';
-import { lazy, type ComponentType } from 'react';
-import { CategoryId, type CategoryDefinition, type LazyToolComponent } from '@/types/tool';
+import { createElement, useEffect, useState, type ComponentType } from 'react';
+import ToolLoading from '@/components/tool/ToolLoading';
+import { CategoryId, type CategoryDefinition } from '@/types/tool';
 
-// 工具实现全部按需加载（React.lazy + 动态 import）：
-// 首页只展示名称/图标/描述，不再下载任何工具代码；
-// 打开某个工具时才拉取它自己的 chunk。
+// 工具实现按需加载，预加载与实际渲染共用同一个请求。
 const lazyTool = (load: () => Promise<{ default: ComponentType }>): ComponentType => {
-  const Component = lazy(load) as LazyToolComponent;
-  Component.preload = () => {
-    void load();
+  let loaded: ComponentType | undefined;
+  let pending: Promise<ComponentType> | undefined;
+
+  const loadComponent = (): Promise<ComponentType> => {
+    if (loaded) return Promise.resolve(loaded);
+    if (!pending) {
+      pending = load().then(module => {
+        loaded = module.default;
+        return loaded;
+      }).catch(error => {
+        pending = undefined;
+        throw error;
+      });
+    }
+    return pending;
   };
-  return Component;
+
+  const Component = (() => {
+    const [resolved, setResolved] = useState<ComponentType | undefined>(() => loaded);
+    const [failed, setFailed] = useState(false);
+
+    useEffect(() => {
+      if (resolved) return;
+      let active = true;
+      loadComponent().then(
+        component => { if (active) setResolved(() => component); },
+        () => { if (active) setFailed(true); },
+      );
+      return () => { active = false; };
+    }, [resolved]);
+
+    if (resolved) return createElement(resolved);
+    if (failed) return createElement('button', {
+      type: 'button',
+      className: 'text-primary-600 hover:underline',
+      onClick: () => window.location.reload(),
+    }, '加载失败，请点击刷新 / Failed to load. Click to reload.');
+    return createElement(ToolLoading);
+  });
+  return Object.assign(Component, {
+    preload: () => { void loadComponent().catch(() => {}); },
+  });
 };
 
 const JsonFormatter = lazyTool(() => import('@/features/tools/text/JsonFormatter'));

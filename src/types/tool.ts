@@ -4,8 +4,8 @@ import type { LucideIcon } from 'lucide-react';
 /** 工具组件：可能是普通组件，也可能是按需加载的 lazy 组件 */
 export type ToolComponent = ComponentType | LazyExoticComponent<ComponentType>;
 
-/** 带 preload 能力的 lazy 组件（悬停卡片时可提前拉取 chunk） */
-export type LazyToolComponent = LazyExoticComponent<ComponentType> & { preload: () => void };
+/** 带 preload 能力的按需加载组件（悬停卡片时可提前拉取 chunk） */
+export type LazyToolComponent = ComponentType & { preload: () => void };
 
 /** 主动预热某个工具的 chunk，失败时静默忽略 */
 export const preloadToolComponent = (component: ToolComponent): void => {
