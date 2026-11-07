@@ -32,6 +32,10 @@ export default {
           900: '#1c1f23', // Semi text
         }
       },
+      transitionTimingFunction: {
+        // 干脆利落：起步快、收尾稳，适合展开 / 收起这类位移较小的动效
+        crisp: 'cubic-bezier(0.32, 0.72, 0, 1)',
+      },
       fontFamily: {
         sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
       },

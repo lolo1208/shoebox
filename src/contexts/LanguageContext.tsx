@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import { translations, type Language, type TranslationKey } from '@/locales';
 
 interface LanguageContextType {
@@ -12,17 +12,13 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 const LANGUAGE_KEY = 'shoebox-language';
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // 先用英文渲染，挂载后再按本地存储 / 浏览器语言切换，避免闪烁
-  const [language, setLanguageState] = useState<Language>('en');
-
-  useEffect(() => {
-    const saved = localStorage.getItem(LANGUAGE_KEY) as Language | null;
-    if (saved === 'en' || saved === 'zh') {
-      setLanguageState(saved);
-      return;
-    }
-    setLanguageState(navigator.language.toLowerCase().startsWith('zh') ? 'zh' : 'en');
-  }, []);
+  // 首帧就确定语言：避免先渲染英文再切换导致整棵树二次渲染与文字闪烁
+  const [language, setLanguageState] = useState<Language>(() => {
+    if (typeof window === 'undefined') return 'en';
+    const saved = localStorage.getItem(LANGUAGE_KEY);
+    if (saved === 'en' || saved === 'zh') return saved;
+    return navigator.language.toLowerCase().startsWith('zh') ? 'zh' : 'en';
+  });
 
   const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);

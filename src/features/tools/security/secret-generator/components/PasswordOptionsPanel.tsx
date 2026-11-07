@@ -1,9 +1,18 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { Field, FIELD_CLASS, NumberField } from '@/components/ui/FormField';
+import { Field, FIELD_CLASS } from '@/components/ui/FormField';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { CHARACTER_CLASS_IDS, PASSWORD_LENGTH, SYMBOL_CHARSETS, SYMBOL_SET_IDS, type CharacterClassId, type PasswordOptions } from '@/lib/secret';
+import {
+  buildCharset,
+  CHARACTER_CLASS_IDS,
+  PASSWORD_LENGTH,
+  SYMBOL_CHARSETS,
+  SYMBOL_SET_IDS,
+  type CharacterClassId,
+  type PasswordOptions,
+} from '@/lib/secret';
 import { PASSWORD_LENGTH_CHIPS } from '../constants';
+import IntegerInput from './IntegerInput';
 import OptionChip from './OptionChip';
 
 const SECTION_LABEL = 'text-[11px] font-semibold uppercase tracking-wide text-gray-400';
@@ -49,12 +58,18 @@ interface PasswordOptionsPanelProps {
 /** 密码参数面板：长度、字符类别与高级取样规则 */
 const PasswordOptionsPanel: React.FC<PasswordOptionsPanelProps> = ({ options, onChange, onToggleClass }) => {
   const { t } = useLanguage();
+  // 不重复模式的可选长度上限由字符集大小决定，提示行需要实时读取
+  const charsetSize = useMemo(() => buildCharset(options).size, [options]);
 
   return (
     <div className="space-y-5">
       <Field
         label={t('secret.password.length')}
-        hint={t('secret.password.length_hint', { min: PASSWORD_LENGTH.min, max: PASSWORD_LENGTH.max })}
+        hint={
+          options.allowRepeats
+            ? t('secret.password.length_hint', { min: PASSWORD_LENGTH.min, max: PASSWORD_LENGTH.max })
+            : t('secret.password.length_unique_hint', { max: charsetSize })
+        }
       >
         <div className="flex items-center gap-3">
           <input
@@ -67,11 +82,12 @@ const PasswordOptionsPanel: React.FC<PasswordOptionsPanelProps> = ({ options, on
             className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-gray-200 accent-primary-600"
           />
           <div className="w-20 shrink-0">
-            <NumberField
+            <IntegerInput
               value={options.length}
               onChange={(length) => onChange({ length })}
               min={PASSWORD_LENGTH.min}
               max={PASSWORD_LENGTH.max}
+              label={t('secret.password.length')}
             />
           </div>
         </div>

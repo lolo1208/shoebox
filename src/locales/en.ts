@@ -395,6 +395,7 @@ export const en = {
 
   'secret.password.length': "Length",
   'secret.password.length_hint': "{min}–{max} characters",
+  'secret.password.length_unique_hint': "Up to {max} characters without repeats (current charset)",
   'secret.password.classes': "Character types",
   'secret.password.symbol_set': "Symbol set",
   'secret.password.symbol_set_standard': "Common",
@@ -448,6 +449,7 @@ export const en = {
   'secret.strength.strong': "Strong",
   'secret.strength.excellent': "Excellent",
   'secret.crack': "Offline cracking ≈ {time}",
+  'secret.crack_hint': "Assumes 100 billion guesses per second, the order of magnitude for offline GPU cracking",
   'secret.crack.instant': "under a second",
   'secret.crack.unit.seconds': "seconds",
   'secret.crack.unit.minutes': "minutes",
@@ -459,6 +461,7 @@ export const en = {
   'secret.error.no_character_class': "Select at least one character type",
   'secret.error.length_exceeds_charset': "Without repeats the length cannot exceed the charset size ({max})",
   'secret.error.length_below_class_count': "At least {n} characters are needed to cover every selected character type",
+  'secret.error.random_unavailable': "No cryptographically secure random source (Web Crypto) is available here, so nothing can be generated safely. Use a different browser or serve the page over HTTPS.",
 
   // Tool: UUID
   'uuid.v4': "Random (v4)",

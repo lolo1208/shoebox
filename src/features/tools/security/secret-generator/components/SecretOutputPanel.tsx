@@ -72,7 +72,10 @@ const SecretOutputPanel: React.FC<SecretOutputPanelProps> = ({ mode, result, onR
       </div>
 
       {errorText && (
-        <div className="flex items-start gap-2 rounded-lg border border-red-100 bg-red-50 p-3 text-xs leading-relaxed text-red-600">
+        <div
+          role="alert"
+          className="flex items-start gap-2 rounded-lg border border-red-100 bg-red-50 p-3 text-xs leading-relaxed text-red-600"
+        >
           <AlertTriangle size={14} className="mt-0.5 shrink-0" />
           <span>{errorText}</span>
         </div>
@@ -114,6 +117,23 @@ const SecretOutputPanel: React.FC<SecretOutputPanelProps> = ({ mode, result, onR
             ))}
           </ul>
         ))}
+
+      {colorize && !errorText && (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-gray-400">
+          <span>
+            <span className="font-mono text-primary-600">A</span> {t('secret.class.uppercase')}
+          </span>
+          <span>
+            <span className="font-mono text-gray-800">a</span> {t('secret.class.lowercase')}
+          </span>
+          <span>
+            <span className="font-mono text-emerald-600">0</span> {t('secret.class.digits')}
+          </span>
+          <span>
+            <span className="font-mono text-orange-500">#</span> {t('secret.class.symbols')}
+          </span>
+        </div>
+      )}
 
       <p className="text-[11px] leading-relaxed text-gray-400">{t('secret.note')}</p>
     </div>

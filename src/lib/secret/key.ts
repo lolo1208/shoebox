@@ -61,16 +61,17 @@ export function keyEntropyBits(bytes: number, format: KeyFormat): number {
 export function generateKeyBatch(options: KeyOptions): GenerationResult {
   const bytes = clampInteger(options.bytes, KEY_BYTES.min, KEY_BYTES.max);
   const count = clampInteger(options.count, SECRET_COUNT.min, SECRET_COUNT.max);
+  const bits = keyEntropyBits(bytes, options.format);
 
-  const secrets = Array.from({ length: count }, () =>
-    options.format === 'ascii' ? randomAscii(bytes) : encodeKeyBytes(randomBytes(bytes), options.format),
-  );
+  const secrets: string[] = [];
+  try {
+    for (let i = 0; i < count; i++) {
+      secrets.push(options.format === 'ascii' ? randomAscii(bytes) : encodeKeyBytes(randomBytes(bytes), options.format));
+    }
+  } catch {
+    // Web Crypto 缺失 / 被策略禁用时不能静默降级，直接报错
+    return { secrets: [], error: { code: 'random_unavailable', params: {} }, bits, charsetSize: 0, length: 0 };
+  }
 
-  return {
-    secrets,
-    error: null,
-    bits: keyEntropyBits(bytes, options.format),
-    charsetSize: 0,
-    length: secrets[0]?.length ?? 0,
-  };
+  return { secrets, error: null, bits, charsetSize: 0, length: secrets[0]?.length ?? 0 };
 }

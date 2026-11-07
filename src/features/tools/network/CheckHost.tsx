@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Globe, Play, Loader2, AlertTriangle, CheckCircle2, XCircle, Clock, Info, Wifi, Server, RotateCw, MapPin, Sliders, Lock, Hash, Activity, ArrowUp, ArrowDown, Route, ChevronDown, BarChart2 } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { loadStylesheet } from '@/lib/loadStylesheet';
 import { useLanguage } from '@/contexts/LanguageContext';
 import {
   createMeasurement,
@@ -435,6 +436,14 @@ const ResultRow: React.FC<{
 
 const CheckHost: React.FC = () => {
   const { t, language } = useLanguage();
+
+  // 国旗图标样式只在打开本工具时加载，不拖累首页首屏
+  useEffect(() => {
+    loadStylesheet(
+      'flag-icons-css',
+      'https://cdn.jsdelivr.net/npm/flag-icons@7.3.2/css/flag-icons.min.css',
+    );
+  }, []);
   
   // Persistence: Store history for each type
   const [savedHistory, setSavedHistory] = useLocalStorage<Record<string, HistoryData>>('tool-checkhost-history', {});

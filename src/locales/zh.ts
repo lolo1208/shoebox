@@ -395,6 +395,7 @@ export const zh = {
 
   'secret.password.length': "密码长度",
   'secret.password.length_hint': "{min}–{max} 个字符",
+  'secret.password.length_unique_hint': "不重复模式下最多 {max} 个字符（当前字符集）",
   'secret.password.classes': "字符类型",
   'secret.password.symbol_set': "符号集",
   'secret.password.symbol_set_standard': "常用",
@@ -448,6 +449,7 @@ export const zh = {
   'secret.strength.strong': "强",
   'secret.strength.excellent': "极强",
   'secret.crack': "离线爆破约 {time}",
+  'secret.crack_hint': "按攻击者每秒尝试 1000 亿次（离线 GPU 暴力破解）估算",
   'secret.crack.instant': "不到 1 秒",
   'secret.crack.unit.seconds': "秒",
   'secret.crack.unit.minutes': "分钟",
@@ -459,6 +461,7 @@ export const zh = {
   'secret.error.no_character_class': "请至少选择一种字符类型",
   'secret.error.length_exceeds_charset': "字符不重复时长度不能超过字符集大小（{max}）",
   'secret.error.length_below_class_count': "长度至少需要 {n} 位才能覆盖所选的全部字符类型",
+  'secret.error.random_unavailable': "当前环境没有可用的密码学随机源（Web Crypto），无法安全生成，请更换浏览器或使用 HTTPS 打开",
 
   // Tool: UUID
   'uuid.v4': "随机生成 (v4)",

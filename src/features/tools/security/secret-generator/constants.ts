@@ -1,14 +1,15 @@
 /**
  * 密码 / 密钥生成器的默认参数与快捷预设。
- * 预设只覆盖「强度相关」字段，生成条数等展示偏好保持不变。
+ *
+ * 密码预设描述的是**完整的强度配置**（字符类别、长度、符号集、取样规则），
+ * 点击预设即得到与之一致的密码形态；只有「生成条数」这类展示偏好不受影响。
+ * 这样预设高亮判断可以和实际参数一一对应，不会出现「点了预设却仍显示自定义」。
  */
 
-import {
-  CHARACTER_CLASS_IDS,
-  type KeyOptions,
-  type KeyFormat,
-  type PasswordOptions,
-} from '@/lib/secret';
+import { CHARACTER_CLASS_IDS, type KeyFormat, type KeyOptions, type PasswordOptions } from '@/lib/secret';
+
+/** 预设覆盖的强度配置（不含生成条数） */
+export type PasswordPresetConfig = Omit<PasswordOptions, 'count'>;
 
 export const DEFAULT_PASSWORD_OPTIONS: PasswordOptions = {
   length: 16,
@@ -34,7 +35,7 @@ export type PasswordPresetId = 'pin' | 'easy' | 'balanced' | 'maximum';
 export interface PasswordPreset {
   id: PasswordPresetId;
   nameKey: string;
-  patch: Partial<PasswordOptions>;
+  config: PasswordPresetConfig;
 }
 
 /** 按使用场景排列：纯数字 → 易读 → 通用 → 高强度 */
@@ -42,62 +43,72 @@ export const PASSWORD_PRESETS: PasswordPreset[] = [
   {
     id: 'pin',
     nameKey: 'secret.preset.pin',
-    patch: {
+    config: {
       length: 6,
       classes: { uppercase: false, lowercase: false, digits: true, symbols: false },
+      symbolSet: 'standard',
+      customCharacters: '',
       excludeAmbiguous: false,
-      requireEachClass: false,
+      allowRepeats: true,
+      requireEachClass: true,
     },
   },
   {
     id: 'easy',
     nameKey: 'secret.preset.easy',
-    patch: {
+    config: {
       length: 16,
       classes: { uppercase: true, lowercase: true, digits: true, symbols: false },
+      symbolSet: 'standard',
+      customCharacters: '',
       excludeAmbiguous: true,
+      allowRepeats: true,
       requireEachClass: true,
     },
   },
   {
     id: 'balanced',
     nameKey: 'secret.preset.balanced',
-    patch: {
+    config: {
       length: 16,
       classes: { uppercase: true, lowercase: true, digits: true, symbols: true },
+      symbolSet: 'standard',
+      customCharacters: '',
       excludeAmbiguous: false,
+      allowRepeats: true,
       requireEachClass: true,
     },
   },
   {
     id: 'maximum',
     nameKey: 'secret.preset.maximum',
-    patch: {
+    config: {
       length: 32,
       classes: { uppercase: true, lowercase: true, digits: true, symbols: true },
       symbolSet: 'full',
+      customCharacters: '',
       excludeAmbiguous: false,
+      allowRepeats: true,
       requireEachClass: true,
     },
   },
 ];
 
-/** 预设命中判断只比较强度相关字段，仅 `count` 不参与 */
-const PRESET_SCOPED_FIELDS = ['length', 'excludeAmbiguous', 'allowRepeats', 'requireEachClass', 'symbolSet'] as const;
-
-function samePasswordConfig(a: PasswordOptions, b: PasswordOptions): boolean {
+function samePasswordConfig(a: PasswordOptions, b: PasswordPresetConfig): boolean {
   return (
-    PRESET_SCOPED_FIELDS.every((field) => a[field] === b[field]) &&
+    a.length === b.length &&
+    a.symbolSet === b.symbolSet &&
     a.customCharacters === b.customCharacters &&
+    a.excludeAmbiguous === b.excludeAmbiguous &&
+    a.allowRepeats === b.allowRepeats &&
+    a.requireEachClass === b.requireEachClass &&
     CHARACTER_CLASS_IDS.every((id) => a.classes[id] === b.classes[id])
   );
 }
 
 /** 当前参数命中的预设，全部不匹配时返回 custom */
 export function resolvePasswordPresetId(options: PasswordOptions): PasswordPresetId | 'custom' {
-  const hit = PASSWORD_PRESETS.find((preset) =>
-    samePasswordConfig(options, { ...DEFAULT_PASSWORD_OPTIONS, ...preset.patch }),
-  );
+  const hit = PASSWORD_PRESETS.find((preset) => samePasswordConfig(options, preset.config));
   return hit?.id ?? 'custom';
 }
 

@@ -52,7 +52,9 @@ const StrengthMeter: React.FC<StrengthMeterProps> = ({ bits, charsetSize }) => {
 
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-[11px]">
         <span className={`font-medium ${tone.text}`}>{t(`secret.strength.${level}`)}</span>
-        <span className="text-gray-400">{t('secret.crack', { time: timeText })}</span>
+        <span className="text-gray-400" title={t('secret.crack_hint')}>
+          {t('secret.crack', { time: timeText })}
+        </span>
       </div>
 
       {charsetSize > 0 && (

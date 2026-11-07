@@ -1,8 +1,9 @@
 import React from 'react';
-import { Field, NumberField } from '@/components/ui/FormField';
+import { Field } from '@/components/ui/FormField';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { KEY_BYTES, KEY_FORMATS, type KeyFormat, type KeyOptions } from '@/lib/secret';
 import { KEY_BYTE_CHIPS, KEY_FORMAT_HINTS } from '../constants';
+import IntegerInput from './IntegerInput';
 import OptionChip from './OptionChip';
 
 const SECTION_LABEL = 'text-[11px] font-semibold uppercase tracking-wide text-gray-400';
@@ -65,13 +66,14 @@ const KeyOptionsPanel: React.FC<KeyOptionsPanelProps> = ({ options, onChange }) 
             className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-gray-200 accent-primary-600"
           />
           <div className="w-20 shrink-0">
-            <NumberField
+            <IntegerInput
               value={options.bytes}
               onChange={(bytes) => onChange({ bytes })}
               min={KEY_BYTES.min}
               max={KEY_BYTES.max}
               step={BYTE_STEP}
               suffix="B"
+              label={t('secret.key.bytes')}
             />
           </div>
         </div>

@@ -60,7 +60,9 @@ export type SecretErrorCode =
   /** 关闭重复后，长度超过字符集大小 */
   | 'length_exceeds_charset'
   /** 长度不足以覆盖所有必选类别 */
-  | 'length_below_class_count';
+  | 'length_below_class_count'
+  /** 运行环境没有可用的密码学随机源 */
+  | 'random_unavailable';
 
 export interface SecretError {
   code: SecretErrorCode;

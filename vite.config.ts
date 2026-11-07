@@ -4,13 +4,19 @@ import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'node:url';
 
 // Vendor chunk layout for the production build (name -> packages it contains).
+// 工具都是懒加载的，库按“工具簇”拆分，避免打开一个小工具却拖下整个 vendor 包。
 const CHUNK_GROUPS: Array<[string, string[]]> = [
   ['vendor-react', ['react', 'react-dom', 'scheduler']],
   ['vendor-ui', ['lucide-react']],
-  ['vendor-utils', ['crypto-js', 'marked', 'qrcode', 'upng-js', 'html2canvas', 'highlight.js', 'lunar-javascript', 'js-yaml']],
+  ['vendor-crypto', ['crypto-js']],
+  ['vendor-markdown', ['marked', 'highlight.js']],
+  ['vendor-image', ['html2canvas', 'upng-js', 'qrcode']],
+  ['vendor-data', ['js-yaml', 'lunar-javascript', 'lodash']],
   ['vendor-zip', ['jszip']],
-  ['vendor-media', ['mediainfo.js', '@ffmpeg/ffmpeg', '@ffmpeg/util']],
-  ['vendor-ai', ['@imgly/background-removal']],
+  ['vendor-media', ['mediainfo.js', '@ffmpeg/ffmpeg', '@ffmpeg/util', 'jsmediatags', 'browser-id3-writer']],
+  // 注意：@imgly/background-removal 故意不单独分包，让它直接进入 BackgroundRemover 的 chunk。
+  // 否则 rolldown 会把几 KB 的共享 runtime helper 合并进这个小 chunk，
+  // 导致它重新变成首屏静态依赖。
 ];
 
 // Resolves the owning package name of a module id, e.g.
@@ -78,7 +84,11 @@ export default defineConfig({
       transformIndexHtml(html) {
         // Only run this during build
         if (process.env.NODE_ENV === 'production') {
-          return html.replace(/<script[^>]*id="dev-cdn"[^>]*>[\s\S]*?<\/script>/g, '');
+          // CDN 版 Tailwind 与 importmap 只在无本地构建的正网环境需要，
+          // 打包后它们只会增加首屏解析/远程请求开销，因此一并移除。
+          return html
+            .replace(/<script[^>]*id="dev-cdn"[^>]*>[\s\S]*?<\/script>/g, '')
+            .replace(/<script type="importmap">[\s\S]*?<\/script>/g, '');
         }
         return html;
       },
@@ -127,6 +137,9 @@ export default defineConfig({
       output: {
         // Rolldown (Vite 8) only accepts the function form of manualChunks.
         manualChunks(id) {
+          // Vite 的 preload 辅助函数是公共模块，必须单独成块；
+          // 否则会被并入某个懒加载 vendor 包，导致整个包被迫在首屏加载。
+          if (id.includes('vite/preload-helper')) return 'vite-runtime';
           const pkg = packageNameFromId(id);
           if (!pkg) return;
           return CHUNK_GROUPS.find(([, packages]) => packages.includes(pkg))?.[0];

@@ -13,7 +13,8 @@ export const KEY_BYTES = { min: 8, max: 128 } as const;
 export const SECRET_COUNT = { min: 1, max: 20 } as const;
 
 /** 取整并夹取到 [min, max]，非数字回退到 min */
-export function clampInteger(value: number, min: number, max: number): number {
-  if (!Number.isFinite(value)) return min;
-  return Math.min(Math.max(Math.round(value), min), max);
+export function clampInteger(value: unknown, min: number, max: number): number {
+  const numeric = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(numeric)) return min;
+  return Math.min(Math.max(Math.round(numeric), min), max);
 }

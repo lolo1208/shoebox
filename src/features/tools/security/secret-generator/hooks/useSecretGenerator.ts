@@ -1,13 +1,23 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import {
+  CHARACTER_CLASS_IDS,
+  clampInteger,
   generateKeyBatch,
   generatePasswordBatch,
+  KEY_BYTES,
+  KEY_FORMATS,
+  PASSWORD_LENGTH,
+  SECRET_COUNT,
+  SYMBOL_SET_IDS,
+  type CharacterClassSelection,
   type CharacterClassId,
   type GenerationResult,
+  type KeyFormat,
   type KeyOptions,
   type PasswordOptions,
   type SecretMode,
+  type SymbolSet,
 } from '@/lib/secret';
 import {
   DEFAULT_KEY_OPTIONS,
@@ -16,19 +26,41 @@ import {
   type PasswordPreset,
 } from '../constants';
 
+/** 存储里的枚举值可能是旧版本或被手工改过，非法值一律回退到默认 */
+function pickEnum<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
+  return allowed.includes(value as T) ? (value as T) : fallback;
+}
+
 /**
- * localStorage 中的结构可能来自旧版本，读取时按缺省值补齐，
- * 嵌套的 classes 也要单独合并，避免新增类别后读到 undefined。
+ * localStorage 中的结构可能来自旧版本，读取时按缺省值补齐并夹取范围，
+ * 保证 UI 控件与生成算法看到的是同一份合法参数。
  */
 function withPasswordDefaults(stored: Partial<PasswordOptions>): PasswordOptions {
+  const classes = {} as CharacterClassSelection;
+  for (const id of CHARACTER_CLASS_IDS) {
+    classes[id] = stored.classes?.[id] ?? DEFAULT_PASSWORD_OPTIONS.classes[id];
+  }
+
   return {
     ...DEFAULT_PASSWORD_OPTIONS,
     ...stored,
-    classes: { ...DEFAULT_PASSWORD_OPTIONS.classes, ...stored.classes },
+    length: clampInteger(stored.length ?? DEFAULT_PASSWORD_OPTIONS.length, PASSWORD_LENGTH.min, PASSWORD_LENGTH.max),
+    count: clampInteger(stored.count ?? DEFAULT_PASSWORD_OPTIONS.count, SECRET_COUNT.min, SECRET_COUNT.max),
+    symbolSet: pickEnum<SymbolSet>(stored.symbolSet, SYMBOL_SET_IDS, DEFAULT_PASSWORD_OPTIONS.symbolSet),
+    customCharacters: typeof stored.customCharacters === 'string' ? stored.customCharacters : '',
+    classes,
   };
 }
 
-const withKeyDefaults = (stored: Partial<KeyOptions>): KeyOptions => ({ ...DEFAULT_KEY_OPTIONS, ...stored });
+function withKeyDefaults(stored: Partial<KeyOptions>): KeyOptions {
+  return {
+    ...DEFAULT_KEY_OPTIONS,
+    ...stored,
+    bytes: clampInteger(stored.bytes ?? DEFAULT_KEY_OPTIONS.bytes, KEY_BYTES.min, KEY_BYTES.max),
+    count: clampInteger(stored.count ?? DEFAULT_KEY_OPTIONS.count, SECRET_COUNT.min, SECRET_COUNT.max),
+    format: pickEnum<KeyFormat>(stored.format, KEY_FORMATS, DEFAULT_KEY_OPTIONS.format),
+  };
+}
 
 function runGeneration(
   mode: SecretMode,
@@ -78,8 +110,13 @@ export function useSecretGenerator(): SecretGeneratorController {
     setResult(runGeneration(mode, passwordOptions, keyOptions));
   }, [mode, passwordOptions, keyOptions]);
 
-  // 依赖 regenerate 即可：选项或模式变化都会重建它，从而自动刷新结果
+  // 初始结果已由 useState 的惰性初始化生成，首次挂载不再重复生成（避免首屏闪一下）
+  const mounted = useRef(false);
   useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true;
+      return;
+    }
     regenerate();
   }, [regenerate]);
 
@@ -100,7 +137,7 @@ export function useSecretGenerator(): SecretGeneratorController {
   );
 
   const applyPasswordPreset = useCallback(
-    (preset: PasswordPreset) => updatePasswordOptions(preset.patch),
+    (preset: PasswordPreset) => updatePasswordOptions(preset.config),
     [updatePasswordOptions],
   );
 

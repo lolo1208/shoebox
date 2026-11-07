@@ -101,3 +101,48 @@ body {
 .hljs-link {
     text-decoration: underline;
 }
+
+/* ------------------------------------------------------------------
+ * 折叠面板（分组展开 / 收起）
+ * grid-template-rows 0fr ↔ 1fr，高度自动过渡，无需测量内容
+ * ------------------------------------------------------------------ */
+.collapse-panel {
+  --collapse-duration: 200ms;
+  --collapse-ease: cubic-bezier(0.32, 0.72, 0, 1); /* 干脆利落：快起步、快收尾 */
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    grid-template-rows var(--collapse-duration) var(--collapse-ease),
+    opacity calc(var(--collapse-duration) * 0.6) var(--collapse-ease),
+    visibility 0s linear;
+}
+
+.collapse-panel[data-open='false'] {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    grid-template-rows var(--collapse-duration) var(--collapse-ease),
+    opacity calc(var(--collapse-duration) * 0.45) var(--collapse-ease),
+    visibility 0s linear var(--collapse-duration);
+}
+
+.collapse-panel > .collapse-inner {
+  min-height: 0;
+  overflow: hidden;
+  transform: translateY(0);
+  transition: transform var(--collapse-duration) var(--collapse-ease);
+}
+
+.collapse-panel[data-open='false'] > .collapse-inner {
+  transform: translateY(-4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collapse-panel,
+  .collapse-panel > .collapse-inner {
+    transition: none;
+  }
+}

@@ -1,10 +1,11 @@
-import React, { useMemo, useState } from 'react';
+import React, { Suspense, useMemo, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import AppHeader from '@/components/layout/AppHeader';
 import Sidebar from '@/components/layout/Sidebar';
 import Home from '@/components/home/Home';
 import Logo from '@/components/brand/Logo';
 import CategoryView from '@/components/tool/CategoryView';
+import ToolLoading from '@/components/tool/ToolLoading';
 import { CategoryId } from '@/types/tool';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { useTools } from '@/hooks/useTools';
@@ -123,7 +124,10 @@ const AppContent: React.FC = () => {
                       </div>
                     </div>
                     <div className="p-6">
-                      <ToolComponent />
+                      {/* 每个工具独立 Suspense：新增工具加载时不会卸载已打开的工具状态 */}
+                      <Suspense fallback={<ToolLoading />}>
+                        <ToolComponent />
+                      </Suspense>
                     </div>
                   </div>
                 );

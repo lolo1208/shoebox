@@ -2,7 +2,8 @@
 /// <reference lib="dom" />
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, RotateCcw, Terminal, Loader2, Code2, AlertCircle, ChevronDown, Settings2, Plus, X, Copy, Check, Info } from 'lucide-react';
-import hljs from 'highlight.js';
+// 只引入常用语言包（约 35 种），避免把 highlight.js 全量语言打进 chunk
+import hljs from 'highlight.js/lib/common';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useLanguage } from '@/contexts/LanguageContext';
 

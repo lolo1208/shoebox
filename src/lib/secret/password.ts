@@ -156,7 +156,13 @@ export function generatePasswordBatch(options: PasswordOptions): GenerationResul
     ),
   };
 
-  const secrets = Array.from({ length: count }, () => buildPassword(space));
+  const secrets: string[] = [];
+  try {
+    for (let i = 0; i < count; i++) secrets.push(buildPassword(space));
+  } catch {
+    // Web Crypto 缺失 / 被策略禁用时不能静默降级，直接报错
+    return failure({ code: 'random_unavailable', params: {} }, charset.size, length);
+  }
 
   return {
     secrets,

@@ -6,7 +6,8 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { marked } from 'marked';
 import html2canvas from 'html2canvas';
 import Logo from '@/components/brand/Logo';
-import hljs from 'highlight.js';
+// 只引入常用语言包（约 35 种），避免把 highlight.js 全量语言打进 chunk
+import hljs from 'highlight.js/lib/common';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 // Define styles as a constant to ensure clean parsing by both Browser and html2canvas

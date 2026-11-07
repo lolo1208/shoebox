@@ -45,52 +45,59 @@ import {
   Terminal,
   Type,
 } from 'lucide-react';
-import { CategoryId, type CategoryDefinition } from '@/types/tool';
+import { lazy, type ComponentType } from 'react';
+import { CategoryId, type CategoryDefinition, type LazyToolComponent } from '@/types/tool';
 
-import JsonFormatter from '@/features/tools/text/JsonFormatter';
-import TimestampConverter from '@/features/tools/text/TimestampConverter';
-import TextDiff from '@/features/tools/text/TextDiff';
-import HttpStatusCode from '@/features/tools/text/HttpStatusCode';
+// 工具实现全部按需加载（React.lazy + 动态 import）：
+// 首页只展示名称/图标/描述，不再下载任何工具代码；
+// 打开某个工具时才拉取它自己的 chunk。
+const lazyTool = (load: () => Promise<{ default: ComponentType }>): ComponentType => {
+  const Component = lazy(load) as LazyToolComponent;
+  Component.preload = () => {
+    void load();
+  };
+  return Component;
+};
 
-import ImageConverter from '@/features/tools/image/ImageConverter';
-import ImageResizer from '@/features/tools/image/ImageResizer';
-import ImageCropper from '@/features/tools/image/ImageCropper';
-import QrCodeGenerator from '@/features/tools/image/QrCodeGenerator';
-import BackgroundRemover from '@/features/tools/image/BackgroundRemover';
-import WatermarkGenerator from '@/features/tools/image/WatermarkGenerator';
-import PixelateCensor from '@/features/tools/image/PixelateCensor';
-import ImageGridSlicer from '@/features/tools/image/ImageGridSlicer';
-import ImageComposition from '@/features/tools/image/ImageComposition';
-import ExifTool from '@/features/tools/image/ExifTool';
-import FaviconGenerator from '@/features/tools/image/FaviconGenerator';
-import MarkdownToImage from '@/features/tools/image/MarkdownToImage';
-import PaletteExtractor from '@/features/tools/image/palette-extractor';
-
-import HashSuite from '@/features/tools/security/HashSuite';
-import CodecTool from '@/features/tools/security/codec';
-import SecretGenerator from '@/features/tools/security/secret-generator';
-import UuidGenerator from '@/features/tools/security/UuidGenerator';
-import TextCrypto from '@/features/tools/security/TextCrypto';
-
-import CodeRunner from '@/features/tools/developer/CodeRunner';
-import ProgrammerCalculator from '@/features/tools/developer/ProgrammerCalculator';
-import EasingVisualizer from '@/features/tools/developer/EasingVisualizer';
-import TexturePacker from '@/features/tools/developer/TexturePacker';
-import BitmapFontGenerator from '@/features/tools/developer/BitmapFontGenerator';
-
-import HttpRequestTester from '@/features/tools/network/HttpRequestTester';
-import DnsTxtQuery from '@/features/tools/network/DnsTxtQuery';
-import CheckHost from '@/features/tools/network/CheckHost';
-import WhoisLookup from '@/features/tools/network/WhoisLookup';
-import SpeedTest from '@/features/tools/network/SpeedTest';
-import RandomPortGenerator from '@/features/tools/network/RandomPortGenerator';
-
-import AudioConverter from '@/features/tools/media/AudioConverter';
-import VideoCommandGenerator from '@/features/tools/media/VideoCommandGenerator';
-import VideoFrameExtractor from '@/features/tools/media/video-frame-extractor';
-import VideoToGif from '@/features/tools/media/video-to-gif';
-import MediaInfoViewer from '@/features/tools/media/MediaInfoViewer';
-import MusicTagEditor from '@/features/tools/media/MusicTagEditor';
+const JsonFormatter = lazyTool(() => import('@/features/tools/text/JsonFormatter'));
+const TimestampConverter = lazyTool(() => import('@/features/tools/text/TimestampConverter'));
+const TextDiff = lazyTool(() => import('@/features/tools/text/TextDiff'));
+const HttpStatusCode = lazyTool(() => import('@/features/tools/text/HttpStatusCode'));
+const ImageConverter = lazyTool(() => import('@/features/tools/image/ImageConverter'));
+const ImageResizer = lazyTool(() => import('@/features/tools/image/ImageResizer'));
+const ImageCropper = lazyTool(() => import('@/features/tools/image/ImageCropper'));
+const QrCodeGenerator = lazyTool(() => import('@/features/tools/image/QrCodeGenerator'));
+const BackgroundRemover = lazyTool(() => import('@/features/tools/image/BackgroundRemover'));
+const WatermarkGenerator = lazyTool(() => import('@/features/tools/image/WatermarkGenerator'));
+const PixelateCensor = lazyTool(() => import('@/features/tools/image/PixelateCensor'));
+const ImageGridSlicer = lazyTool(() => import('@/features/tools/image/ImageGridSlicer'));
+const ImageComposition = lazyTool(() => import('@/features/tools/image/ImageComposition'));
+const ExifTool = lazyTool(() => import('@/features/tools/image/ExifTool'));
+const FaviconGenerator = lazyTool(() => import('@/features/tools/image/FaviconGenerator'));
+const MarkdownToImage = lazyTool(() => import('@/features/tools/image/MarkdownToImage'));
+const PaletteExtractor = lazyTool(() => import('@/features/tools/image/palette-extractor'));
+const HashSuite = lazyTool(() => import('@/features/tools/security/HashSuite'));
+const CodecTool = lazyTool(() => import('@/features/tools/security/codec'));
+const SecretGenerator = lazyTool(() => import('@/features/tools/security/secret-generator'));
+const UuidGenerator = lazyTool(() => import('@/features/tools/security/UuidGenerator'));
+const TextCrypto = lazyTool(() => import('@/features/tools/security/TextCrypto'));
+const CodeRunner = lazyTool(() => import('@/features/tools/developer/CodeRunner'));
+const ProgrammerCalculator = lazyTool(() => import('@/features/tools/developer/ProgrammerCalculator'));
+const EasingVisualizer = lazyTool(() => import('@/features/tools/developer/EasingVisualizer'));
+const TexturePacker = lazyTool(() => import('@/features/tools/developer/TexturePacker'));
+const BitmapFontGenerator = lazyTool(() => import('@/features/tools/developer/BitmapFontGenerator'));
+const HttpRequestTester = lazyTool(() => import('@/features/tools/network/HttpRequestTester'));
+const DnsTxtQuery = lazyTool(() => import('@/features/tools/network/DnsTxtQuery'));
+const CheckHost = lazyTool(() => import('@/features/tools/network/CheckHost'));
+const WhoisLookup = lazyTool(() => import('@/features/tools/network/WhoisLookup'));
+const SpeedTest = lazyTool(() => import('@/features/tools/network/SpeedTest'));
+const RandomPortGenerator = lazyTool(() => import('@/features/tools/network/RandomPortGenerator'));
+const AudioConverter = lazyTool(() => import('@/features/tools/media/AudioConverter'));
+const VideoCommandGenerator = lazyTool(() => import('@/features/tools/media/VideoCommandGenerator'));
+const VideoFrameExtractor = lazyTool(() => import('@/features/tools/media/video-frame-extractor'));
+const VideoToGif = lazyTool(() => import('@/features/tools/media/video-to-gif'));
+const MediaInfoViewer = lazyTool(() => import('@/features/tools/media/MediaInfoViewer'));
+const MusicTagEditor = lazyTool(() => import('@/features/tools/media/MusicTagEditor'));
 
 /**
  * 工具注册表。

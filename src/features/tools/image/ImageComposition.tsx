@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Upload, Download, RefreshCw, X, Plus, RotateCw, Trash2, ArrowUp, ArrowDown, LayoutTemplate, ChevronDown, ChevronRight, Smartphone, Monitor, FileText, Instagram, Hash, Layers, ArrowRightLeft, Move, Maximize, ZoomIn, ZoomOut, AlignStartVertical, AlignCenterVertical, AlignEndVertical, AlignStartHorizontal, AlignCenterHorizontal, AlignEndHorizontal, Lock, Unlock } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useLanguage } from '@/contexts/LanguageContext';
+import Collapse from '@/components/ui/Collapse';
 
 interface CanvasElement {
   id: string;
@@ -643,12 +644,12 @@ const ImageComposition: React.FC = () => {
                                          <category.icon size={14} className="text-gray-500" />
                                          {category.label}
                                      </div>
-                                     <div className="text-gray-400">
-                                         {expandedCategory === category.id ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                     <div className={`text-gray-400 transition-transform duration-200 ease-crisp ${expandedCategory === category.id ? 'rotate-90' : ''}`}>
+                                         <ChevronRight size={14} />
                                      </div>
                                  </button>
-                                 
-                                 {expandedCategory === category.id && (
+
+                                 <Collapse open={expandedCategory === category.id} duration={200}>
                                      <div className="grid grid-cols-2 gap-2 p-2 bg-gray-50 rounded-lg mb-2">
                                          {category.items.map(item => (
                                              <button
@@ -665,7 +666,7 @@ const ImageComposition: React.FC = () => {
                                              </button>
                                          ))}
                                      </div>
-                                 )}
+                                 </Collapse>
                              </div>
                          ))}
                      </div>
