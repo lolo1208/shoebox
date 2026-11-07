@@ -3,6 +3,29 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'node:url';
 
+// Vendor chunk layout for the production build (name -> packages it contains).
+const CHUNK_GROUPS: Array<[string, string[]]> = [
+  ['vendor-react', ['react', 'react-dom', 'scheduler']],
+  ['vendor-ui', ['lucide-react']],
+  ['vendor-utils', ['crypto-js', 'marked', 'qrcode', 'upng-js', 'html2canvas', 'highlight.js', 'lunar-javascript', 'js-yaml']],
+  ['vendor-zip', ['jszip']],
+  ['vendor-media', ['mediainfo.js', '@ffmpeg/ffmpeg', '@ffmpeg/util']],
+  ['vendor-ai', ['@imgly/background-removal']],
+];
+
+// Resolves the owning package name of a module id, e.g.
+// /x/node_modules/.pnpm/react@18.3.1/node_modules/react/index.js -> react
+function packageNameFromId(id: string): string | undefined {
+  const normalized = id.replace(/\\/g, '/');
+  const marker = 'node_modules/';
+  const index = normalized.lastIndexOf(marker);
+  if (index === -1) return;
+  const rest = normalized.slice(index + marker.length);
+  const segments = rest.split('/');
+  if (segments[0]?.startsWith('@')) return `${segments[0]}/${segments[1]}`;
+  return segments[0];
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -102,13 +125,11 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-ui': ['lucide-react'],
-          'vendor-utils': ['crypto-js', 'marked', 'qrcode', 'upng-js', 'html2canvas', 'highlight.js', 'lunar-javascript', 'js-yaml'],
-          'vendor-zip': ['jszip'],
-          'vendor-media': ['mediainfo.js', '@ffmpeg/ffmpeg', '@ffmpeg/util'],
-          'vendor-ai': ['@imgly/background-removal']
+        // Rolldown (Vite 8) only accepts the function form of manualChunks.
+        manualChunks(id) {
+          const pkg = packageNameFromId(id);
+          if (!pkg) return;
+          return CHUNK_GROUPS.find(([, packages]) => packages.includes(pkg))?.[0];
         },
       },
     },
