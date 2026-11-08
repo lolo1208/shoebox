@@ -1,10 +1,67 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { FileAudio, Download, Play, Pause, Volume2, Music, RefreshCw, FileVideo, ChevronRight, ChevronLeft, Settings2, Info, Check, Timer, Clock } from 'lucide-react';
+import { FileAudio, Download, Play, Pause, Volume2, RefreshCw, FileVideo, ChevronRight, ChevronLeft, Settings2, Info, Check, Timer, Clock } from 'lucide-react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { toBlobURL } from '@ffmpeg/util';
 import MediaInfoFactory from 'mediainfo.js';
 import { useLanguage } from '@/contexts/LanguageContext';
+
+type LoudnessTarget = 'off' | 'voice' | 'bgm' | 'ambience' | 'sfx';
+
+interface ExportPreset {
+    id: string;
+    label: string;
+    desc: string;
+    format: string;
+    bitrate: string;
+    sampleRate: string; // 'original' 表示沿用源采样率
+    channels: string;
+    suffix: string; // 导出文件名后缀
+    vorbisQuality?: string; // OGG 手动选时用
+    loudness: LoudnessTarget;
+}
+
+// 响度：loudnorm 内部固定升到 192kHz，filter 链后面必须接 aresample 降回目标采样率
+const LOUDNESS_FILTERS: Partial<Record<LoudnessTarget, string>> = {
+    voice: 'loudnorm=I=-18:TP=-1.5:LRA=11',
+    bgm: 'loudnorm=I=-20.5:TP=-1.5:LRA=11',
+    ambience: 'loudnorm=I=-24:TP=-1.5:LRA=11',
+};
+const LOUDNESS_LUFS: Partial<Record<LoudnessTarget, number>> = {
+    voice: -18,
+    bgm: -20.5,
+    ambience: -24,
+};
+const PEAK_TARGET = 0.85; // ≈ −1.4 dBFS
+const PEAK_CEILING = 0.891; // ≈ −1.0 dBFS
+
+const measurePeak = (buffer: AudioBuffer, startSec: number, endSec: number, downmixMono: boolean) => {
+    let peak = 0;
+    const from = Math.max(0, Math.floor(startSec * buffer.sampleRate));
+    const to = Math.min(buffer.length, Math.ceil(endSec * buffer.sampleRate));
+
+    // 输出为单声道时，按 0.5·(L+R) 预算降混后的峰值，否则峰值会被高估
+    if (downmixMono && buffer.numberOfChannels > 1) {
+        const channelsData: Float32Array[] = [];
+        for (let c = 0; c < buffer.numberOfChannels; c++) channelsData.push(buffer.getChannelData(c));
+        for (let i = from; i < to; i++) {
+            let sum = 0;
+            for (const data of channelsData) sum += data[i];
+            const v = Math.abs(sum / channelsData.length);
+            if (v > peak) peak = v;
+        }
+        return peak;
+    }
+
+    for (let c = 0; c < buffer.numberOfChannels; c++) {
+        const data = buffer.getChannelData(c);
+        for (let i = from; i < to; i++) {
+            const v = Math.abs(data[i]);
+            if (v > peak) peak = v;
+        }
+    }
+    return peak;
+};
 
 const AudioConverter: React.FC = () => {
   const { t } = useLanguage();
@@ -44,6 +101,11 @@ const AudioConverter: React.FC = () => {
   const [targetFormat, setTargetFormat] = useState('mp3');
   const [bitrate, setBitrate] = useState('192'); // kbps for lossy
   const [originalBitrate, setOriginalBitrate] = useState<string | null>(null);
+  const [sampleRate, setSampleRate] = useState('original'); // Hz，'original' 表示不重采样
+  const [channels, setChannels] = useState('2'); // '1' 单声道 / '2' 立体声
+  const [vorbisQuality, setVorbisQuality] = useState('4'); // OGG q:a
+  const [loudnessTarget, setLoudnessTarget] = useState<LoudnessTarget>('off');
+  const [presetId, setPresetId] = useState('custom');
   
   // Effects
   const [fadeIn, setFadeIn] = useState(false);
@@ -602,25 +664,44 @@ const AudioConverter: React.FC = () => {
           const filters = [];
           filters.push(`atrim=${trimStart.toFixed(3)}:${trimEnd.toFixed(3)}`);
           filters.push(`asetpts=PTS-STARTPTS`);
-          
-          if (volume !== 100) filters.push(`volume=${volume/100}`);
+
+          // 增益：响度处理开启时电平由目标决定，音量滑杆不参与导出（音量请在游戏侧 GainNode 里做）
+          const loudnessActive = loudnessTarget !== 'off';
+          let gain = loudnessActive ? 1 : volume / 100;
+          if (loudnessTarget === 'sfx' && audioBuffer) {
+              const peak = measurePeak(audioBuffer, trimStart, trimEnd, channels === '1');
+              if (peak > 0.0001) gain = Math.min(PEAK_TARGET / peak, PEAK_CEILING / peak);
+          }
+          if (Math.abs(gain - 1) > 0.001) filters.push(`volume=${gain.toFixed(4)}`);
+
           if (fadeIn) filters.push(`afade=t=in:ss=0:d=${effectiveFade}`);
           if (fadeOut) {
               const fadeOutStart = clipDuration - effectiveFade;
               filters.push(`afade=t=out:st=${fadeOutStart.toFixed(3)}:d=${effectiveFade}`);
           }
 
+          const effectiveRate = sampleRate !== 'original'
+              ? sampleRate
+              : String(audioBuffer?.sampleRate || 48000);
+          const loudnormFilter = LOUDNESS_FILTERS[loudnessTarget];
+          if (loudnormFilter) {
+              filters.push(loudnormFilter);
+              filters.push(`aresample=${effectiveRate}`);
+          }
+
           const args = ['-i', inputName, '-filter:a', filters.join(',')];
+          const rateArgs = sampleRate !== 'original' ? ['-ar', sampleRate] : [];
 
           const selectedBitrate = bitrate.startsWith('original:') ? Math.min(320, Number(bitrate.slice(9))) : Number(bitrate);
           if (targetFormat === 'mp3') {
-              args.push('-c:a', 'libmp3lame', '-ac', '2', '-b:a', `${selectedBitrate}k`);
+              args.push(...rateArgs, '-c:a', 'libmp3lame', '-ac', channels, '-b:a', `${selectedBitrate}k`);
           } else if (targetFormat === 'm4a') {
-              args.push('-c:a', 'aac', '-ac', '2', '-b:a', `${selectedBitrate}k`);
+              // AAC / M4A：按预设设定码率、采样率与声道，并启用 faststart（moov 前置，便于边下边播）
+              args.push(...rateArgs, '-c:a', 'aac', '-b:a', `${selectedBitrate}k`, '-ac', channels, '-movflags', '+faststart');
           } else if (targetFormat === 'ogg') {
-              args.push('-c:a', 'libvorbis', '-ac', '2', '-q:a', '4');
+              args.push(...rateArgs, '-c:a', 'libvorbis', '-ac', channels, '-q:a', vorbisQuality);
           } else if (targetFormat === 'wav') {
-              args.push('-c:a', 'pcm_s16le');
+              args.push(...rateArgs, '-c:a', 'pcm_s16le', '-ac', channels);
           }
 
           args.push(outputName);
@@ -629,15 +710,10 @@ const AudioConverter: React.FC = () => {
 
           const data = await ffmpeg!.readFile(outputName);
           const blob = new Blob([data as BlobPart], { type: `audio/${targetFormat}` });
-          const url = URL.createObjectURL(blob);
-          
-          const link = document.createElement('a');
-          link.href = url;
           const origName = file.name.replace(/\.[^.]+$/, '');
-          link.download = `[Edited] ${origName}.${targetFormat}`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+          const activePreset = exportPresets.find(p => p.id === presetId);
+          const fileName = `[Edited] ${origName}${activePreset?.suffix ?? ''}.${targetFormat}`;
+          triggerDownload(blob, fileName);
 
           await ffmpeg!.deleteFile(inputName);
           await ffmpeg!.deleteFile(outputName);
@@ -654,6 +730,17 @@ const AudioConverter: React.FC = () => {
 
   const fetchFile = async (f: File) => {
       return new Uint8Array(await f.arrayBuffer());
+  };
+
+  const triggerDownload = (blob: Blob, filename: string) => {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(url), 10_000);
   };
 
   const formatTime = (t: number) => {
@@ -673,7 +760,8 @@ const AudioConverter: React.FC = () => {
           : Number(bitrate);
       if (!Number.isFinite(kbps) || kbps <= 0) kbps = 192;
       if (targetFormat === 'wav') {
-          kbps = 1411; 
+          const rate = sampleRate === 'original' ? 44100 : Number(sampleRate);
+          kbps = (16 * rate * Number(channels)) / 1000;
       }
       const sizeKB = (duration * kbps) / 8;
       if (sizeKB < 1024) {
@@ -681,6 +769,51 @@ const AudioConverter: React.FC = () => {
       } else {
           return `≈ ${(sizeKB / 1024).toFixed(2)} MB`;
       }
+  };
+
+  // 三个预设的定位：人声（语音质量优先）/ 音效（单声道、瞬态与体积平衡）/ BGM（立体声）
+  const exportPresets = useMemo<ExportPreset[]>(() => [
+      {
+          id: 'voice',
+          label: t('audio.preset_voice'),
+          desc: t('audio.preset_voice_desc'),
+          format: 'm4a', bitrate: '64', sampleRate: '32000', channels: '1', suffix: '_voice', loudness: 'voice',
+      },
+      {
+          id: 'sfx',
+          label: t('audio.preset_sfx'),
+          desc: t('audio.preset_sfx_desc'),
+          format: 'm4a', bitrate: '96', sampleRate: '44100', channels: '1', suffix: '_sfx', loudness: 'sfx',
+      },
+      {
+          id: 'bgm',
+          label: t('audio.preset_bgm'),
+          desc: t('audio.preset_bgm_desc'),
+          format: 'm4a', bitrate: '128', sampleRate: '44100', channels: '2', suffix: '_bgm', loudness: 'bgm',
+      },
+  ], [t]);
+
+  const rateLabel = sampleRate === 'original' ? t('audio.rate_source') : `${Number(sampleRate) / 1000} kHz`;
+  const channelLabel = channels === '1' ? t('audio.mono') : t('audio.stereo');
+  const paramsLabel =
+      targetFormat === 'm4a' ? `AAC · ${rateLabel} · ${channelLabel} · faststart`
+      : targetFormat === 'ogg' ? `Vorbis q${vorbisQuality} · ${rateLabel} · ${channelLabel}`
+      : targetFormat === 'wav' ? `PCM16 · ${rateLabel} · ${channelLabel}`
+      : null;
+  const loudnessBadge = loudnessTarget === 'off'
+      ? ''
+      : loudnessTarget === 'sfx'
+          ? 'peak −1.4 dBFS'
+          : `${LOUDNESS_LUFS[loudnessTarget]} LUFS`;
+
+  const applyPreset = (preset: ExportPreset) => {
+      setPresetId(preset.id);
+      setTargetFormat(preset.format);
+      setBitrate(preset.bitrate);
+      setSampleRate(preset.sampleRate);
+      setChannels(preset.channels);
+      setVorbisQuality(preset.vorbisQuality ?? '4');
+      setLoudnessTarget(preset.loudness);
   };
 
   const formats = useMemo(() => [
@@ -845,15 +978,17 @@ const AudioConverter: React.FC = () => {
                       {/* 3. Right: Volume & Effects (Right Aligned) */}
                       <div className="flex flex-1 flex-wrap items-center justify-end gap-6">
                           {/* Volume */}
-                          <div className="flex flex-col gap-1 w-[100px]">
+                          <div className={`flex flex-col gap-1 w-[100px] transition-opacity ${loudnessTarget !== 'off' ? 'opacity-40' : ''}`}>
                               <div className="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                                   <div className="flex items-center gap-1"><Volume2 size={10}/> {t('audio.volume')}</div>
-                                  <span>{volume}%</span>
+                                  <span>{loudnessTarget !== 'off' ? t('audio.volume_locked') : `${volume}%`}</span>
                               </div>
                               <input 
                                 type="range" min="0" max="200" step="5"
                                 value={volume} onChange={(e) => setVolume(parseInt(e.target.value))}
-                                className="w-full h-1.5 bg-gray-200 rounded-lg accent-primary-600 cursor-pointer"
+                                disabled={loudnessTarget !== 'off'}
+                                title={loudnessTarget !== 'off' ? t('audio.volume_locked_hint') : undefined}
+                                className="w-full h-1.5 bg-gray-200 rounded-lg accent-primary-600 cursor-pointer disabled:cursor-not-allowed"
                               />
                           </div>
 
@@ -890,11 +1025,45 @@ const AudioConverter: React.FC = () => {
                       {t('audio.export_config')}
                   </h3>
                   
+                  {/* Presets */}
+                  <div className="mb-5 space-y-3">
+                      <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">{t('audio.presets')}</span>
+                          <span className="text-[11px] text-gray-400">{t('audio.preset_hint')}</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          {exportPresets.map(preset => {
+                              const active = presetId === preset.id;
+                              return (
+                                  <button
+                                    key={preset.id}
+                                    type="button"
+                                    onClick={() => applyPreset(preset)}
+                                    className={`
+                                        relative text-left p-3 rounded-lg border transition-all
+                                        ${active
+                                            ? 'border-primary-500 bg-primary-50 shadow-sm'
+                                            : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'}
+                                    `}
+                                  >
+                                      {active && (
+                                          <Check size={14} className="absolute top-2 right-2 text-primary-600" />
+                                      )}
+                                      <div className={`text-xs font-bold leading-snug pr-5 ${active ? 'text-primary-700' : 'text-gray-800'}`}>
+                                          {preset.label}
+                                      </div>
+                                      <div className="text-[11px] text-gray-500 leading-snug mt-1">{preset.desc}</div>
+                                  </button>
+                              );
+                          })}
+                      </div>
+                  </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                       {formats.map(fmt => (
                           <div 
                             key={fmt.id}
-                            onClick={() => setTargetFormat(fmt.id)}
+                            onClick={() => { setTargetFormat(fmt.id); setPresetId('custom'); }}
                             className={`
                                 cursor-pointer p-4 rounded-xl border-2 transition-all relative overflow-hidden group
                                 ${targetFormat === fmt.id 
@@ -925,14 +1094,42 @@ const AudioConverter: React.FC = () => {
                                   <label className="text-sm font-medium text-gray-700">{t('audio.quality')}</label>
                                   <select 
                                     value={bitrate} 
-                                    onChange={(e) => setBitrate(e.target.value)}
+                                    onChange={(e) => { setBitrate(e.target.value); setPresetId('custom'); }}
                                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block p-2.5 min-w-[120px]"
                                   >
                                       {originalBitrate && <option value={`original:${originalBitrate}`}>{originalBitrate} kbps (原始)</option>}
+                                      {!['128', '192', '320'].includes(bitrate) && !bitrate.startsWith('original:') && (
+                                          <option value={bitrate}>{bitrate} kbps</option>
+                                      )}
+                                      <option value="64">64 kbps</option>
+                                      <option value="96">96 kbps</option>
                                       <option value="128">128 kbps</option>
                                       <option value="192">192 kbps</option>
                                       <option value="320">320 kbps</option>
                                   </select>
+                              </div>
+                          )}
+
+                          {targetFormat === 'ogg' && (
+                              <div className="flex items-center gap-3">
+                                  <label className="text-sm font-medium text-gray-700">{t('audio.quality')}</label>
+                                  <select 
+                                    value={vorbisQuality} 
+                                    onChange={(e) => { setVorbisQuality(e.target.value); setPresetId('custom'); }}
+                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block p-2.5 min-w-[120px]"
+                                  >
+                                      <option value="2">q2 (~96k)</option>
+                                      <option value="3">q3 (~112k)</option>
+                                      <option value="4">q4 (~128k)</option>
+                                      <option value="5">q5 (~160k)</option>
+                                      <option value="6">q6 (~192k)</option>
+                                  </select>
+                              </div>
+                          )}
+
+                          {paramsLabel && (
+                              <div className="text-xs text-gray-500 bg-gray-100 px-3 py-1.5 rounded-lg font-mono whitespace-nowrap">
+                                  {paramsLabel}{loudnessBadge ? ` · ${loudnessBadge}` : ''}
                               </div>
                           )}
                           
@@ -943,6 +1140,21 @@ const AudioConverter: React.FC = () => {
                               </div>
                           )}
                           
+                          <label className="flex items-center gap-2 text-xs font-medium text-gray-700 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
+                              {t('audio.loudness')}
+                              <select
+                                value={loudnessTarget}
+                                onChange={e => setLoudnessTarget(e.target.value as LoudnessTarget)}
+                                className="bg-white border border-gray-300 text-gray-900 text-xs rounded-md p-1.5 focus:ring-primary-500 focus:border-primary-500"
+                              >
+                                  <option value="off">{t('audio.loudness_off')}</option>
+                                  <option value="voice">{t('audio.loudness_voice')}</option>
+                                  <option value="bgm">{t('audio.loudness_bgm')}</option>
+                                  <option value="ambience">{t('audio.loudness_ambience')}</option>
+                                  <option value="sfx">{t('audio.loudness_sfx')}</option>
+                              </select>
+                          </label>
+
                           <div className="text-sm text-gray-500 font-mono bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg">
                               {t('audio.est_size')}: <strong>{calculateEstimatedSize()}</strong>
                           </div>
